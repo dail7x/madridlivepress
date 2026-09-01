@@ -12,6 +12,7 @@
     "@astrojs/node": "^9.1.0",
     "@astrojs/tailwind": "^6.0.0",
     "@directus/sdk": "^18.0.0",
+    "@directus/visual-editing": "^2.1.0",
     "astro": "^5.4.2",
     "clsx": "^2.1.1",
     "lucide-astro": "^0.556.0",
