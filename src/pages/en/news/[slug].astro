@@ -1,5 +1,7 @@
 ---
 import Layout from '@/layouts/Layout.astro';
+import AudioBriefPlayer from '@/components/ui/AudioBriefPlayer.astro';
+import ExecutiveBrief from '@/components/ui/ExecutiveBrief.astro';
 import type { Comunicado, Categoria, Portavoz } from '@/lib/directus';
 import { directus, readItems, getAssetUrl } from '@/lib/directus';
 
@@ -38,6 +40,13 @@ try {
         'imagen_url_externa',
         'imagen_portada.*',
         'archivo_pdf.*',
+        'audio_habilitado',
+        'audio_url',
+        'audio_duracion',
+        'audio_script_es',
+        'audio_script_en',
+        'puntos_clave',
+        'puntos_clave_en',
         'tags',
         { categoria: ['id', 'nombre', 'nombre_en', 'slug', 'slug_en'] },
         { portavoz: ['id', 'nombre', 'cargo', 'bio', 'avatar.*', 'email_prensa'] },
@@ -65,6 +74,10 @@ const formattedDate = new Date(comunicado.fecha_publicacion).toLocaleDateString(
   year: 'numeric',
 });
 const imgUrl = comunicado.imagen_url_externa || (comunicado.imagen_portada ? getAssetUrl(comunicado.imagen_portada, { width: 1200, height: 700, format: 'webp' }) : '/images/news/dos-millones-turistas.jpg');
+const audioScript = comunicado.audio_script_en || subtitle || title;
+const keyPoints = comunicado.puntos_clave_en && comunicado.puntos_clave_en.length > 0
+  ? comunicado.puntos_clave_en
+  : comunicado.puntos_clave || [];
 ---
 
 <Layout
@@ -122,6 +135,23 @@ const imgUrl = comunicado.imagen_url_externa || (comunicado.imagen_portada ? get
 
     <!-- Main Content Body -->
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-8">
+      <!-- Neural Audio Brief (ElevenLabs) -->
+      {comunicado.audio_habilitado !== false && (
+        <AudioBriefPlayer
+          title={title}
+          scriptText={audioScript}
+          duration={comunicado.audio_duracion || '1:30 min'}
+          audioUrl={comunicado.audio_url}
+          lang="en"
+        />
+      )}
+
+      <!-- Executive Brief (30-Sec TL;DR) -->
+      {keyPoints.length > 0 && (
+        <ExecutiveBrief points={keyPoints} lang="en" />
+      )}
+
+      <!-- Article Rich Text -->
       <div
         class="prose prose-zinc max-w-none font-serif text-base sm:text-lg text-zinc-800 leading-relaxed space-y-4 [&>p]:leading-relaxed [&>blockquote]:border-l-2 [&>blockquote]:border-vermilion [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:text-zinc-900"
         set:html={body}

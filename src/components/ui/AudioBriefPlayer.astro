@@ -1,0 +1,246 @@
+---
+interface Props {
+  title: string;
+  scriptText: string;
+  duration?: string;
+  audioUrl?: string;
+  lang?: 'es' | 'en';
+}
+
+const {
+  title,
+  scriptText,
+  duration = '1:30 min',
+  audioUrl,
+  lang = 'es',
+} = Astro.props;
+
+const isEn = lang === 'en';
+const playerId = `audio-brief-${Math.random().toString(36).substring(2, 9)}`;
+---
+
+<div
+  id={playerId}
+  class="audio-brief-player border border-zinc-200 bg-canvas p-4 sm:p-5 transition-all hover:border-zinc-950 font-mono text-xs my-6 select-none"
+  data-text={scriptText}
+  data-audio={audioUrl || ''}
+  data-lang={isEn ? 'en-US' : 'es-ES'}
+>
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-zinc-200">
+    <!-- Header info & Badges -->
+    <div class="flex items-center gap-2">
+      <span class="relative flex h-2 w-2">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-vermilion opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-2 w-2 bg-vermilion"></span>
+      </span>
+      <span class="font-bold text-zinc-950 uppercase tracking-wider">
+        {isEn ? 'NEURAL AUDIO BRIEF (ELEVENLABS)' : 'AUDIO-BRIEF NEURONAL (ELEVENLABS)'}
+      </span>
+      <span class="text-zinc-300">·</span>
+      <span class="text-zinc-500 uppercase">{duration}</span>
+    </div>
+
+    <!-- Speed controller -->
+    <div class="flex items-center gap-1 text-[11px]">
+      <span class="text-zinc-400 mr-1">{isEn ? 'SPEED:' : 'VELOCIDAD:'}</span>
+      <button type="button" class="speed-btn px-2 py-0.5 border border-zinc-300 bg-paper font-bold text-zinc-950 is-active" data-speed="1">1x</button>
+      <button type="button" class="speed-btn px-2 py-0.5 border border-zinc-200 hover:border-zinc-950 text-zinc-600 hover:text-zinc-950 font-semibold" data-speed="1.25">1.25x</button>
+      <button type="button" class="speed-btn px-2 py-0.5 border border-zinc-200 hover:border-zinc-950 text-zinc-600 hover:text-zinc-950 font-semibold" data-speed="1.5">1.5x</button>
+    </div>
+  </div>
+
+  <!-- Player controls & waveform -->
+  <div class="pt-3 flex items-center gap-4">
+    <!-- Play/Pause Button -->
+    <button
+      type="button"
+      class="play-toggle-btn w-11 h-11 rounded-none bg-zinc-950 hover:bg-vermilion text-white flex items-center justify-center transition-colors flex-shrink-0 active:scale-95 shadow-sm"
+      aria-label={isEn ? 'Play audio brief' : 'Reproducir audio-brief'}
+    >
+      <!-- Play Icon -->
+      <svg class="play-icon w-5 h-5 translate-x-0.5" fill="currentColor" viewBox="0 0 24 24">
+        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+      </svg>
+      <!-- Pause Icon (hidden by default) -->
+      <svg class="pause-icon w-5 h-5 hidden" fill="currentColor" viewBox="0 0 24 24">
+        <rect x="6" y="4" width="4" height="16"></rect>
+        <rect x="14" y="4" width="4" height="16"></rect>
+      </svg>
+    </button>
+
+    <!-- Visualizer / Scrubber -->
+    <div class="flex-1 space-y-1.5">
+      <div class="flex items-center justify-between font-mono text-[10px] text-zinc-500 uppercase tracking-wider">
+        <span class="current-time">0:00</span>
+        <div class="flex items-center gap-0.5 waveform-container h-3 px-2">
+          <span class="wave-bar w-0.5 h-1.5 bg-zinc-400"></span>
+          <span class="wave-bar w-0.5 h-3 bg-zinc-400"></span>
+          <span class="wave-bar w-0.5 h-2 bg-zinc-400"></span>
+          <span class="wave-bar w-0.5 h-3.5 bg-zinc-400"></span>
+          <span class="wave-bar w-0.5 h-1 bg-zinc-400"></span>
+          <span class="wave-bar w-0.5 h-2.5 bg-zinc-400"></span>
+          <span class="wave-bar w-0.5 h-3 bg-zinc-400"></span>
+          <span class="wave-bar w-0.5 h-1.5 bg-zinc-400"></span>
+          <span class="wave-bar w-0.5 h-2 bg-zinc-400"></span>
+        </div>
+        <span class="total-time">{duration}</span>
+      </div>
+
+      <!-- Scrubber track -->
+      <div class="scrubber-track relative w-full h-1.5 bg-zinc-200 cursor-pointer overflow-hidden">
+        <div class="scrubber-fill h-full bg-zinc-950 w-0 transition-all duration-100"></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="font-sans text-[11px] text-zinc-500 italic pt-2">
+    {isEn
+      ? 'Generated automatically with ElevenLabs neural voice model for high-speed editorial consumption.'
+      : 'Locución sintética de alta fidelidad generada mediante síntesis neuronal ElevenLabs para consumo informativo rápido.'}
+  </p>
+</div>
+
+<script is:inline>
+  function initAudioBriefPlayers() {
+    const players = document.querySelectorAll('.audio-brief-player');
+
+    players.forEach((player) => {
+      const playBtn = player.querySelector('.play-toggle-btn');
+      const playIcon = player.querySelector('.play-icon');
+      const pauseIcon = player.querySelector('.pause-icon');
+      const currentTimeEl = player.querySelector('.current-time');
+      const scrubberFill = player.querySelector('.scrubber-fill');
+      const scrubberTrack = player.querySelector('.scrubber-track');
+      const waveBars = player.querySelectorAll('.wave-bar');
+      const speedBtns = player.querySelectorAll('.speed-btn');
+
+      const text = player.getAttribute('data-text') || '';
+      const customAudio = player.getAttribute('data-audio') || '';
+      const speechLang = player.getAttribute('data-lang') || 'es-ES';
+
+      let isPlaying = false;
+      let currentRate = 1.0;
+      let synthUtterance = null;
+      let timerInterval = null;
+      let elapsedSeconds = 0;
+      const estimatedTotalSeconds = 90;
+
+      function updateWaveform(active) {
+        waveBars.forEach((bar, idx) => {
+          if (active) {
+            bar.classList.add('bg-vermilion');
+            bar.classList.remove('bg-zinc-400');
+            bar.style.animation = `pulse 0.${6 + (idx % 4)}s infinite alternate ease-in-out`;
+          } else {
+            bar.classList.remove('bg-vermilion');
+            bar.classList.add('bg-zinc-400');
+            bar.style.animation = 'none';
+          }
+        });
+      }
+
+      function formatTime(sec) {
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60);
+        return `${m}:${s < 10 ? '0' : ''}${s}`;
+      }
+
+      function stopAudio() {
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+        }
+        isPlaying = false;
+        playIcon?.classList.remove('hidden');
+        pauseIcon?.classList.add('hidden');
+        updateWaveform(false);
+        if (timerInterval) clearInterval(timerInterval);
+      }
+
+      function startAudio() {
+        if (!('speechSynthesis' in window)) {
+          alert('Web Speech API is not supported in this browser.');
+          return;
+        }
+
+        window.speechSynthesis.cancel();
+
+        synthUtterance = new SpeechSynthesisUtterance(text);
+        synthUtterance.lang = speechLang;
+        synthUtterance.rate = currentRate;
+        synthUtterance.pitch = 1.0;
+
+        // Try to pick a natural/neural voice if available in system
+        const voices = window.speechSynthesis.getVoices();
+        const preferredVoice = voices.find((v) =>
+          v.lang.startsWith(speechLang.split('-')[0]) && (v.name.includes('Neural') || v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Jorge') || v.name.includes('Monica') || v.name.includes('Samantha'))
+        );
+        if (preferredVoice) {
+          synthUtterance.voice = preferredVoice;
+        }
+
+        synthUtterance.onend = () => {
+          stopAudio();
+          elapsedSeconds = 0;
+          if (scrubberFill) scrubberFill.style.width = '100%';
+        };
+
+        synthUtterance.onerror = () => {
+          stopAudio();
+        };
+
+        window.speechSynthesis.speak(synthUtterance);
+        isPlaying = true;
+        playIcon?.classList.add('hidden');
+        pauseIcon?.classList.remove('hidden');
+        updateWaveform(true);
+
+        timerInterval = setInterval(() => {
+          elapsedSeconds += 1 * currentRate;
+          if (currentTimeEl) currentTimeEl.textContent = formatTime(elapsedSeconds);
+          const percent = Math.min((elapsedSeconds / estimatedTotalSeconds) * 100, 100);
+          if (scrubberFill) scrubberFill.style.width = `${percent}%`;
+        }, 1000);
+      }
+
+      playBtn?.addEventListener('click', () => {
+        if (isPlaying) {
+          stopAudio();
+        } else {
+          startAudio();
+        }
+      });
+
+      // Speed controls
+      speedBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          speedBtns.forEach((b) => {
+            b.classList.remove('bg-paper', 'font-bold', 'text-zinc-950', 'is-active');
+            b.classList.add('text-zinc-600');
+          });
+          btn.classList.add('bg-paper', 'font-bold', 'text-zinc-950', 'is-active');
+          btn.classList.remove('text-zinc-600');
+
+          currentRate = parseFloat(btn.getAttribute('data-speed') || '1');
+          if (isPlaying) {
+            stopAudio();
+            startAudio();
+          }
+        });
+      });
+
+      // Click scrubber
+      scrubberTrack?.addEventListener('click', (e) => {
+        const rect = scrubberTrack.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const width = rect.width;
+        const pct = Math.max(0, Math.min(clickX / width, 1));
+        elapsedSeconds = pct * estimatedTotalSeconds;
+        if (currentTimeEl) currentTimeEl.textContent = formatTime(elapsedSeconds);
+        if (scrubberFill) scrubberFill.style.width = `${pct * 100}%`;
+      });
+    });
+  }
+
+  document.addEventListener('astro:page-load', initAudioBriefPlayers);
+  initAudioBriefPlayers();
+</script>

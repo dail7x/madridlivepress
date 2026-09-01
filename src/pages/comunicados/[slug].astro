@@ -1,5 +1,7 @@
 ---
 import Layout from '@/layouts/Layout.astro';
+import AudioBriefPlayer from '@/components/ui/AudioBriefPlayer.astro';
+import ExecutiveBrief from '@/components/ui/ExecutiveBrief.astro';
 import { directus, getAssetUrl } from '@/lib/directus';
 import { readItems } from '@directus/sdk';
 import { useTranslations } from '@/lib/i18n';
@@ -24,6 +26,7 @@ try {
         'status',
         'fecha_publicacion',
         'slug',
+        'slug_en',
         'titulo',
         'bajada',
         'cuerpo',
@@ -31,6 +34,13 @@ try {
         'imagen_portada.*',
         'archivo_pdf.*',
         'audio_video_url',
+        'audio_habilitado',
+        'audio_url',
+        'audio_duracion',
+        'audio_script_es',
+        'audio_script_en',
+        'puntos_clave',
+        'puntos_clave_en',
         'tags',
         { categoria: ['id', 'nombre', 'slug', 'color'] },
         { portavoz: ['id', 'nombre', 'cargo', 'bio', 'avatar.*', 'email_prensa'] },
@@ -273,6 +283,22 @@ const tagsList = item.tags && item.tags.length > 0
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
         <!-- Left Main Body Column (~50% width) -->
         <div class="lg:col-span-6 space-y-6">
+          <!-- Audio-Brief Player (Neural TTS ElevenLabs) -->
+          {item.audio_habilitado !== false && (
+            <AudioBriefPlayer
+              title={item.titulo}
+              scriptText={item.audio_script_es || item.bajada || item.titulo}
+              duration={item.audio_duracion || '1:30 min'}
+              audioUrl={item.audio_url}
+              lang="es"
+            />
+          )}
+
+          <!-- Lead Ejecutivo (TL;DR / 30 seg) -->
+          {item.puntos_clave && item.puntos_clave.length > 0 && (
+            <ExecutiveBrief points={item.puntos_clave} lang="es" />
+          )}
+
           <!-- Red Accent Bar beside Lead (Exact Reference 2) -->
           <div class="flex items-start gap-3 sm:gap-4">
             <div class="w-6 sm:w-8 h-1 bg-vermilion flex-shrink-0 mt-3"></div>

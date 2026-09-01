@@ -1,0 +1,54 @@
+---
+interface Props {
+  points: string[];
+  lang?: 'es' | 'en';
+}
+
+const { points = [], lang = 'es' } = Astro.props;
+const isEn = lang === 'en';
+
+if (!points || points.length === 0) {
+  return null;
+}
+---
+
+<section class="executive-lead-box border border-zinc-200 bg-canvas p-6 sm:p-7 my-6 font-sans relative border-l-4 border-l-vermilion">
+  <div class="flex items-center justify-between gap-4 pb-4 border-b border-zinc-200">
+    <div class="flex items-center gap-2 font-mono text-xs uppercase tracking-wider">
+      <span class="w-2 h-2 rounded-full bg-vermilion inline-block"></span>
+      <span class="font-bold text-zinc-950">
+        {isEn ? 'EXECUTIVE BRIEF · 30-SECOND TL;DR' : 'LEAD EJECUTIVO · LECTURA EN 30 SEGUNDOS'}
+      </span>
+    </div>
+
+    <div class="font-mono text-[10px] text-zinc-400 uppercase tracking-widest hidden sm:block">
+      {isEn ? 'KEY TAKEAWAYS & DATA' : 'PUNTOS CLAVE Y CIFRAS'}
+    </div>
+  </div>
+
+  <ul class="pt-4 space-y-3 font-sans text-sm text-zinc-800 leading-relaxed">
+    {points.map((pt) => {
+      // If the point has a colon, bold the prefix
+      const parts = pt.split(':');
+      const hasPrefix = parts.length > 1;
+      const prefix = hasPrefix ? parts[0] : '';
+      const rest = hasPrefix ? parts.slice(1).join(':') : pt;
+
+      return (
+        <li class="flex items-start gap-3">
+          <span class="font-mono text-vermilion font-bold text-xs pt-0.5 select-none">■</span>
+          <div>
+            {hasPrefix ? (
+              <span>
+                <strong class="font-semibold text-zinc-950">{prefix}:</strong>
+                {rest}
+              </span>
+            ) : (
+              <span>{pt}</span>
+            )}
+          </div>
+        </li>
+      );
+    })}
+  </ul>
+</section>

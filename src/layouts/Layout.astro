@@ -22,8 +22,51 @@ const {
 const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://madridlivepress.116.203.118.1.sslip.io');
 const currentPath = Astro.url.pathname;
 const isEn = lang === 'en' || currentPath.startsWith('/en');
-const targetLangPath = isEn ? currentPath.replace(/^\/en/, '') || '/' : `/en${currentPath === '/' ? '' : currentPath}`;
 const prefix = isEn ? '/en' : '';
+
+function getAlternateLanguagePath(pathname: string, targetLang: 'es' | 'en'): string {
+  const cleanPath = pathname.replace(/\/$/, '') || '/';
+  
+  if (targetLang === 'es') {
+    if (cleanPath === '/en' || cleanPath === '/en/') return '/';
+    if (cleanPath === '/en/news' || cleanPath === '/en/comunicados') return '/comunicados';
+    if (cleanPath.startsWith('/en/news/')) return cleanPath.replace('/en/news/', '/comunicados/');
+    if (cleanPath.startsWith('/en/comunicados/')) return cleanPath.replace('/en/comunicados/', '/comunicados/');
+    if (cleanPath === '/en/directory' || cleanPath === '/en/directorio') return '/directorio';
+    if (cleanPath.startsWith('/en/directory/')) return cleanPath.replace('/en/directory/', '/directorio/');
+    if (cleanPath.startsWith('/en/directorio/')) return cleanPath.replace('/en/directorio/', '/directorio/');
+    if (cleanPath === '/en/press-kits') return '/press-kits';
+    if (cleanPath === '/en/coverage' || cleanPath === '/en/cobertura') return '/cobertura';
+    if (cleanPath === '/en/archive' || cleanPath === '/en/archivo') return '/archivo';
+    if (cleanPath === '/en/about' || cleanPath === '/en/sobre-el-sector') return '/sobre-el-sector';
+    if (cleanPath === '/en/events' || cleanPath === '/en/eventos') return '/eventos';
+    if (cleanPath.startsWith('/en/events/')) return cleanPath.replace('/en/events/', '/eventos/');
+    if (cleanPath.startsWith('/en/eventos/')) return cleanPath.replace('/en/eventos/', '/eventos/');
+    if (cleanPath === '/en/accreditation' || cleanPath === '/en/acreditaciones') return '/acreditaciones';
+    return cleanPath.replace(/^\/en/, '') || '/';
+  }
+
+  if (targetLang === 'en') {
+    if (cleanPath === '/' || cleanPath === '') return '/en';
+    if (cleanPath === '/comunicados') return '/en/news';
+    if (cleanPath.startsWith('/comunicados/')) return cleanPath.replace('/comunicados/', '/en/news/');
+    if (cleanPath === '/directorio') return '/en/directory';
+    if (cleanPath.startsWith('/directorio/')) return cleanPath.replace('/directorio/', '/en/directory/');
+    if (cleanPath === '/press-kits') return '/en/press-kits';
+    if (cleanPath === '/cobertura') return '/en/coverage';
+    if (cleanPath === '/archivo') return '/en/archive';
+    if (cleanPath === '/sobre-el-sector') return '/en/about';
+    if (cleanPath === '/eventos') return '/en/events';
+    if (cleanPath.startsWith('/eventos/')) return cleanPath.replace('/eventos/', '/en/events/');
+    if (cleanPath === '/acreditaciones') return '/en/accreditation';
+    return cleanPath.startsWith('/en') ? cleanPath : `/en${cleanPath}`;
+  }
+
+  return pathname;
+}
+
+const targetPathEs = getAlternateLanguagePath(currentPath, 'es');
+const targetPathEn = getAlternateLanguagePath(currentPath, 'en');
 ---
 
 <!doctype html>
@@ -95,14 +138,14 @@ const prefix = isEn ? '/en' : '';
           <!-- ES / EN Vertical Language Switcher -->
           <div class="writing-vertical font-mono text-[11px] tracking-widest text-zinc-500">
             <a
-              href={isEn ? targetLangPath : currentPath}
+              href={targetPathEs}
               class={`hover:text-zinc-900 transition-colors ${!isEn ? 'text-zinc-900 font-bold' : 'text-zinc-400'}`}
             >
               ES
             </a>
             <span class="mx-1 text-zinc-300">/</span>
             <a
-              href={!isEn ? targetLangPath : currentPath}
+              href={targetPathEn}
               class={`hover:text-zinc-900 transition-colors ${isEn ? 'text-zinc-900 font-bold' : 'text-zinc-400'}`}
             >
               EN

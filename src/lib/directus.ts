@@ -57,6 +57,13 @@ export interface Comunicado {
   categoria?: string | Categoria;
   portavoz?: string | Portavoz;
   audio_video_url?: string;
+  audio_habilitado?: boolean;
+  audio_url?: string;
+  audio_duracion?: string;
+  audio_script_es?: string;
+  audio_script_en?: string;
+  puntos_clave?: string[];
+  puntos_clave_en?: string[];
   destacado?: boolean;
   tags?: string[];
 }
