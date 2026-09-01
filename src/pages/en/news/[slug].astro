@@ -1,0 +1,170 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import type { Comunicado, Categoria, Portavoz } from '@/lib/directus';
+import { directus, readItems, getAssetUrl } from '@/lib/directus';
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+
+if (!slug) {
+  return Astro.redirect('/en/news');
+}
+
+let comunicado: Comunicado | null = null;
+try {
+  const res = await directus.request(
+    readItems('comunicados' as any, {
+      filter: {
+        _or: [
+          { slug: { _eq: slug } },
+          { slug_en: { _eq: slug } },
+        ],
+        status: { _eq: 'published' },
+      },
+      fields: [
+        'id',
+        'status',
+        'fecha_publicacion',
+        'slug',
+        'slug_en',
+        'titulo',
+        'titulo_en',
+        'bajada',
+        'bajada_en',
+        'cuerpo',
+        'cuerpo_en',
+        'destacado',
+        'imagen_url_externa',
+        'imagen_portada.*',
+        'archivo_pdf.*',
+        'tags',
+        { categoria: ['id', 'nombre', 'nombre_en', 'slug', 'slug_en'] },
+        { portavoz: ['id', 'nombre', 'cargo', 'bio', 'avatar.*', 'email_prensa'] },
+      ],
+      limit: 1,
+    })
+  );
+  comunicado = (res && (res as any)[0]) || null;
+} catch (e) {
+  console.error('Error loading English press release:', e);
+}
+
+if (!comunicado) {
+  return Astro.redirect('/en/news');
+}
+
+const cat = comunicado.categoria as Categoria | undefined;
+const portavoz = comunicado.portavoz as Portavoz | undefined;
+const title = comunicado.titulo_en || comunicado.titulo;
+const subtitle = comunicado.bajada_en || comunicado.bajada;
+const body = comunicado.cuerpo_en || comunicado.cuerpo;
+const formattedDate = new Date(comunicado.fecha_publicacion).toLocaleDateString('en-US', {
+  day: '2-digit',
+  month: 'long',
+  year: 'numeric',
+});
+const imgUrl = comunicado.imagen_url_externa || (comunicado.imagen_portada ? getAssetUrl(comunicado.imagen_portada, { width: 1200, height: 700, format: 'webp' }) : '/images/news/dos-millones-turistas.jpg');
+---
+
+<Layout
+  title={`${title} | Madrid Live Press`}
+  description={subtitle || title}
+  lang="en"
+>
+  <article class="w-full bg-paper pb-20">
+    <!-- Back breadcrumb -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-4 border-b border-zinc-200 flex items-center justify-between font-mono text-xs text-zinc-500">
+      <a href="/en/news" class="hover:text-vermilion flex items-center gap-1.5 font-bold uppercase tracking-wider">
+        <span>←</span>
+        <span>Back to News</span>
+      </a>
+      <span class="uppercase">PRESS RELEASE · {cat?.nombre_en || cat?.nombre || 'OFFICIAL'}</span>
+    </div>
+
+    <!-- Article Header -->
+    <header class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-6 space-y-4">
+      <div class="flex items-center gap-3 font-mono text-xs uppercase tracking-wider text-zinc-500">
+        <span class="w-2 h-2 rounded-full bg-vermilion inline-block"></span>
+        <span class="font-bold text-zinc-950">{cat?.nombre_en || cat?.nombre || 'OFFICIAL STATEMENT'}</span>
+        <span>·</span>
+        <span>{formattedDate}</span>
+        <span>·</span>
+        <span>MADRID</span>
+      </div>
+
+      <h1 class="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-zinc-950 leading-[1.15] tracking-tight">
+        {title}
+      </h1>
+
+      {subtitle && (
+        <p class="font-sans text-lg sm:text-xl text-zinc-600 leading-relaxed font-normal pt-2 border-t border-zinc-100">
+          {subtitle}
+        </p>
+      )}
+    </header>
+
+    <!-- Main Hero Image -->
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div class="aspect-[16/9] w-full overflow-hidden bg-zinc-100 border border-zinc-200">
+        <img
+          src={imgUrl}
+          alt={title}
+          class="w-full h-full object-cover filter contrast-105"
+          loading="eager"
+        />
+      </div>
+      <div class="flex items-center justify-between pt-2 font-mono text-[10px] text-zinc-400 uppercase tracking-wider">
+        <span>PHOTO: NOCHEMADRID / MADRID LIVE PRESS OFFICIAL ARCHIVE</span>
+        <span>HIGH RESOLUTION AVAILABLE</span>
+      </div>
+    </div>
+
+    <!-- Main Content Body -->
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-8">
+      <div
+        class="prose prose-zinc max-w-none font-serif text-base sm:text-lg text-zinc-800 leading-relaxed space-y-4 [&>p]:leading-relaxed [&>blockquote]:border-l-2 [&>blockquote]:border-vermilion [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:text-zinc-900"
+        set:html={body}
+      />
+
+      <!-- Spokesperson Card if available -->
+      {portavoz && (
+        <div class="border border-zinc-200 bg-canvas p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div class="w-16 h-16 rounded-full overflow-hidden bg-zinc-200 border border-zinc-300 flex-shrink-0">
+            {portavoz.avatar ? (
+              <img src={getAssetUrl(portavoz.avatar)} alt={portavoz.nombre} class="w-full h-full object-cover" />
+            ) : (
+              <div class="w-full h-full flex items-center justify-center font-display font-bold text-zinc-600">
+                {portavoz.nombre[0]}
+              </div>
+            )}
+          </div>
+          <div class="space-y-1">
+            <div class="font-mono text-[10px] uppercase tracking-wider text-zinc-400 font-semibold">Official Spokesperson</div>
+            <h4 class="font-display text-base font-bold text-zinc-950">{portavoz.nombre}</h4>
+            <p class="font-sans text-xs text-zinc-600">{portavoz.cargo}</p>
+            {portavoz.email_prensa && (
+              <a href={`mailto:${portavoz.email_prensa}`} class="font-mono text-xs text-vermilion hover:underline inline-block pt-1">
+                {portavoz.email_prensa}
+              </a>
+            )}
+          </div>
+        </div>
+      )}
+
+      <!-- Media Kit / Download CTA -->
+      <div class="border border-zinc-950 bg-paper p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-mono text-xs">
+        <div class="space-y-1">
+          <div class="font-bold text-zinc-950 uppercase tracking-wider">OFFICIAL PRESS KIT & HIGH-RES ASSETS</div>
+          <div class="text-zinc-500 text-[11px]">Download broadcast B-Roll (4K ProRes) and full graphic package.</div>
+        </div>
+        <a
+          href="/en/press-kits"
+          class="bg-zinc-950 hover:bg-vermilion text-white font-bold px-4 py-2 uppercase tracking-wider transition-colors whitespace-nowrap text-center"
+        >
+          Access Press Kit ↓
+        </a>
+      </div>
+    </div>
+  </article>
+</Layout>

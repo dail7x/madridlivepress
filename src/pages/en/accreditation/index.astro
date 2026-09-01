@@ -1,0 +1,74 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import WireframeHeader from '@/components/ui/WireframeHeader.astro';
+
+export const prerender = false;
+---
+
+<Layout
+  title="Media Accreditation & Press Passes | Madrid Live Press"
+  description="Request verified journalist, photojournalist, and broadcast crew credentials for events, concerts, and nightlife venues in Madrid."
+  lang="en"
+>
+  <div class="w-full bg-paper pb-16">
+    <WireframeHeader
+      title="ACCREDITATION"
+      subtitle="Accreditation desk for journalists, photojournalists, agencies, and foreign correspondents."
+      badge="PRESS PASSES"
+      updatedTime="RESPONSE IN < 24H"
+    />
+
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <form class="border border-zinc-200 bg-paper p-6 sm:p-8 space-y-6 font-mono text-xs">
+        <div class="space-y-2">
+          <label class="block font-bold text-zinc-950 uppercase tracking-wider">Full Name *</label>
+          <input
+            type="text"
+            required
+            placeholder="Jane Doe"
+            class="w-full bg-paper border border-zinc-300 focus:border-zinc-950 px-3 py-2 text-xs font-mono outline-none"
+          />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <label class="block font-bold text-zinc-950 uppercase tracking-wider">Media Outlet / Agency *</label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. Reuters, BBC, Billboard"
+              class="w-full bg-paper border border-zinc-300 focus:border-zinc-950 px-3 py-2 text-xs font-mono outline-none"
+            />
+          </div>
+
+          <div class="space-y-2">
+            <label class="block font-bold text-zinc-950 uppercase tracking-wider">Professional Email *</label>
+            <input
+              type="email"
+              required
+              placeholder="press@media.com"
+              class="w-full bg-paper border border-zinc-300 focus:border-zinc-950 px-3 py-2 text-xs font-mono outline-none"
+            />
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block font-bold text-zinc-950 uppercase tracking-wider">Coverage Scope / Requested Venue *</label>
+          <textarea
+            rows="4"
+            required
+            placeholder="Detail the event, venue, or interview request you are seeking accreditation for..."
+            class="w-full bg-paper border border-zinc-300 focus:border-zinc-950 px-3 py-2 text-xs font-mono outline-none resize-none"
+          ></textarea>
+        </div>
+
+        <button
+          type="submit"
+          class="w-full bg-zinc-950 hover:bg-vermilion text-white font-bold py-3 uppercase tracking-wider transition-colors"
+        >
+          Submit Accreditation Request →
+        </button>
+      </form>
+    </div>
+  </div>
+</Layout>

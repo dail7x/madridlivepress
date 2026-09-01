@@ -18,6 +18,9 @@ try {
         'id',
         'status',
         'titulo',
+        'titulo_en',
+        'descripcion',
+        'descripcion_en',
         'tipo_recurso',
         'resolucion_formato',
         'tamano_mb',
@@ -33,10 +36,10 @@ try {
 }
 
 const DEFAULT_KIT_THUMBS = [
-  'https://images.unsplash.com/photo-1514306191717-452ec28c7814?q=80&w=800&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?q=80&w=800&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=800&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?q=80&w=800&auto=format&fit=crop',
+  '/images/press/abc-clipping.jpg',
+  '/images/press/elmundo-clipping.jpg',
+  '/images/press/hosteltur-clipping.jpg',
+  '/images/press/telemadrid-clipping.jpg',
 ];
 ---
 
@@ -49,7 +52,7 @@ const DEFAULT_KIT_THUMBS = [
     <WireframeHeader
       title="PRESS KITS"
       subtitle="Official media assets, 4K b-roll footage, high-resolution photography, and technical dossiers ready for editorial use."
-      badge="24 RESOURCES"
+      badge="PRESS ASSETS"
       updatedTime="HIGH RESOLUTION · BILINGUAL"
     />
 
@@ -60,15 +63,25 @@ const DEFAULT_KIT_THUMBS = [
             ? getAssetUrl(kit.miniatura, { width: 600, height: 400, format: 'webp' })
             : DEFAULT_KIT_THUMBS[index % DEFAULT_KIT_THUMBS.length];
           const fileUrl = kit.archivo ? getAssetUrl(kit.archivo) : thumb;
+          const kitTitle = kit.titulo_en || kit.titulo;
+          const kitDesc = kit.descripcion_en || kit.descripcion;
 
           return (
             <div class="border border-zinc-200 bg-paper p-5 flex flex-col justify-between space-y-4 hover:border-zinc-950 transition-colors">
               <div class="space-y-3">
                 <div class="aspect-[16/10] overflow-hidden bg-zinc-100 border border-zinc-200">
-                  <img src={thumb} alt={kit.titulo} class="w-full h-full object-cover filter contrast-105" />
+                  <img src={thumb} alt={kitTitle} class="w-full h-full object-cover filter contrast-105" />
                 </div>
-                <div class="font-mono text-[10px] text-zinc-500 uppercase">{kit.resolucion_formato || 'HIGH RESOLUTION'}</div>
-                <h3 class="font-display text-base font-bold text-zinc-950">{kit.titulo}</h3>
+                <div class="flex items-center justify-between font-mono text-[10px] text-zinc-500 uppercase">
+                  <span>{kit.resolucion_formato || 'HIGH RESOLUTION'}</span>
+                  {kit.tamano_mb && <span>{kit.tamano_mb} MB</span>}
+                </div>
+                <h3 class="font-display text-base font-bold text-zinc-950 leading-snug">{kitTitle}</h3>
+                {kitDesc && (
+                  <p class="font-sans text-xs text-zinc-600 leading-relaxed line-clamp-2">
+                    {kitDesc}
+                  </p>
+                )}
               </div>
               <a href={fileUrl} target="_blank" download class="w-full bg-zinc-950 hover:bg-vermilion text-white font-mono text-xs uppercase font-bold py-2.5 px-4 text-center transition-colors">
                 Download Kit ↓

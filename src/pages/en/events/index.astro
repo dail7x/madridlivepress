@@ -1,0 +1,94 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import WireframeHeader from '@/components/ui/WireframeHeader.astro';
+import type { Evento } from '@/lib/directus';
+import { directus, readItems, getAssetUrl } from '@/lib/directus';
+
+export const prerender = false;
+
+let eventos: Evento[] = [];
+try {
+  const res = await directus.request(
+    readItems('eventos' as any, {
+      filter: { status: { _eq: 'published' } },
+      sort: ['fecha_evento'],
+      fields: [
+        'id',
+        'titulo',
+        'titulo_en',
+        'slug',
+        'slug_en',
+        'fecha_evento',
+        'categoria',
+        'descripcion',
+        'descripcion_en',
+        'pases_prensa_disponibles',
+        'fecha_limite_acreditacion',
+        'imagen_portada.*',
+        { sala: ['id', 'nombre', 'distrito', 'direccion'] },
+      ],
+    })
+  );
+  eventos = (res as any) || [];
+} catch (e) {
+  console.error('Error loading events in English:', e);
+}
+---
+
+<Layout
+  title="Media Agenda & Press Calls | Madrid Live Press"
+  description="Calendar of institutional press conferences, award galas, and live music showcases in Madrid."
+  lang="en"
+>
+  <div class="w-full bg-paper pb-16">
+    <WireframeHeader
+      title="AGENDA"
+      subtitle="Upcoming institutional press conferences, award ceremonies, and media briefings."
+      badge="PRESS CALLS"
+      updatedTime="UPDATED WEEKLY"
+    />
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      {eventos.map((ev) => {
+        const title = ev.titulo_en || ev.titulo;
+        const desc = ev.descripcion_en || ev.descripcion;
+        const dateStr = new Date(ev.fecha_evento).toLocaleDateString('en-US', {
+          weekday: 'long',
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric',
+        });
+
+        return (
+          <article class="border border-zinc-200 bg-paper p-6 sm:p-8 hover:border-zinc-950 transition-all flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="space-y-3 max-w-2xl">
+              <div class="flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-zinc-500">
+                <span class="w-2 h-2 rounded-full bg-vermilion inline-block"></span>
+                <span class="font-bold text-zinc-950">{dateStr}</span>
+                <span>·</span>
+                <span>{(ev.sala as any)?.nombre || 'Teatro Barceló Madrid'}</span>
+              </div>
+
+              <h2 class="font-display text-xl sm:text-2xl font-bold text-zinc-950">
+                {title}
+              </h2>
+
+              <p class="font-sans text-sm text-zinc-600 leading-relaxed">
+                {desc}
+              </p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 font-mono text-xs">
+              <a
+                href="/en/accreditation"
+                class="bg-zinc-950 hover:bg-vermilion text-white font-bold px-4 py-2.5 uppercase tracking-wider transition-colors text-center"
+              >
+                Request Press Pass →
+              </a>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  </div>
+</Layout>

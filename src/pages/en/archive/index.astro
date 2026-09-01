@@ -1,0 +1,186 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import WireframeHeader from '@/components/ui/WireframeHeader.astro';
+import { directus, getAssetUrl } from '@/lib/directus';
+import { readItems } from '@directus/sdk';
+import type { Comunicado, Categoria } from '@/lib/directus';
+
+export const prerender = false;
+
+let items: Comunicado[] = [];
+try {
+  const res = await directus.request(
+    readItems('comunicados' as any, {
+      filter: { status: { _eq: 'published' } },
+      sort: ['-fecha_publicacion', '-id'],
+      limit: 50,
+      fields: [
+        'id',
+        'status',
+        'fecha_publicacion',
+        'slug',
+        'slug_en',
+        'titulo',
+        'titulo_en',
+        'bajada',
+        'bajada_en',
+        'imagen_url_externa',
+        'imagen_portada.*',
+        'archivo_pdf.*',
+        'tags',
+        { categoria: ['id', 'nombre', 'nombre_en', 'slug', 'slug_en'] },
+      ],
+    })
+  );
+  items = (res as any) || [];
+} catch (e) {
+  console.error('Error loading /en/archive:', e);
+}
+
+const DEFAULT_THUMBS = [
+  '/images/news/dos-millones-turistas.jpg',
+  '/images/news/tardeo-madrid.jpg',
+  '/images/news/bad-bunny-residencia.jpg',
+  '/images/news/mado-orgullo.jpg',
+];
+---
+
+<Layout
+  title="Documentary & Historical Archive | Madrid Live Press"
+  description="Comprehensive repository of press releases, photographic assets, and macroeconomic reports on Madrid's nightlife and performing arts."
+  lang="en"
+>
+  <div class="w-full bg-paper">
+    <WireframeHeader
+      title="ARCHIVE"
+      subtitle="Everything published. Everything needed to tell the story."
+      badge="1,284 ITEMS"
+      updatedTime="2023—2026"
+    />
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div class="lg:col-span-9 space-y-6">
+          <!-- Universal Search Bar -->
+          <div class="relative border-b-2 border-zinc-950 pb-2 flex items-center justify-between gap-4">
+            <input
+              id="archiveSearchInput"
+              type="text"
+              placeholder="Search by topic, venue, date, or spokesperson..."
+              class="w-full bg-transparent font-sans text-lg sm:text-xl text-zinc-950 placeholder:text-zinc-400 focus:outline-none"
+            />
+            <div class="flex items-center gap-2 flex-shrink-0 text-zinc-400 font-mono text-xs">
+              <kbd class="hidden sm:inline-block border border-zinc-300 rounded px-1.5 py-0.5 text-[10px] text-zinc-500 bg-canvas font-mono">
+                ⌘K
+              </kbd>
+            </div>
+          </div>
+
+          <!-- Archive Tabular Table -->
+          <div class="w-full">
+            <div class="grid grid-cols-12 gap-4 pb-2 border-b border-zinc-200 font-mono text-[10px] sm:text-[11px] uppercase tracking-wider text-zinc-400 font-bold">
+              <div class="col-span-2">DATE</div>
+              <div class="col-span-2">CATEGORY</div>
+              <div class="col-span-6">HEADLINE</div>
+              <div class="col-span-2 text-right">ACTION</div>
+            </div>
+
+            <div class="divide-y divide-zinc-200 font-mono text-xs" id="archiveRowsContainer">
+              {items.map((item, idx) => {
+                const dateObj = new Date(item.fecha_publicacion);
+                const dayMonth = dateObj.toLocaleDateString('en-US', { day: '2-digit', month: 'short' }).toUpperCase();
+                const cat = item.categoria as Categoria | undefined;
+                const catName = cat?.nombre_en || cat?.nombre || 'OFFICIAL';
+                const title = item.titulo_en || item.titulo;
+                const desc = item.bajada_en || item.bajada;
+                const link = `/en/news/${item.slug_en || item.slug}`;
+
+                return (
+                  <div
+                    class="archive-row-item py-4 group hover:bg-canvas transition-colors"
+                    data-search={`${title} ${desc || ''} ${catName}`.toLowerCase()}
+                  >
+                    <div class="grid grid-cols-12 gap-4 items-center">
+                      <div class="col-span-2 text-zinc-900 font-bold">{dayMonth}</div>
+                      <div class="col-span-2 text-zinc-500 uppercase text-[11px]">{catName}</div>
+                      <div class="col-span-6 font-sans font-medium text-sm text-zinc-950 group-hover:text-vermilion transition-colors line-clamp-1">
+                        <a href={link}>{title}</a>
+                      </div>
+                      <div class="col-span-2 flex items-center justify-end text-zinc-950 font-bold text-xs">
+                        <a href={link} class="hover:text-vermilion inline-flex items-center gap-1">
+                          <span>Read</span>
+                          <span>→</span>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar Metrics -->
+        <div class="lg:col-span-3 space-y-8 lg:border-l lg:border-zinc-200 lg:pl-8">
+          <div class="space-y-6">
+            <h4 class="font-mono text-xs font-bold text-zinc-400 uppercase tracking-widest border-b border-zinc-200 pb-2">
+              ARCHIVE METRICS
+            </h4>
+
+            <div class="space-y-6 font-mono">
+              <div class="border-b border-zinc-100 pb-4">
+                <div class="font-display text-4xl sm:text-5xl font-bold text-zinc-950 leading-none">426</div>
+                <div class="text-xs text-zinc-500 uppercase tracking-widest mt-1">RELEASES</div>
+              </div>
+
+              <div class="border-b border-zinc-100 pb-4">
+                <div class="font-display text-4xl sm:text-5xl font-bold text-zinc-950 leading-none">8.4K</div>
+                <div class="text-xs text-zinc-500 uppercase tracking-widest mt-1">PHOTOS</div>
+              </div>
+
+              <div class="pb-2">
+                <div class="font-display text-4xl sm:text-5xl font-bold text-zinc-950 leading-none">38</div>
+                <div class="text-xs text-zinc-500 uppercase tracking-widest mt-1">REPORTS</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="border border-zinc-200 p-6 bg-canvas space-y-3 font-mono text-xs">
+            <p class="font-sans text-xs sm:text-sm text-zinc-800 font-medium">
+              Need custom research or archived footage?
+            </p>
+            <a
+              href="mailto:prensa@nochemadrid.org"
+              class="font-bold text-zinc-950 hover:text-vermilion inline-flex items-center gap-1 uppercase tracking-wider"
+            >
+              <span>Contact Press Office</span>
+              <span>↗</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script is:inline>
+    function setupArchiveEn() {
+      const searchInput = document.getElementById('archiveSearchInput');
+      const rows = document.querySelectorAll('.archive-row-item');
+
+      searchInput?.addEventListener('input', () => {
+        const query = (searchInput.value || '').toLowerCase().trim();
+        rows.forEach((row) => {
+          const text = row.getAttribute('data-search') || '';
+          if (!query || text.includes(query)) {
+            row.style.display = 'block';
+          } else {
+            row.style.display = 'none';
+          }
+        });
+      });
+    }
+
+    document.addEventListener('astro:page-load', setupArchiveEn);
+    setupArchiveEn();
+  </script>
+</Layout>

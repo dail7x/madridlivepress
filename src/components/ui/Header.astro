@@ -6,16 +6,24 @@ interface Props {
 const { lang = 'es' } = Astro.props;
 const currentPath = Astro.url.pathname;
 const isEn = lang === 'en' || currentPath.startsWith('/en');
-const prefix = isEn ? '/en' : '';
 
-const navItems = [
-  { label: isEn ? 'NEWS' : 'NOTICIAS', href: `${prefix}/comunicados` },
-  { label: isEn ? 'COVERAGE' : 'COBERTURA', href: `${prefix}/cobertura` },
-  { label: isEn ? 'PRESS KITS' : 'PRESS KITS', href: `${prefix}/press-kits` },
-  { label: isEn ? 'DIRECTORY' : 'DIRECTORIO', href: `${prefix}/directorio` },
-  { label: isEn ? 'ARCHIVE' : 'ARCHIVO', href: `${prefix}/archivo` },
-  { label: isEn ? 'ABOUT THE SECTOR' : 'SOBRE EL SECTOR', href: `${prefix}/sobre-el-sector` },
-];
+const navItems = isEn
+  ? [
+      { label: 'NEWS', href: '/en/news' },
+      { label: 'COVERAGE', href: '/en/coverage' },
+      { label: 'PRESS KITS', href: '/en/press-kits' },
+      { label: 'DIRECTORY', href: '/en/directory' },
+      { label: 'ARCHIVE', href: '/en/archive' },
+      { label: 'ABOUT THE SECTOR', href: '/en/about' },
+    ]
+  : [
+      { label: 'NOTICIAS', href: '/comunicados' },
+      { label: 'COBERTURA', href: '/cobertura' },
+      { label: 'PRESS KITS', href: '/press-kits' },
+      { label: 'DIRECTORIO', href: '/directorio' },
+      { label: 'ARCHIVO', href: '/archivo' },
+      { label: 'SOBRE EL SECTOR', href: '/sobre-el-sector' },
+    ];
 ---
 
 <header class="w-full bg-paper border-b border-zinc-200 z-20 sticky top-0 md:relative backdrop-blur-md bg-paper/95">
@@ -49,7 +57,7 @@ const navItems = [
         ></div>
 
         {navItems.map((item) => {
-          const isActive = currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href));
+          const isActive = currentPath === item.href || (item.href !== '/' && item.href !== '/en' && currentPath.startsWith(item.href));
           return (
             <a
               href={item.href}
@@ -65,7 +73,7 @@ const navItems = [
 
         <!-- Minimalist Search Icon -->
         <a
-          href={`${prefix}/archivo`}
+          href={isEn ? '/en/archive' : '/archivo'}
           data-astro-prefetch="hover"
           class="text-zinc-700 hover:text-zinc-950 p-1.5 transition-colors active:scale-[0.95]"
           aria-label={isEn ? 'Search' : 'Buscar'}
@@ -80,7 +88,7 @@ const navItems = [
 
         <!-- Accreditation CTA Button -->
         <a
-          href={`${prefix}/acreditaciones`}
+          href={isEn ? '/en/accreditation' : '/acreditaciones'}
           data-astro-prefetch="hover"
           class="font-mono text-xs uppercase tracking-wider text-zinc-900 hover:text-vermilion px-2.5 py-1 transition-colors font-bold whitespace-nowrap"
         >
@@ -111,10 +119,10 @@ const navItems = [
 
         <div class="flex items-center gap-2">
           <a
-            href={isEn ? currentPath.replace(/^\/en/, '') || '/' : `/en${currentPath === '/' ? '' : currentPath}`}
-            class="font-mono text-xs font-bold text-zinc-900 uppercase tracking-widest px-2 py-1"
+            href={isEn ? currentPath.replace(/^\/en(\/|$)/, '/').replace(/\/$/, '') || '/' : `/en${currentPath === '/' ? '' : currentPath}`}
+            class="font-mono text-xs font-bold text-zinc-950 uppercase tracking-widest px-2 py-1"
           >
-            {isEn ? 'EN' : 'ES'}
+            {isEn ? 'ES' : 'EN'}
           </a>
 
           <button
@@ -158,13 +166,13 @@ const navItems = [
           {isEn ? 'Press Office' : 'Gabinete de Prensa'}
         </h4>
         <div class="space-y-2 font-mono text-xs text-zinc-600">
-          <a href={`${prefix}/acreditaciones`} class="block hover:text-vermilion">
+          <a href={isEn ? '/en/accreditation' : '/acreditaciones'} class="block hover:text-vermilion">
             {isEn ? 'Request Accreditation' : 'Solicitar Acreditación'}
           </a>
-          <a href={`${prefix}/press-kits`} class="block hover:text-vermilion">
+          <a href={isEn ? '/en/press-kits' : '/press-kits'} class="block hover:text-vermilion">
             {isEn ? 'Press Kits & B-Roll' : 'Press Kits y B-Roll Oficial'}
           </a>
-          <a href={`${prefix}/eventos`} class="block hover:text-vermilion">
+          <a href={isEn ? '/en/events' : '/eventos'} class="block hover:text-vermilion">
             {isEn ? 'Media Agenda & Calls' : 'Agenda de Convocatorias'}
           </a>
         </div>
@@ -176,7 +184,7 @@ const navItems = [
         </h4>
         <p class="font-mono text-xs text-zinc-600 leading-relaxed">
           NOCHEMADRID<br />
-          Asociados de Ocio y Espectáculos de Madrid<br />
+          {isEn ? 'Madrid Nightlife & Performing Arts Federation' : 'Asociados de Ocio y Espectáculos de Madrid'}<br />
           prensa@nochemadrid.org
         </p>
       </div>
@@ -186,11 +194,11 @@ const navItems = [
           {isEn ? 'Language' : 'Idioma'}
         </h4>
         <div class="flex gap-4 font-mono text-xs">
-          <a href={currentPath.replace(/^\/en/, '') || '/'} class={!isEn ? 'font-bold text-vermilion' : 'text-zinc-600'}>
+          <a href="/" class={!isEn ? 'font-bold text-vermilion' : 'text-zinc-600'}>
             Castellano (ES)
           </a>
           <span class="text-zinc-300">/</span>
-          <a href={`/en${currentPath === '/' ? '' : currentPath}`} class={isEn ? 'font-bold text-vermilion' : 'text-zinc-600'}>
+          <a href="/en" class={isEn ? 'font-bold text-vermilion' : 'text-zinc-600'}>
             English (EN)
           </a>
         </div>

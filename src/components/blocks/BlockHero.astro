@@ -10,8 +10,9 @@ interface Props {
 const { block, lang = 'es' } = Astro.props;
 const isEn = lang === 'en';
 const prefix = isEn ? '/en' : '';
+const newsBase = isEn ? '/en/news' : '/comunicados';
 
-// Pull latest stories directly with real images
+// Pull latest stories directly with real images and translations
 let latestStories: Comunicado[] = [];
 try {
   const res = await directus.request(
@@ -22,11 +23,13 @@ try {
       fields: [
         'id',
         'titulo',
+        'titulo_en',
         'slug',
+        'slug_en',
         'fecha_publicacion',
         'imagen_url_externa',
         'imagen_portada.*',
-        { categoria: ['id', 'nombre', 'slug'] }
+        { categoria: ['id', 'nombre', 'nombre_en', 'slug', 'slug_en'] }
       ],
     })
   );
@@ -36,14 +39,14 @@ try {
 }
 
 const DEFAULT_THUMBS = [
-  'https://images.unsplash.com/photo-1514306191717-452ec28c7814?q=80&w=600&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?q=80&w=600&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=600&auto=format&fit=crop',
+  '/images/news/dos-millones-turistas.jpg',
+  '/images/news/tardeo-madrid.jpg',
+  '/images/news/bad-bunny-residencia.jpg',
 ];
 
 const heroImage = block.fondo
   ? getAssetUrl(block.fondo, { quality: 90, format: 'webp' })
-  : 'https://images.unsplash.com/photo-1514306191717-452ec28c7814?q=80&w=1400&auto=format&fit=crop';
+  : '/images/news/enlacolasilencio.jpg';
 ---
 
 <section class="w-full bg-paper border-b border-zinc-200">
@@ -98,7 +101,7 @@ const heroImage = block.fondo
 
           <div class="flex flex-wrap items-center gap-4 pt-2 border-t border-zinc-100 font-mono text-xs">
             <a
-              href={`${prefix}/comunicados`}
+              href={newsBase}
               data-astro-prefetch="hover"
               class="bg-zinc-950 hover:bg-vermilion text-white font-bold px-4 py-2 uppercase tracking-wider transition-colors inline-flex items-center gap-1.5"
             >
@@ -123,7 +126,7 @@ const heroImage = block.fondo
             <span class="w-1.5 h-1.5 rounded-full bg-vermilion inline-block"></span>
             <span>{isEn ? 'LATEST PRESS RELEASES' : 'ÚLTIMOS COMUNICADOS'}</span>
           </div>
-          <a href={`${prefix}/comunicados`} data-astro-prefetch="hover" class="text-zinc-500 hover:text-vermilion text-[11px] font-semibold">
+          <a href={newsBase} data-astro-prefetch="hover" class="text-zinc-500 hover:text-vermilion text-[11px] font-semibold">
             {isEn ? 'VIEW ALL →' : 'VER TODOS →'}
           </a>
         </div>
@@ -133,10 +136,13 @@ const heroImage = block.fondo
             const cat = story.categoria as Categoria | undefined;
             const imgUrl = (story as any).imagen_url_externa || (story.imagen_portada ? getAssetUrl(story.imagen_portada, { width: 350, height: 250, format: 'webp' }) : DEFAULT_THUMBS[idx]);
             const dateStr = new Date(story.fecha_publicacion).toLocaleDateString(isEn ? 'en-US' : 'es-ES', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase();
+            const storyTitle = (isEn ? story.titulo_en : story.titulo) || story.titulo;
+            const storySlug = (isEn ? (story.slug_en || story.slug) : story.slug);
+            const catName = (isEn ? cat?.nombre_en : cat?.nombre) || cat?.nombre || (isEn ? 'OFFICIAL' : 'OFICIAL');
 
             return (
               <a
-                href={`${prefix}/comunicados/${story.slug}`}
+                href={`${newsBase}/${storySlug}`}
                 data-astro-prefetch="hover"
                 class="group block border border-zinc-200 bg-paper p-3 hover:border-zinc-950 transition-all active:scale-[0.99]"
               >
@@ -144,19 +150,19 @@ const heroImage = block.fondo
                   <div class="col-span-4 aspect-[4/3] overflow-hidden bg-zinc-100 border border-zinc-200">
                     <img
                       src={imgUrl}
-                      alt={story.titulo}
+                      alt={storyTitle}
                       class="h-full w-full object-cover filter contrast-105 group-hover:scale-105 transition-transform duration-300"
                     />
                   </div>
 
                   <div class="col-span-8 flex flex-col justify-between h-full space-y-1">
                     <div class="font-mono text-[9px] uppercase tracking-wider text-zinc-500 flex items-center justify-between">
-                      <span class="font-semibold text-zinc-900">{cat?.nombre?.toUpperCase() || (isEn ? 'OFFICIAL' : 'OFICIAL')}</span>
+                      <span class="font-semibold text-zinc-900">{catName.toUpperCase()}</span>
                       <span>{dateStr}</span>
                     </div>
 
                     <h3 class="font-display text-xs sm:text-sm font-bold text-zinc-950 leading-snug group-hover:text-vermilion transition-colors line-clamp-2">
-                      {story.titulo}
+                      {storyTitle}
                     </h3>
 
                     <div class="flex justify-end">

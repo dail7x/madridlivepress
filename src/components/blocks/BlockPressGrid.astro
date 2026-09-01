@@ -10,6 +10,7 @@ interface Props {
 const { block, lang = 'es' } = Astro.props;
 const isEn = lang === 'en';
 const prefix = isEn ? '/en' : '';
+const newsBase = isEn ? '/en/news' : '/comunicados';
 const limit = block.limite || 6;
 
 let comunicados: Comunicado[] = [];
@@ -32,20 +33,23 @@ try {
           'status',
           'fecha_publicacion',
           'slug',
+          'slug_en',
           'titulo',
+          'titulo_en',
           'bajada',
+          'bajada_en',
           'imagen_url_externa',
           'imagen_portada.*',
           'archivo_pdf.*',
           'tags',
-          { categoria: ['id', 'nombre', 'slug', 'color'] },
+          { categoria: ['id', 'nombre', 'nombre_en', 'slug', 'slug_en', 'color'] },
           { portavoz: ['id', 'nombre', 'cargo'] },
         ],
       })
     ),
     directus.request(
       readItems('categorias' as any, {
-        fields: ['id', 'nombre', 'slug', 'color'],
+        fields: ['id', 'nombre', 'nombre_en', 'slug', 'slug_en', 'color'],
         sort: ['nombre'],
       })
     ),
@@ -72,7 +76,7 @@ try {
       </div>
 
       <a
-        href={`${prefix}/comunicados`}
+        href={newsBase}
         class="inline-flex items-center gap-1 font-mono text-xs uppercase tracking-wider text-zinc-800 hover:text-vermilion transition-colors group"
       >
         <span>{isEn ? 'View all news' : 'Ver todas las notas'}</span>
@@ -84,17 +88,17 @@ try {
     {categorias.length > 0 && (
       <div class="flex flex-wrap gap-2 pt-6 pb-2">
         <a
-          href={`${prefix}/comunicados`}
+          href={newsBase}
           class="font-mono text-xs uppercase px-3 py-1.5 border border-zinc-900 bg-zinc-900 text-white tracking-wider"
         >
           {isEn ? 'All' : 'Todas'}
         </a>
         {categorias.map((c) => (
           <a
-            href={`${prefix}/comunicados?cat=${c.slug}`}
+            href={`${newsBase}?cat=${isEn ? (c.slug_en || c.slug) : c.slug}`}
             class="font-mono text-xs uppercase px-3 py-1.5 border border-zinc-200 hover:border-zinc-900 text-zinc-700 hover:text-zinc-950 tracking-wider transition-colors"
           >
-            {c.nombre}
+            {isEn ? (c.nombre_en || c.nombre) : c.nombre}
           </a>
         ))}
       </div>
@@ -109,9 +113,10 @@ try {
       ) : (
         comunicados.map((item, index) => {
           const cat = item.categoria as Categoria | undefined;
-          const coverImg = (item as any).imagen_url_externa || (item.imagen_portada
-            ? getAssetUrl(item.imagen_portada, { width: 600, height: 400, format: 'webp' })
-            : null);
+          const storyTitle = (isEn ? item.titulo_en : item.titulo) || item.titulo;
+          const storySlug = isEn ? (item.slug_en || item.slug) : item.slug;
+          const storyBajada = (isEn ? item.bajada_en : item.bajada) || item.bajada;
+          const catName = (isEn ? cat?.nombre_en : cat?.nombre) || cat?.nombre;
           const pdf = item.archivo_pdf ? getAssetUrl(item.archivo_pdf) : null;
           const pubDate = item.fecha_publicacion ? new Date(item.fecha_publicacion) : new Date();
           const dateFormatted = pubDate.toLocaleDateString(isEn ? 'en-US' : 'es-ES', {
@@ -130,7 +135,7 @@ try {
                 <div class="text-zinc-400">{npCode}</div>
                 {cat && (
                   <div class="text-zinc-600 uppercase tracking-widest pt-1">
-                    {cat.nombre}
+                    {catName}
                   </div>
                 )}
               </div>
@@ -138,14 +143,14 @@ try {
               <!-- Center title & excerpt col (~65%) -->
               <div class="md:col-span-7 space-y-2">
                 <h3 class="font-display text-lg sm:text-xl font-semibold text-zinc-950 leading-snug group-hover:text-vermilion transition-colors">
-                  <a href={`${prefix}/comunicados/${item.slug}`}>
-                    {item.titulo}
+                  <a href={`${newsBase}/${storySlug}`}>
+                    {storyTitle}
                   </a>
                 </h3>
 
-                {item.bajada && (
+                {storyBajada && (
                   <p class="font-sans text-sm text-zinc-600 line-clamp-2 leading-relaxed">
-                    {item.bajada}
+                    {storyBajada}
                   </p>
                 )}
               </div>
@@ -165,9 +170,9 @@ try {
                 )}
 
                 <a
-                  href={`${prefix}/comunicados/${item.slug}`}
+                  href={`${newsBase}/${storySlug}`}
                   class="font-sans text-sm font-semibold text-zinc-900 group-hover:text-vermilion transition-colors"
-                  aria-label={`Leer ${item.titulo}`}
+                  aria-label={`Read ${storyTitle}`}
                 >
                   ↗
                 </a>

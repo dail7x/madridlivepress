@@ -1,0 +1,237 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import WireframeHeader from '@/components/ui/WireframeHeader.astro';
+import type { Comunicado, Categoria } from '@/lib/directus';
+import { directus, readItems, getAssetUrl } from '@/lib/directus';
+
+export const prerender = false;
+
+// 1. Fetch categories
+let categorias: Categoria[] = [];
+try {
+  const catRes = await directus.request(
+    readItems('categorias' as any, {
+      fields: ['id', 'nombre', 'nombre_en', 'slug', 'slug_en'],
+      sort: ['nombre'],
+    })
+  );
+  categorias = (catRes as any) || [];
+} catch (e) {
+  console.error('Error fetching categories:', e);
+}
+
+// 2. Fetch press releases
+let comunicados: Comunicado[] = [];
+try {
+  const comRes = await directus.request(
+    readItems('comunicados' as any, {
+      filter: { status: { _eq: 'published' } },
+      sort: ['-fecha_publicacion', '-id'],
+      limit: 100,
+      fields: [
+        'id',
+        'status',
+        'fecha_publicacion',
+        'slug',
+        'slug_en',
+        'titulo',
+        'titulo_en',
+        'bajada',
+        'bajada_en',
+        'destacado',
+        'imagen_url_externa',
+        'imagen_portada.*',
+        'archivo_pdf.*',
+        { categoria: ['id', 'nombre', 'nombre_en', 'slug', 'slug_en'] },
+      ],
+    })
+  );
+  comunicados = (comRes as any) || [];
+} catch (e) {
+  console.error('Error fetching news:', e);
+}
+
+const featuredNews = comunicados.find((c) => c.destacado) || comunicados[0];
+const otherNews = comunicados.filter((c) => c.id !== featuredNews?.id);
+
+const DEFAULT_NEWS_IMAGE = '/images/news/dos-millones-turistas.jpg';
+---
+
+<Layout
+  title="News & Press Releases | Madrid Live Press"
+  description="Official press releases, macroeconomic reports, and verified cultural statements on Madrid nightlife."
+  lang="en"
+>
+  <div class="w-full bg-paper pb-16">
+    <!-- Wireframe Header NEWS -->
+    <WireframeHeader
+      title="NEWS"
+      subtitle="Madrid's cultural pulse, verified and ready to publish."
+      badge="PRESS RELEASES"
+      updatedTime="LIVE 12:38 CET"
+    />
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4">
+      <!-- Category Filter Pills -->
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200 pb-3 font-mono text-xs">
+        <div class="flex flex-wrap items-center gap-2" id="categoryFilters">
+          <button
+            type="button"
+            class="filter-pill active bg-zinc-950 text-white font-bold px-3 py-1 uppercase tracking-wider transition-all"
+            data-cat="all"
+          >
+            All · {comunicados.length}
+          </button>
+          {categorias.map((c) => (
+            <button
+              type="button"
+              class="filter-pill border border-zinc-200 hover:border-zinc-950 text-zinc-600 hover:text-zinc-950 font-bold px-3 py-1 uppercase tracking-wider transition-all"
+              data-cat={c.slug_en || c.slug}
+            >
+              {c.nombre_en || c.nombre}
+            </button>
+          ))}
+        </div>
+
+        <div class="flex items-center gap-4 text-zinc-500 text-[11px]">
+          <span>{comunicados.length} RELEASES</span>
+        </div>
+      </div>
+
+      <!-- Featured Cover Story (Visible in first viewport) -->
+      {featuredNews && (
+        <article
+          class="news-card group border border-zinc-200 bg-paper hover:border-zinc-950 transition-all p-0"
+          data-category={(featuredNews.categoria as any)?.slug_en || (featuredNews.categoria as any)?.slug || 'general'}
+        >
+          <a href={`/en/news/${featuredNews.slug_en || featuredNews.slug}`} class="block">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-0">
+              <div class="lg:col-span-7 aspect-[16/9] lg:aspect-auto min-h-[260px] lg:min-h-[340px] overflow-hidden bg-zinc-100 border-b lg:border-b-0 lg:border-r border-zinc-200">
+                <img
+                  src={featuredNews.imagen_url_externa || (featuredNews.imagen_portada ? getAssetUrl(featuredNews.imagen_portada, { width: 900, height: 600, format: 'webp' }) : DEFAULT_NEWS_IMAGE)}
+                  alt={featuredNews.titulo_en || featuredNews.titulo}
+                  class="w-full h-full object-cover filter contrast-105 group-hover:scale-105 transition-transform duration-500"
+                  loading="eager"
+                />
+              </div>
+
+              <div class="lg:col-span-5 p-6 sm:p-8 flex flex-col justify-between space-y-4">
+                <div class="space-y-3">
+                  <div class="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider text-zinc-500">
+                    <span class="px-2 py-0.5 bg-canvas border border-zinc-200 font-bold text-zinc-950">
+                      COVER STORY
+                    </span>
+                    <span>·</span>
+                    <span class="font-semibold text-zinc-900">
+                      {(featuredNews.categoria as any)?.nombre_en || (featuredNews.categoria as any)?.nombre || 'OFFICIAL'}
+                    </span>
+                  </div>
+
+                  <h2 class="font-display text-2xl sm:text-3xl font-bold text-zinc-950 leading-tight group-hover:text-vermilion transition-colors">
+                    {featuredNews.titulo_en || featuredNews.titulo}
+                  </h2>
+
+                  <p class="font-sans text-sm text-zinc-600 leading-relaxed line-clamp-3">
+                    {featuredNews.bajada_en || featuredNews.bajada}
+                  </p>
+                </div>
+
+                <div class="pt-4 border-t border-zinc-100 flex items-center justify-between font-mono text-xs">
+                  <span class="text-zinc-500 uppercase">
+                    {new Date(featuredNews.fecha_publicacion).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()}
+                  </span>
+                  <span class="font-bold text-zinc-950 group-hover:translate-x-1 transition-transform">
+                    READ RELEASE →
+                  </span>
+                </div>
+              </div>
+            </div>
+          </a>
+        </article>
+      )}
+
+      <!-- Other News Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4" id="newsGrid">
+        {otherNews.map((story) => {
+          const cat = story.categoria as Categoria | undefined;
+          const imgUrl = story.imagen_url_externa || (story.imagen_portada ? getAssetUrl(story.imagen_portada, { width: 500, height: 350, format: 'webp' }) : DEFAULT_NEWS_IMAGE);
+          const dateStr = new Date(story.fecha_publicacion).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase();
+
+          return (
+            <article
+              class="news-card group border border-zinc-200 bg-paper hover:border-zinc-950 transition-all p-5 flex flex-col justify-between space-y-4"
+              data-category={cat?.slug_en || cat?.slug || 'general'}
+            >
+              <a href={`/en/news/${story.slug_en || story.slug}`} class="space-y-3 block">
+                <div class="aspect-[16/10] overflow-hidden bg-zinc-100 border border-zinc-200">
+                  <img
+                    src={imgUrl}
+                    alt={story.titulo_en || story.titulo}
+                    class="w-full h-full object-cover filter contrast-105 group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                </div>
+
+                <div class="flex items-center justify-between font-mono text-[10px] uppercase tracking-wider text-zinc-500 pt-1">
+                  <span class="font-bold text-zinc-950 px-2 py-0.5 bg-canvas border border-zinc-200">
+                    {cat?.nombre_en || cat?.nombre || 'OFFICIAL'}
+                  </span>
+                  <span>{dateStr}</span>
+                </div>
+
+                <h3 class="font-display text-base sm:text-lg font-bold text-zinc-950 leading-snug group-hover:text-vermilion transition-colors line-clamp-2">
+                  {story.titulo_en || story.titulo}
+                </h3>
+
+                <p class="font-sans text-xs text-zinc-600 leading-relaxed line-clamp-2">
+                  {story.bajada_en || story.bajada}
+                </p>
+              </a>
+
+              <div class="pt-3 border-t border-zinc-100 flex items-center justify-between font-mono text-xs">
+                <span class="text-[10px] text-zinc-400 uppercase">HIGH RESOLUTION ASSETS</span>
+                <a
+                  href={`/en/news/${story.slug_en || story.slug}`}
+                  class="font-bold text-zinc-950 group-hover:text-vermilion inline-flex items-center gap-1"
+                >
+                  <span>Read</span>
+                  <span>→</span>
+                </a>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </div>
+  </div>
+
+  <script is:inline>
+    function setupCategoryFilters() {
+      const pills = document.querySelectorAll('#categoryFilters .filter-pill');
+      const cards = document.querySelectorAll('.news-card');
+
+      pills.forEach((pill) => {
+        pill.addEventListener('click', () => {
+          pills.forEach((p) => {
+            p.classList.remove('bg-zinc-950', 'text-white');
+            p.classList.add('border-zinc-200', 'text-zinc-600');
+          });
+          pill.classList.remove('border-zinc-200', 'text-zinc-600');
+          pill.classList.add('bg-zinc-950', 'text-white');
+
+          const cat = pill.getAttribute('data-cat');
+          cards.forEach((card) => {
+            if (cat === 'all' || card.getAttribute('data-category') === cat) {
+              card.classList.remove('hidden');
+            } else {
+              card.classList.add('hidden');
+            }
+          });
+        });
+      });
+    }
+
+    document.addEventListener('astro:page-load', setupCategoryFilters);
+    setupCategoryFilters();
+  </script>
+</Layout>

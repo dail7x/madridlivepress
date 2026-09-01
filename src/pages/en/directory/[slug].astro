@@ -1,0 +1,187 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import type { Sala } from '@/lib/directus';
+import { directus, readItems, getAssetUrl } from '@/lib/directus';
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+
+if (!slug) {
+  return Astro.redirect('/en/directory');
+}
+
+let sala: Sala | null = null;
+try {
+  const res = await directus.request(
+    readItems('salas' as any, {
+      filter: {
+        slug: { _eq: slug },
+        status: { _eq: 'published' },
+      },
+      fields: [
+        'id',
+        'nombre',
+        'slug',
+        'tipo_espacio',
+        'tipo_espacio_en',
+        'distrito',
+        'direccion',
+        'aforo',
+        'descripcion',
+        'descripcion_en',
+        'logo.*',
+        'imagen_portada.*',
+        'contacto_prensa_nombre',
+        'contacto_prensa_email',
+        'contacto_prensa_telefono',
+        'dossier_pdf.*',
+        'sitio_web',
+        'instagram',
+        'destacado',
+      ],
+      limit: 1,
+    })
+  );
+  sala = (res && (res as any)[0]) || null;
+} catch (e) {
+  console.error('Error loading venue in English:', e);
+}
+
+if (!sala) {
+  return Astro.redirect('/en/directory');
+}
+
+const typeName = sala.tipo_espacio_en || sala.tipo_espacio;
+const desc = sala.descripcion_en || sala.descripcion;
+const igUrl = sala.instagram ? `https://instagram.com/${sala.instagram.replace('@', '')}` : null;
+---
+
+<Layout
+  title={`${sala.nombre} — Press Dossier & Technical Sheet | Madrid Live Press`}
+  description={desc || `${sala.nombre} in Madrid.`}
+  lang="en"
+>
+  <div class="w-full bg-paper pb-20">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-4 border-b border-zinc-200 flex items-center justify-between font-mono text-xs text-zinc-500">
+      <a href="/en/directory" class="hover:text-vermilion flex items-center gap-1.5 font-bold uppercase tracking-wider">
+        <span>←</span>
+        <span>Back to Directory</span>
+      </a>
+      <span class="uppercase">{typeName} · {sala.distrito}</span>
+    </div>
+
+    <!-- Venue Header -->
+    <header class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-6 space-y-4">
+      <div class="flex items-center gap-3 font-mono text-xs uppercase tracking-wider text-zinc-500">
+        <span class="w-2 h-2 rounded-full bg-vermilion inline-block"></span>
+        <span class="font-bold text-zinc-950">{typeName}</span>
+        <span>·</span>
+        <span>{sala.distrito}</span>
+        {sala.aforo && <span>· CAP: {sala.aforo}</span>}
+      </div>
+
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h1 class="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-zinc-950 tracking-tight">
+          {sala.nombre}
+        </h1>
+
+        <div class="flex items-center gap-3 font-mono text-xs">
+          {igUrl && (
+            <a
+              href={igUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="border border-zinc-950 hover:bg-zinc-950 hover:text-white px-3 py-1.5 font-bold uppercase tracking-wider transition-colors inline-flex items-center gap-1"
+            >
+              <span>Instagram</span>
+              <span>↗</span>
+            </a>
+          )}
+          {sala.sitio_web && (
+            <a
+              href={sala.sitio_web}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="bg-zinc-950 hover:bg-vermilion text-white px-3 py-1.5 font-bold uppercase tracking-wider transition-colors inline-flex items-center gap-1"
+            >
+              <span>Official Website</span>
+              <span>↗</span>
+            </a>
+          )}
+        </div>
+      </div>
+
+      <p class="font-mono text-sm text-zinc-600 pt-1">
+        📍 {sala.direccion}
+      </p>
+    </header>
+
+    <!-- Content & Technical Details Grid -->
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <!-- Left: Description & Editorial -->
+      <div class="lg:col-span-8 space-y-6">
+        <div class="border border-zinc-200 bg-paper p-6 sm:p-8 space-y-4">
+          <h2 class="font-display text-xl font-bold text-zinc-950">About {sala.nombre}</h2>
+          <p class="font-sans text-base text-zinc-700 leading-relaxed">
+            {desc}
+          </p>
+        </div>
+
+        <div class="border border-zinc-200 bg-canvas p-6 space-y-3 font-mono text-xs">
+          <h3 class="font-bold text-zinc-950 uppercase tracking-wider">Press & Media Accreditation</h3>
+          <p class="text-zinc-600 leading-relaxed">
+            Journalists and photojournalists covering performances or reporting on this venue can request credentials through the Madrid Live Press central pressroom.
+          </p>
+          <a href="/en/accreditation" class="text-vermilion font-bold hover:underline inline-block pt-1">
+            Request Media Pass for this Venue →
+          </a>
+        </div>
+      </div>
+
+      <!-- Right: Technical Sidebar -->
+      <div class="lg:col-span-4 space-y-4 font-mono text-xs">
+        <div class="border border-zinc-200 bg-paper p-5 space-y-3">
+          <div class="font-bold text-zinc-950 uppercase tracking-wider pb-2 border-b border-zinc-100">
+            TECHNICAL SPECIFICATIONS
+          </div>
+          <div class="space-y-2 text-zinc-700">
+            <div class="flex justify-between">
+              <span class="text-zinc-400">VENUE TYPE:</span>
+              <span class="font-semibold text-zinc-950">{typeName}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-zinc-400">CAPACITY:</span>
+              <span class="font-semibold text-zinc-950">{sala.aforo ? `${sala.aforo} attendees` : 'Consult'}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-zinc-400">DISTRICT:</span>
+              <span class="font-semibold text-zinc-950">{sala.distrito}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-zinc-400">ACOUSTIC AUDIT:</span>
+              <span class="font-semibold text-emerald-600">CERTIFIED</span>
+            </div>
+          </div>
+        </div>
+
+        {sala.contacto_prensa_nombre && (
+          <div class="border border-zinc-200 bg-paper p-5 space-y-2">
+            <div class="font-bold text-zinc-950 uppercase tracking-wider pb-2 border-b border-zinc-100">
+              PRESS CONTACT
+            </div>
+            <div class="font-bold text-zinc-950">{sala.contacto_prensa_nombre}</div>
+            {sala.contacto_prensa_email && (
+              <a href={`mailto:${sala.contacto_prensa_email}`} class="text-vermilion hover:underline block">
+                {sala.contacto_prensa_email}
+              </a>
+            )}
+            {sala.contacto_prensa_telefono && (
+              <div class="text-zinc-500">{sala.contacto_prensa_telefono}</div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+</Layout>

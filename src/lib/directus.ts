@@ -23,7 +23,9 @@ export interface DirectusFile {
 export interface Categoria {
   id: string;
   nombre: string;
+  nombre_en?: string;
   slug: string;
+  slug_en?: string;
   descripcion?: string;
   color?: string;
 }
@@ -42,10 +44,15 @@ export interface Comunicado {
   status: 'published' | 'draft' | 'archived';
   fecha_publicacion: string;
   slug: string;
+  slug_en?: string;
   titulo: string;
+  titulo_en?: string;
   bajada?: string;
+  bajada_en?: string;
   cuerpo?: string;
+  cuerpo_en?: string;
   imagen_portada?: string | DirectusFile;
+  imagen_url_externa?: string;
   archivo_pdf?: string | DirectusFile;
   categoria?: string | Categoria;
   portavoz?: string | Portavoz;
@@ -59,11 +66,13 @@ export interface Sala {
   status: 'published' | 'draft' | 'archived';
   nombre: string;
   slug: string;
-  tipo_espacio: 'discoteca' | 'sala_conciertos' | 'teatro_musical' | 'tablao' | 'bar_especial';
+  tipo_espacio: string;
+  tipo_espacio_en?: string;
   distrito: string;
   direccion: string;
   aforo?: number;
   descripcion?: string;
+  descripcion_en?: string;
   logo?: string | DirectusFile;
   imagen_portada?: string | DirectusFile;
   contacto_prensa_nombre?: string;
@@ -79,23 +88,32 @@ export interface RecursoPrensa {
   id: string;
   status: string;
   titulo: string;
-  categoria_recurso: 'logos' | 'b_roll' | 'fotografia' | 'informes' | 'infografias';
+  titulo_en?: string;
+  categoria_recurso?: string;
   descripcion?: string;
+  descripcion_en?: string;
   archivo?: string | DirectusFile;
   formato?: string;
   peso?: string;
   imagen_previa?: string | DirectusFile;
+  tipo_recurso?: string;
+  resolucion_formato?: string;
+  tamano_mb?: string;
+  derechos_creditos?: string;
 }
 
 export interface Evento {
   id: string;
   status: string;
   titulo: string;
+  titulo_en?: string;
   slug: string;
+  slug_en?: string;
   fecha_evento: string;
   sala?: string | Sala;
   categoria?: string;
   descripcion?: string;
+  descripcion_en?: string;
   imagen_portada?: string | DirectusFile;
   pases_prensa_disponibles?: boolean;
   fecha_limite_acreditacion?: string;

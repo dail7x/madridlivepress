@@ -1,0 +1,207 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import WireframeHeader from '@/components/ui/WireframeHeader.astro';
+import type { Sala } from '@/lib/directus';
+import { directus, readItems, getAssetUrl } from '@/lib/directus';
+
+export const prerender = false;
+
+let salas: Sala[] = [];
+try {
+  const res = await directus.request(
+    readItems('salas' as any, {
+      filter: { status: { _eq: 'published' } },
+      sort: ['nombre'],
+      limit: 100,
+      fields: [
+        'id',
+        'nombre',
+        'slug',
+        'tipo_espacio',
+        'tipo_espacio_en',
+        'distrito',
+        'direccion',
+        'aforo',
+        'descripcion',
+        'descripcion_en',
+        'logo.*',
+        'imagen_portada.*',
+        'sitio_web',
+        'instagram',
+        'destacado',
+      ],
+    })
+  );
+  salas = (res as any) || [];
+} catch (e) {
+  console.error('Error fetching venues in English:', e);
+}
+
+const distritos = Array.from(new Set(salas.map((s) => s.distrito).filter(Boolean))).sort();
+const tipos = Array.from(new Set(salas.map((s) => s.tipo_espacio_en || s.tipo_espacio).filter(Boolean))).sort();
+---
+
+<Layout
+  title="Official Nightlife & Cultural Venues Directory | Madrid Live Press"
+  description="Verified directory of 96 associated nightlife halls, live music venues, theaters, and flamenco spaces in Madrid."
+  lang="en"
+>
+  <div class="w-full bg-paper pb-16">
+    <WireframeHeader
+      title="DIRECTORY"
+      subtitle="Official index of associated cultural spaces, live music halls, theaters, and clubs."
+      badge="96 ASSOCIATED VENUES"
+      updatedTime="FEDERATED NETWORK"
+    />
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4">
+      <!-- Search and District Filters -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4 pb-4 border-b border-zinc-200 font-mono text-xs">
+        <div class="md:col-span-6">
+          <input
+            type="search"
+            id="venueSearchInput"
+            placeholder="Search venue by name, address, or musical genre..."
+            class="w-full bg-paper border border-zinc-300 focus:border-zinc-950 px-3 py-2 text-xs font-mono placeholder:text-zinc-400 outline-none"
+          />
+        </div>
+
+        <div class="md:col-span-3">
+          <select
+            id="districtSelect"
+            class="w-full bg-paper border border-zinc-300 focus:border-zinc-950 px-3 py-2 text-xs font-mono outline-none uppercase"
+          >
+            <option value="all">All Districts ({salas.length})</option>
+            {distritos.map((d) => (
+              <option value={d}>{d}</option>
+            ))}
+          </select>
+        </div>
+
+        <div class="md:col-span-3">
+          <select
+            id="typeSelect"
+            class="w-full bg-paper border border-zinc-300 focus:border-zinc-950 px-3 py-2 text-xs font-mono outline-none uppercase"
+          >
+            <option value="all">All Venue Types</option>
+            {tipos.map((t) => (
+              <option value={t}>{t}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <!-- Venues Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="venuesGrid">
+        {salas.map((sala) => {
+          const typeName = sala.tipo_espacio_en || sala.tipo_espacio;
+          const desc = sala.descripcion_en || sala.descripcion;
+          const igUrl = sala.instagram ? `https://instagram.com/${sala.instagram.replace('@', '')}` : null;
+
+          return (
+            <article
+              class="venue-card group border border-zinc-200 bg-paper hover:border-zinc-950 transition-all p-5 flex flex-col justify-between space-y-4"
+              data-name={sala.nombre.toLowerCase()}
+              data-district={sala.distrito || ''}
+              data-type={typeName || ''}
+            >
+              <div class="space-y-3">
+                <div class="flex items-center justify-between font-mono text-[10px] uppercase tracking-wider text-zinc-500">
+                  <span class="font-bold text-zinc-950 px-2 py-0.5 bg-canvas border border-zinc-200">
+                    {typeName}
+                  </span>
+                  <span class="font-semibold">{sala.distrito}</span>
+                </div>
+
+                <div class="flex items-start gap-3 pt-1">
+                  <!-- Monogram / Logo -->
+                  <div class="w-12 h-12 flex-shrink-0 bg-zinc-950 text-white font-display font-black text-lg flex items-center justify-center border border-zinc-800">
+                    {sala.nombre.slice(0, 2).toUpperCase()}
+                  </div>
+
+                  <div>
+                    <h3 class="font-display text-lg font-bold text-zinc-950 group-hover:text-vermilion transition-colors leading-tight">
+                      <a href={`/en/directory/${sala.slug}`}>
+                        {sala.nombre}
+                      </a>
+                    </h3>
+                    <p class="font-mono text-[11px] text-zinc-500 pt-0.5">{sala.direccion}</p>
+                  </div>
+                </div>
+
+                <p class="font-sans text-xs text-zinc-600 leading-relaxed line-clamp-3">
+                  {desc}
+                </p>
+              </div>
+
+              <div class="pt-3 border-t border-zinc-100 flex items-center justify-between font-mono text-xs">
+                <div class="flex items-center gap-3">
+                  {igUrl && (
+                    <a
+                      href={igUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="text-zinc-500 hover:text-zinc-950 font-bold"
+                      title="Instagram"
+                    >
+                      IG ↗
+                    </a>
+                  )}
+                  {sala.aforo && (
+                    <span class="text-zinc-400 text-[10px]">CAP: {sala.aforo}</span>
+                  )}
+                </div>
+
+                <a
+                  href={`/en/directory/${sala.slug}`}
+                  class="font-bold text-zinc-950 group-hover:text-vermilion inline-flex items-center gap-1"
+                >
+                  <span>Press Sheet</span>
+                  <span>→</span>
+                </a>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </div>
+  </div>
+
+  <script is:inline>
+    function setupVenueFilters() {
+      const searchInput = document.getElementById('venueSearchInput');
+      const districtSelect = document.getElementById('districtSelect');
+      const typeSelect = document.getElementById('typeSelect');
+      const cards = document.querySelectorAll('.venue-card');
+
+      function filter() {
+        const query = searchInput?.value.toLowerCase().trim() || '';
+        const district = districtSelect?.value || 'all';
+        const type = typeSelect?.value || 'all';
+
+        cards.forEach((card) => {
+          const name = card.getAttribute('data-name') || '';
+          const cardDistrict = card.getAttribute('data-district') || '';
+          const cardType = card.getAttribute('data-type') || '';
+
+          const matchesQuery = !query || name.includes(query) || cardDistrict.toLowerCase().includes(query);
+          const matchesDistrict = district === 'all' || cardDistrict === district;
+          const matchesType = type === 'all' || cardType === type;
+
+          if (matchesQuery && matchesDistrict && matchesType) {
+            card.classList.remove('hidden');
+          } else {
+            card.classList.add('hidden');
+          }
+        });
+      }
+
+      searchInput?.addEventListener('input', filter);
+      districtSelect?.addEventListener('change', filter);
+      typeSelect?.addEventListener('change', filter);
+    }
+
+    document.addEventListener('astro:page-load', setupVenueFilters);
+    setupVenueFilters();
+  </script>
+</Layout>
