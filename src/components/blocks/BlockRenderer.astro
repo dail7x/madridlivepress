@@ -1,0 +1,42 @@
+---
+import type { PageBlockItem } from '@/lib/directus';
+import BlockHero from './BlockHero.astro';
+import BlockPressGrid from './BlockPressGrid.astro';
+import BlockRichText from './BlockRichText.astro';
+import BlockMediaKit from './BlockMediaKit.astro';
+import BlockVenuesMap from './BlockVenuesMap.astro';
+import BlockNewsletter from './BlockNewsletter.astro';
+
+interface Props {
+  bloques?: PageBlockItem[];
+  lang?: 'es' | 'en';
+}
+
+const { bloques = [], lang = 'es' } = Astro.props;
+---
+
+<div class="space-y-16 md:space-y-24 py-6">
+  {
+    bloques.map((block) => {
+      const { collection, item } = block;
+      if (!item) return null;
+
+      switch (collection) {
+        case 'block_hero':
+          return <BlockHero block={item} lang={lang} />;
+        case 'block_press_grid':
+          return <BlockPressGrid block={item} lang={lang} />;
+        case 'block_rich_text':
+          return <BlockRichText block={item} lang={lang} />;
+        case 'block_media_kit':
+          return <BlockMediaKit block={item} lang={lang} />;
+        case 'block_venues_map':
+          return <BlockVenuesMap block={item} lang={lang} />;
+        case 'block_newsletter':
+          return <BlockNewsletter block={item} lang={lang} />;
+        default:
+          return null;
+      }
+    })
+  }
+</div>

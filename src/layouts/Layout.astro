@@ -1,0 +1,70 @@
+---
+import Header from '@/components/ui/Header.astro';
+import Footer from '@/components/ui/Footer.astro';
+import DirectusLivePreview from '@/components/ui/DirectusLivePreview.astro';
+import type { Locale } from '@/lib/i18n';
+import { useTranslations } from '@/lib/i18n';
+import '@/styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  lang?: Locale;
+}
+
+const {
+  title,
+  description,
+  image,
+  lang = 'es',
+} = Astro.props;
+
+const t = useTranslations(lang);
+const pageTitle = title ? `${title} | Madrid Live Press` : t.siteTitle;
+const pageDesc = description || t.siteDescription;
+const pageImage = image || '/og-image.jpg';
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site || 'https://madridlivepress.116.203.118.1.sslip.io');
+---
+
+<!doctype html>
+<html lang={lang} class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+
+    {/* Primary Meta Tags */}
+    <title>{pageTitle}</title>
+    <meta name="title" content={pageTitle} />
+    <meta name="description" content={pageDesc} />
+    <link rel="canonical" href={canonicalUrl} />
+
+    {/* Open Graph / Facebook */}
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDesc} />
+    <meta property="og:image" content={pageImage} />
+
+    {/* Twitter */}
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={canonicalUrl} />
+    <meta property="twitter:title" content={pageTitle} />
+    <meta property="twitter:description" content={pageDesc} />
+    <meta property="twitter:image" content={pageImage} />
+
+    {/* Google Fonts Preconnect */}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  </head>
+  <body class="bg-background text-zinc-100 antialiased min-h-screen flex flex-col selection:bg-brand-primary selection:text-white">
+    <Header currentLang={lang} />
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      <slot />
+    </main>
+    <Footer currentLang={lang} />
+    <DirectusLivePreview />
+  </body>
+</html>

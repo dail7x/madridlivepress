@@ -1,0 +1,161 @@
+---
+import type { BlockMediaKit, RecursoPrensa } from '@/lib/directus';
+import { directus, getAssetUrl } from '@/lib/directus';
+import { readItems } from '@directus/sdk';
+import { useTranslations } from '@/lib/i18n';
+import { DownloadCloud, FileArchive, ArrowRight, ShieldCheck, HardDrive } from 'lucide-astro';
+
+interface Props {
+  block: BlockMediaKit;
+  lang?: 'es' | 'en';
+}
+
+const { block, lang = 'es' } = Astro.props;
+const t = useTranslations(lang);
+
+// Fetch recent media kits from directus
+let recursos: RecursoPrensa[] = [];
+try {
+  const res = await directus.request(
+    readItems('recursos_prensa' as any, {
+      filter: { status: { _eq: 'published' } },
+      sort: ['-id'],
+      limit: 3,
+      fields: ['id', 'titulo', 'categoria_recurso', 'descripcion', 'archivo.*', 'formato', 'peso', 'imagen_previa.*'],
+    })
+  );
+  recursos = (res as any) || [];
+} catch (e) {
+  console.error('Error fetching media resources in BlockMediaKit:', e);
+}
+
+const directZipUrl = block.archivo_zip ? getAssetUrl(block.archivo_zip) : null;
+const previewImgUrl = block.imagen_previa ? getAssetUrl(block.imagen_previa, { width: 600, height: 350, format: 'webp' }) : null;
+---
+
+<section class="space-y-8">
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-white/10">
+    <div class="space-y-2 max-w-2xl">
+      <div class="inline-flex items-center gap-2 text-amber-400 font-mono text-xs uppercase tracking-widest font-semibold">
+        <DownloadCloud class="h-4 w-4" />
+        <span>Centro de Recursos para Medios</span>
+      </div>
+      <h2 class="font-display text-3xl sm:text-4xl font-bold text-white tracking-tight">
+        {block.titulo || t.mediaKit.title}
+      </h2>
+      {block.descripcion && (
+        <p class="font-sans text-base text-zinc-300">
+          {block.descripcion}
+        </p>
+      )}
+    </div>
+
+    <a
+      href={lang === 'en' ? '/en/recursos-prensa' : '/recursos-prensa'}
+      class="inline-flex items-center gap-2 font-mono text-sm text-zinc-400 hover:text-white transition-colors group"
+    >
+      <span>Ver todos los paquetes</span>
+      <ArrowRight class="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
+    </a>
+  </div>
+
+  {/* Main Featured Kit Banner if defined in block */}
+  {directZipUrl && (
+    <div class="relative overflow-hidden rounded-3xl border border-amber-500/30 bg-gradient-to-r from-surface to-surface-light p-6 sm:p-8 lg:p-10 shadow-2xl backdrop-blur-xl">
+      <div class="flex flex-col lg:flex-row items-center justify-between gap-8">
+        <div class="space-y-4 max-w-xl">
+          <div class="flex items-center gap-2">
+            <span class="rounded-md bg-amber-400/20 px-3 py-1 font-mono text-xs font-bold uppercase text-amber-300 border border-amber-400/30">
+              Media Kit Oficial 2026
+            </span>
+            {block.tamanio_formato && (
+              <span class="font-mono text-xs text-zinc-400">
+                {block.tamanio_formato}
+              </span>
+            )}
+          </div>
+
+          <h3 class="font-display text-2xl sm:text-3xl font-bold text-white leading-tight">
+            {block.titulo}
+          </h3>
+
+          {block.especificaciones && (
+            <p class="font-sans text-sm text-zinc-300 leading-relaxed">
+              {block.especificaciones}
+            </p>
+          )}
+
+          <div class="pt-2 flex flex-wrap items-center gap-4">
+            <a
+              href={directZipUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              download
+              class="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-6 py-3.5 font-sans font-bold text-black transition-all hover:bg-amber-400 hover:scale-[1.02] shadow-lg shadow-amber-500/20"
+            >
+              <DownloadCloud class="h-5 w-5" />
+              <span>{t.mediaKit.downloadZip}</span>
+            </a>
+            <div class="flex items-center gap-2 text-xs font-mono text-zinc-400">
+              <ShieldCheck class="h-4 w-4 text-emerald-400" />
+              <span>Uso editorial libre de derechos</span>
+            </div>
+          </div>
+        </div>
+
+        {previewImgUrl && (
+          <div class="w-full lg:w-96 rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
+            <img src={previewImgUrl} alt={block.titulo} class="w-full h-auto object-cover" />
+          </div>
+        )}
+      </div>
+    </div>
+  )}
+
+  {/* Secondary Media Assets Grid */}
+  {recursos.length > 0 && (
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {recursos.map((item) => {
+        const fileUrl = item.archivo ? getAssetUrl(item.archivo) : '#';
+        const preview = item.imagen_previa ? getAssetUrl(item.imagen_previa, { width: 400, height: 250, format: 'webp' }) : null;
+
+        return (
+          <div class="group rounded-2xl border border-white/10 bg-surface/80 p-5 space-y-4 hover:border-white/20 transition-all backdrop-blur-md flex flex-col justify-between">
+            <div class="space-y-3">
+              {preview && (
+                <div class="aspect-video w-full overflow-hidden rounded-xl bg-black/40 border border-white/5">
+                  <img src={preview} alt={item.titulo} class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                </div>
+              )}
+              <div class="flex items-center justify-between">
+                <span class="rounded-md bg-white/5 px-2 py-0.5 font-mono text-[11px] font-medium uppercase tracking-wider text-zinc-300">
+                  {item.categoria_recurso || 'Recurso'}
+                </span>
+                <span class="font-mono text-xs text-zinc-400">{item.peso || item.formato || 'ZIP'}</span>
+              </div>
+              <h4 class="font-display text-base font-bold text-white group-hover:text-amber-300 transition-colors">
+                {item.titulo}
+              </h4>
+              {item.descripcion && (
+                <p class="font-sans text-xs text-zinc-400 line-clamp-2 leading-relaxed">
+                  {item.descripcion}
+                </p>
+              )}
+            </div>
+
+            <a
+              href={fileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              download
+              class="inline-flex items-center justify-center gap-2 rounded-lg border border-white/15 bg-white/5 px-4 py-2.5 font-mono text-xs font-semibold text-white hover:bg-amber-400 hover:text-black hover:border-amber-400 transition-all w-full mt-2"
+            >
+              <DownloadCloud class="h-4 w-4" />
+              <span>{t.mediaKit.downloadZip}</span>
+            </a>
+          </div>
+        );
+      })}
+    </div>
+  )}
+</section>

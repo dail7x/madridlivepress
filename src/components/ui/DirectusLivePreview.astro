@@ -1,0 +1,41 @@
+---
+// Component for Directus Live Preview integration
+const isPreview = Astro.url.searchParams.get('preview') === 'true';
+---
+
+{isPreview && (
+  <aside
+    id="directusPreviewBanner"
+    class="fixed bottom-4 right-4 z-50 flex items-center gap-3 rounded-2xl border border-amber-500/40 bg-black/90 p-4 shadow-2xl backdrop-blur-xl"
+    aria-label="Directus Live Preview Mode"
+  >
+    <div class="flex h-3 w-3 relative">
+      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+      <span class="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+    </div>
+    <div class="font-mono text-xs text-white">
+      <span class="font-bold text-amber-400">Directus Live Preview</span>
+      <span class="text-zinc-400 block text-[10px]">Conectado a la API en tiempo real</span>
+    </div>
+    <button
+      id="refreshPreviewBtn"
+      class="rounded-lg bg-white/10 px-2.5 py-1 font-mono text-xs text-zinc-200 hover:bg-white/20 transition-colors"
+    >
+      Recargar
+    </button>
+  </aside>
+
+  <script is:inline>
+    // Listen to Directus postMessage for live content updates
+    window.addEventListener('message', (event) => {
+      if (event.data && (event.data.type === 'directus:preview' || event.data.type === 'directus:update')) {
+        console.log('[Directus Preview] Actualización de contenido recibida:', event.data);
+        window.location.reload();
+      }
+    });
+
+    document.getElementById('refreshPreviewBtn')?.addEventListener('click', () => {
+      window.location.reload();
+    });
+  </script>
+)}

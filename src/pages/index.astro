@@ -1,0 +1,87 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import BlockRenderer from '@/components/blocks/BlockRenderer.astro';
+import { getPageBySlug, getAssetUrl } from '@/lib/directus';
+import type { PageBlockItem } from '@/lib/directus';
+
+export const prerender = false;
+
+// Fetch home page with its Many-to-Any blocks
+const page = await getPageBySlug('/');
+const title = page?.seo_title || page?.title || 'Sala de Prensa Virtual de la Noche de Madrid';
+const description = page?.seo_description || 'Plataforma oficial y sala de prensa internacional de ocio nocturno y cultura de Madrid, gestionada por NocheMadrid.';
+const seoImage = page?.seo_image ? getAssetUrl(page.seo_image) : undefined;
+
+// Fallback blocks if page in Directus is fresh
+const defaultBlocks: PageBlockItem[] = [
+  {
+    collection: 'block_hero',
+    item: {
+      id: 'default-hero',
+      titular: 'Sala de Prensa Virtual de la Noche y la Cultura de Madrid',
+      subtitulo: 'Canal oficial de comunicación, notas de prensa, material audiovisual y acceso a los 96 espacios asociados en NocheMadrid.',
+      tipo_fondo: 'imagen',
+      cta_texto: 'Explorar Comunicados',
+      cta_enlace: '/comunicados',
+    },
+  },
+  {
+    collection: 'block_press_grid',
+    item: {
+      id: 'default-press',
+      titular: 'Últimos Comunicados Oficiales',
+      mostrar_filtro_categorias: true,
+      mostrar_descarga_pdf: true,
+      limite: 6,
+    },
+  },
+  {
+    collection: 'block_rich_text',
+    item: {
+      id: 'default-rich',
+      titulo: 'Compromiso con el Rigor Periodístico y la Proyección Internacional',
+      contenido: '<p>Madrid Live Press nace como el puente informativo directo entre las redacciones de todo el mundo y las salas de espectáculos de la capital española.</p>',
+      cita_texto: 'Madrid cuenta con la noche más diversa, segura y profesional del mundo. Nuestra misión es trasladar esa realidad con total transparencia a los medios.',
+      cita_autor: 'Vicente Pizcueta',
+      cita_cargo: 'Portavoz Oficial de NocheMadrid',
+    },
+  },
+  {
+    collection: 'block_venues_map',
+    item: {
+      id: 'default-venues',
+      titulo: 'Red de Espacios Asociados: 96 Salas en la Comunidad de Madrid',
+      descripcion: 'Consulta las fichas técnicas, aforos, contactos de medios y ubicaciones de nuestras discotecas, salas de conciertos y teatros musicales.',
+      distrito_defecto: 'all',
+      tipo_local_defecto: 'all',
+    },
+  },
+  {
+    collection: 'block_media_kit',
+    item: {
+      id: 'default-media',
+      titulo: 'Kit de Prensa y Material Audiovisual de Libre Uso Editorial',
+      descripcion: 'Dossiers estadísticos, logos vectoriales, B-roll en 4K y banco de imágenes en alta resolución para redacciones y agencias.',
+      tamanio_formato: 'Paquete Editorial Completo (ZIP)',
+      especificaciones: 'Derechos cedidos exclusivamente para uso periodístico e informativo citando a NocheMadrid.',
+    },
+  },
+  {
+    collection: 'block_newsletter',
+    item: {
+      id: 'default-news',
+      titulo: 'Red de Periodistas & Alertas de Prensa (Media CRM)',
+      descripcion: 'Regístrate para recibir convocatorias de prensa, comunicados embargados e informes económicos del sector.',
+      placeholder_input: 'redaccion@tumedio.com',
+      texto_boton: 'Suscribirse a Alertas',
+      texto_privacidad: 'Tus datos serán tratados exclusivamente por el gabinete de comunicación de NocheMadrid conforme al RGPD.',
+    },
+  },
+];
+
+const blocksToRender = page?.bloques && page.bloques.length > 0 ? page.bloques : defaultBlocks;
+---
+
+<Layout title={title} description={description} image={seoImage} lang="es">
+  <BlockRenderer bloques={blocksToRender} lang="es" />
+</Layout>

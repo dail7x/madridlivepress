@@ -1,0 +1,164 @@
+---
+import type { Locale } from '@/lib/i18n';
+import { useTranslations } from '@/lib/i18n';
+import LanguageSwitcher from './LanguageSwitcher.astro';
+import { Radio, Newspaper, Building2, DownloadCloud, Calendar, ShieldCheck, Menu, X } from 'lucide-astro';
+
+interface Props {
+  currentLang?: Locale;
+}
+
+const { currentLang = 'es' } = Astro.props;
+const t = useTranslations(currentLang);
+const base = currentLang === 'en' ? '/en' : '';
+const currentPath = Astro.url.pathname;
+
+const navItems = [
+  { label: t.nav.home, href: `${base}/` },
+  { label: t.nav.pressReleases, href: `${base}/comunicados` },
+  { label: t.nav.venues, href: `${base}/salas` },
+  { label: t.nav.mediaKit, href: `${base}/recursos-prensa` },
+  { label: t.nav.events, href: `${base}/eventos` },
+  { label: t.nav.accreditations, href: `${base}/acreditaciones` },
+];
+---
+
+<header class="sticky top-0 z-40 w-full glass-nav">
+  {/* Top News Ticker */}
+  <div class="w-full overflow-hidden bg-brand-primary/10 border-b border-white/5 py-1.5 px-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-500 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+        </span>
+        <span class="font-mono text-[10px] font-bold uppercase tracking-widest text-rose-300">
+          Live Press
+        </span>
+      </div>
+
+      <div class="relative w-full overflow-hidden whitespace-nowrap text-[11px] font-mono text-zinc-300">
+        <div class="inline-block animate-ticker">
+          <span class="mx-4">{t.tickerText}</span>
+          <span class="mx-4">•</span>
+          <span class="mx-4">CONTACTO DE PRENSA INTERNACIONAL: PRENSA@NOCHEMADRID.ORG</span>
+          <span class="mx-4">•</span>
+          <span class="mx-4">4.800M€ IMPACTO ECONÓMICO EN LA CAPITAL</span>
+          <span class="mx-4">•</span>
+          <span class="mx-4">{t.tickerText}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* Main Navbar */}
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-20">
+      {/* Brand Logo */}
+      <a href={`${base}/`} class="flex items-center gap-3 group">
+        <div class="h-11 w-11 rounded-xl bg-gradient-to-tr from-brand-primary via-rose-600 to-amber-500 p-0.5 shadow-lg shadow-rose-950/40 group-hover:scale-105 transition-transform duration-300">
+          <div class="h-full w-full rounded-[10px] bg-black flex items-center justify-center">
+            <Radio class="h-5 w-5 text-rose-400 group-hover:text-amber-300 transition-colors" />
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span class="font-display font-black text-lg sm:text-xl tracking-tight text-white">
+              MADRID<span class="text-brand-primary">LIVE</span>PRESS
+            </span>
+          </div>
+          <span class="font-mono text-[10px] tracking-widest text-zinc-400 block -mt-1 uppercase">
+            Sala de Prensa • NocheMadrid
+          </span>
+        </div>
+      </a>
+
+      {/* Desktop Nav */}
+      <nav class="hidden lg:flex items-center gap-1">
+        {navItems.map((item) => {
+          const isActive = currentPath === item.href || (item.href !== `${base}/` && currentPath.startsWith(item.href));
+          return (
+            <a
+              href={item.href}
+              class:list={[
+                'rounded-lg px-3.5 py-2 font-sans text-sm font-medium transition-all duration-200',
+                isActive
+                  ? 'bg-white/10 text-white shadow-sm'
+                  : 'text-zinc-300 hover:bg-white/5 hover:text-white',
+              ]}
+            >
+              {item.label}
+            </a>
+          );
+        })}
+      </nav>
+
+      {/* Right Controls */}
+      <div class="flex items-center gap-3">
+        {/* Language Switcher */}
+        <LanguageSwitcher currentLang={currentLang} />
+
+        {/* Priority Accreditation CTA */}
+        <a
+          href={`${base}/acreditaciones`}
+          class="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3.5 py-2 font-mono text-xs font-semibold text-amber-300 hover:bg-amber-500/20 hover:border-amber-400 transition-all"
+        >
+          <ShieldCheck class="h-3.5 w-3.5" />
+          <span>{t.events.requestPass}</span>
+        </a>
+
+        {/* Mobile menu trigger */}
+        <button
+          id="mobileMenuBtn"
+          type="button"
+          class="lg:hidden rounded-xl border border-white/10 bg-white/5 p-2 text-zinc-300 hover:text-white"
+          aria-label="Abrir menú"
+        >
+          <Menu class="h-6 w-6" id="menuOpenIcon" />
+          <X class="h-6 w-6 hidden" id="menuCloseIcon" />
+        </button>
+      </div>
+    </div>
+  </div>
+
+  {/* Mobile Menu Dropdown */}
+  <div id="mobileMenu" class="hidden lg:hidden border-t border-white/10 bg-surface/95 px-4 pt-3 pb-6 space-y-2 backdrop-blur-2xl">
+    {navItems.map((item) => (
+      <a
+        href={item.href}
+        class="block rounded-xl px-4 py-2.5 font-sans text-base font-medium text-zinc-200 hover:bg-white/10 hover:text-white"
+      >
+        {item.label}
+      </a>
+    ))}
+    <div class="pt-3 border-t border-white/10">
+      <a
+        href={`${base}/acreditaciones`}
+        class="flex items-center justify-center gap-2 w-full rounded-xl bg-amber-500/10 border border-amber-500/30 px-4 py-3 font-mono text-xs font-semibold text-amber-300"
+      >
+        <ShieldCheck class="h-4 w-4" />
+        <span>{t.events.requestPass}</span>
+      </a>
+    </div>
+  </div>
+
+  <script is:inline>
+    const menuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const openIcon = document.getElementById('menuOpenIcon');
+    const closeIcon = document.getElementById('menuCloseIcon');
+
+    menuBtn?.addEventListener('click', () => {
+      const isHidden = mobileMenu?.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu?.classList.remove('hidden');
+        openIcon?.classList.add('hidden');
+        closeIcon?.classList.remove('hidden');
+      } else {
+        mobileMenu?.classList.add('hidden');
+        openIcon?.classList.remove('hidden');
+        closeIcon?.classList.add('hidden');
+      }
+    });
+  </script>
+</header>

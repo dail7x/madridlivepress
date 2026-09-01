@@ -1,0 +1,76 @@
+---
+import type { BlockRichText } from '@/lib/directus';
+import { getAssetUrl } from '@/lib/directus';
+import { Quote } from 'lucide-astro';
+
+interface Props {
+  block: BlockRichText;
+  lang?: 'es' | 'en';
+}
+
+const { block } = Astro.props;
+const avatarUrl = block.cita_avatar ? getAssetUrl(block.cita_avatar, { width: 160, height: 160, format: 'webp' }) : null;
+---
+
+<section class="max-w-4xl mx-auto space-y-8 my-6">
+  {block.titulo && (
+    <h2 class="font-display text-2xl sm:text-3xl font-bold text-white tracking-tight">
+      {block.titulo}
+    </h2>
+  )}
+
+  {/* WYSIWYG HTML Content */}
+  {block.contenido && (
+    <div
+      class="prose prose-invert prose-zinc max-w-none font-sans text-base sm:text-lg leading-relaxed text-zinc-300
+      prose-headings:font-display prose-headings:font-bold prose-headings:text-white
+      prose-a:text-brand-primary hover:prose-a:text-brand-primary-hover
+      prose-strong:text-white prose-strong:font-semibold"
+      set:html={block.contenido}
+    />
+  )}
+
+  {/* Formatted Spokesperson Quote Card */}
+  {block.cita_texto && (
+    <div class="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-surface to-surface-light p-6 sm:p-8 backdrop-blur-xl shadow-xl">
+      <div class="pointer-events-none absolute -right-6 -bottom-6 text-white/5">
+        <Quote class="h-32 w-32" />
+      </div>
+
+      <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-5">
+        {avatarUrl ? (
+          <img
+            src={avatarUrl}
+            alt={block.cita_autor || 'Portavoz'}
+            class="h-16 w-16 sm:h-20 sm:w-20 rounded-full object-cover border-2 border-brand-primary/40 shadow-lg flex-shrink-0"
+          />
+        ) : (
+          <div class="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-brand-primary/20 border border-brand-primary/30 flex items-center justify-center text-brand-primary flex-shrink-0">
+            <Quote class="h-8 w-8" />
+          </div>
+        )}
+
+        <div class="space-y-2">
+          <blockquote class="font-display text-lg sm:text-xl font-medium italic text-zinc-100 leading-snug">
+            "{block.cita_texto}"
+          </blockquote>
+
+          {(block.cita_autor || block.cita_cargo) && (
+            <div class="pt-1">
+              {block.cita_autor && (
+                <div class="font-display text-sm font-bold text-white">
+                  {block.cita_autor}
+                </div>
+              )}
+              {block.cita_cargo && (
+                <div class="font-mono text-xs text-rose-300">
+                  {block.cita_cargo}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )}
+</section>

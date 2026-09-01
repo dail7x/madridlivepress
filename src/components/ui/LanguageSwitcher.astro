@@ -1,0 +1,46 @@
+---
+import type { Locale } from '@/lib/i18n';
+
+interface Props {
+  currentLang?: Locale;
+}
+
+const { currentLang = 'es' } = Astro.props;
+const currentPath = Astro.url.pathname;
+
+// Helper to toggle language preserving the subpath
+function getToggleUrl(targetLang: Locale) {
+  if (targetLang === 'en') {
+    if (currentPath.startsWith('/en')) return currentPath;
+    return currentPath === '/' ? '/en' : `/en${currentPath}`;
+  } else {
+    // target is 'es'
+    if (currentPath.startsWith('/en')) {
+      const rest = currentPath.replace(/^\/en/, '');
+      return rest === '' ? '/' : rest;
+    }
+    return currentPath;
+  }
+}
+---
+
+<div class="inline-flex items-center rounded-xl border border-white/10 bg-surface/80 p-1 font-mono text-xs backdrop-blur-md">
+  <a
+    href={getToggleUrl('es')}
+    class:list={[
+      'rounded-lg px-2.5 py-1 font-medium transition-all',
+      currentLang === 'es' ? 'bg-brand-primary text-white shadow-sm' : 'text-zinc-400 hover:text-white',
+    ]}
+  >
+    ES
+  </a>
+  <a
+    href={getToggleUrl('en')}
+    class:list={[
+      'rounded-lg px-2.5 py-1 font-medium transition-all',
+      currentLang === 'en' ? 'bg-brand-primary text-white shadow-sm' : 'text-zinc-400 hover:text-white',
+    ]}
+  >
+    EN
+  </a>
+</div>

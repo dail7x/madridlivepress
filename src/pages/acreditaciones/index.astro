@@ -1,0 +1,241 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { directus } from '@/lib/directus';
+import { readItems } from '@directus/sdk';
+import { useTranslations } from '@/lib/i18n';
+import type { Evento } from '@/lib/directus';
+import { ShieldCheck, Send, CheckCircle2, AlertCircle, FileText } from 'lucide-astro';
+
+export const prerender = false;
+
+const t = useTranslations('es');
+const selectedEventoId = Astro.url.searchParams.get('evento');
+
+let eventos: Evento[] = [];
+try {
+  const res = await directus.request(
+    readItems('eventos' as any, {
+      filter: { status: { _eq: 'published' } },
+      sort: ['fecha_evento'],
+      fields: ['id', 'titulo', 'fecha_evento'],
+    })
+  );
+  eventos = (res as any) || [];
+} catch (e) {
+  console.error('Error in /acreditaciones:', e);
+}
+---
+
+<Layout
+  title="Acreditación de Prensa Internacional"
+  description="Formulario de acreditación y pases de medios para periodistas internacionales y redacciones que cubren la noche de Madrid."
+  lang="es"
+>
+  <div class="max-w-3xl mx-auto space-y-10">
+    <div class="space-y-3 border-b border-white/10 pb-8 text-center sm:text-left">
+      <div class="inline-flex items-center gap-2 text-amber-400 font-mono text-xs uppercase tracking-widest font-semibold">
+        <ShieldCheck class="h-4 w-4" />
+        <span>Prensa Internacional & Agencias</span>
+      </div>
+      <h1 class="font-display text-4xl sm:text-5xl font-extrabold text-white tracking-tight">
+        {t.accreditations.title}
+      </h1>
+      <p class="font-sans text-lg text-zinc-300">
+        {t.accreditations.subtitle}
+      </p>
+    </div>
+
+    <form id="acreditacionForm" class="rounded-3xl border border-white/10 bg-surface/80 p-8 sm:p-10 backdrop-blur-2xl shadow-2xl space-y-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        {/* Media Name */}
+        <div class="space-y-2">
+          <label for="medio" class="font-mono text-xs font-semibold uppercase tracking-wider text-zinc-300 block">
+            {t.accreditations.mediaName} *
+          </label>
+          <input
+            type="text"
+            id="medio"
+            name="medio"
+            required
+            placeholder="Ej. Reuters, El País, BBC Music, Mixmag..."
+            class="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-brand-primary focus:outline-none"
+          />
+        </div>
+
+        {/* Media Type */}
+        <div class="space-y-2">
+          <label for="tipo_medio" class="font-mono text-xs font-semibold uppercase tracking-wider text-zinc-300 block">
+            Tipo de Medio *
+          </label>
+          <select
+            id="tipo_medio"
+            name="tipo_medio"
+            required
+            class="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white focus:border-brand-primary focus:outline-none"
+          >
+            <option value="Agencia de Noticias">Agencia de Noticias (EFE, Reuters, AFP...)</option>
+            <option value="Prensa Escrita / Diarios">Prensa Escrita / Diarios</option>
+            <option value="Medio Digital / Revista Especializada">Medio Digital / Revista Especializada</option>
+            <option value="Televisión / Radio">Televisión / Radio</option>
+            <option value="Creador de Contenido Especializado">Creador de Contenido Especializado / Podcast</option>
+          </select>
+        </div>
+
+        {/* Journalist Name */}
+        <div class="space-y-2">
+          <label for="periodista_nombre" class="font-mono text-xs font-semibold uppercase tracking-wider text-zinc-300 block">
+            {t.accreditations.journalistName} *
+          </label>
+          <input
+            type="text"
+            id="periodista_nombre"
+            name="periodista_nombre"
+            required
+            placeholder="Nombre y apellidos"
+            class="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-brand-primary focus:outline-none"
+          />
+        </div>
+
+        {/* Journalist Email */}
+        <div class="space-y-2">
+          <label for="periodista_email" class="font-mono text-xs font-semibold uppercase tracking-wider text-zinc-300 block">
+            {t.accreditations.journalistEmail} *
+          </label>
+          <input
+            type="email"
+            id="periodista_email"
+            name="periodista_email"
+            required
+            placeholder="redaccion@tumedio.com"
+            class="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-brand-primary focus:outline-none"
+          />
+        </div>
+
+        {/* Journalist Phone */}
+        <div class="space-y-2">
+          <label for="periodista_telefono" class="font-mono text-xs font-semibold uppercase tracking-wider text-zinc-300 block">
+            {t.accreditations.journalistPhone}
+          </label>
+          <input
+            type="tel"
+            id="periodista_telefono"
+            name="periodista_telefono"
+            placeholder="+34 600 000 000"
+            class="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-brand-primary focus:outline-none"
+          />
+        </div>
+
+        {/* Country */}
+        <div class="space-y-2">
+          <label for="pais" class="font-mono text-xs font-semibold uppercase tracking-wider text-zinc-300 block">
+            {t.accreditations.country} *
+          </label>
+          <input
+            type="text"
+            id="pais"
+            name="pais"
+            required
+            placeholder="España, Reino Unido, Francia, etc."
+            class="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-brand-primary focus:outline-none"
+          />
+        </div>
+      </div>
+
+      {/* Target Event Selection */}
+      <div class="space-y-2">
+        <label for="evento" class="font-mono text-xs font-semibold uppercase tracking-wider text-zinc-300 block">
+          {t.accreditations.eventSelect}
+        </label>
+        <select
+          id="evento"
+          name="evento"
+          class="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white focus:border-brand-primary focus:outline-none"
+        >
+          <option value="">Acreditación general para el circuito NocheMadrid</option>
+          {eventos.map((ev) => (
+            <option value={ev.id} selected={selectedEventoId === String(ev.id)}>
+              {ev.titulo} ({new Date(ev.fecha_evento).toLocaleDateString('es-ES')})
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Notes / Planned Coverage */}
+      <div class="space-y-2">
+        <label for="observaciones" class="font-mono text-xs font-semibold uppercase tracking-wider text-zinc-300 block">
+          {t.accreditations.notes}
+        </label>
+        <textarea
+          id="observaciones"
+          name="observaciones"
+          rows="4"
+          placeholder="Describa el enfoque de la pieza periodística, fecha prevista de publicación o enlaces a reportajes anteriores..."
+          class="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-brand-primary focus:outline-none"
+        ></textarea>
+      </div>
+
+      <button
+        type="submit"
+        id="submitBtn"
+        class="w-full rounded-xl bg-brand-primary py-4 font-sans font-bold text-white shadow-xl shadow-rose-950/40 hover:bg-brand-primary-hover hover:scale-[1.01] transition-all flex items-center justify-center gap-2"
+      >
+        <Send class="h-4 w-4" />
+        <span id="submitText">{t.accreditations.submitButton}</span>
+      </button>
+
+      <div id="formFeedback" class="hidden p-4 rounded-xl font-mono text-xs text-center"></div>
+    </form>
+  </div>
+
+  <script is:inline>
+    const form = document.getElementById('acreditacionForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const submitText = document.getElementById('submitText');
+    const feedback = document.getElementById('formFeedback');
+
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      submitBtn.disabled = true;
+      if (submitText) submitText.textContent = 'Procesando solicitud...';
+
+      const formData = new FormData(form);
+      const payload = {
+        medio: formData.get('medio'),
+        tipo_medio: formData.get('tipo_medio'),
+        periodista_nombre: formData.get('periodista_nombre'),
+        periodista_email: formData.get('periodista_email'),
+        periodista_telefono: formData.get('periodista_telefono'),
+        pais: formData.get('pais'),
+        evento: formData.get('evento') || null,
+        observaciones: formData.get('observaciones'),
+      };
+
+      try {
+        const res = await fetch('/api/acreditacion', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json();
+        feedback.classList.remove('hidden');
+
+        if (res.ok) {
+          feedback.className = 'p-4 rounded-xl font-mono text-xs text-center bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+          feedback.textContent = data.message || 'Solicitud registrada correctamente.';
+          form.reset();
+        } else {
+          feedback.className = 'p-4 rounded-xl font-mono text-xs text-center bg-rose-500/20 text-rose-300 border border-rose-500/30';
+          feedback.textContent = data.message || 'Error al tramitar la solicitud.';
+        }
+      } catch (err) {
+        feedback.classList.remove('hidden');
+        feedback.className = 'p-4 rounded-xl font-mono text-xs text-center bg-rose-500/20 text-rose-300 border border-rose-500/30';
+        feedback.textContent = 'Error de conexión con el servidor. Intente más tarde.';
+      } finally {
+        submitBtn.disabled = false;
+        if (submitText) submitText.textContent = 'Enviar Solicitud de Acreditación';
+      }
+    });
+  </script>
+</Layout>

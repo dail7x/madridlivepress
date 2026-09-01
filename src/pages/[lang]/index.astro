@@ -1,0 +1,90 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import BlockRenderer from '@/components/blocks/BlockRenderer.astro';
+import { getPageBySlug, getAssetUrl } from '@/lib/directus';
+import type { PageBlockItem } from '@/lib/directus';
+
+export const prerender = false;
+
+const { lang } = Astro.params;
+const currentLang = lang === 'en' ? 'en' : 'es';
+
+// Fetch home page with blocks
+const page = await getPageBySlug('/');
+const title = currentLang === 'en' ? 'Madrid Nightlife Virtual Pressroom' : page?.seo_title || page?.title;
+const description = currentLang === 'en' ? 'Official international pressroom and media platform for Madrid nightlife and culture, managed by NocheMadrid.' : page?.seo_description;
+const seoImage = page?.seo_image ? getAssetUrl(page.seo_image) : undefined;
+
+// Fallback blocks for English
+const defaultBlocksEn: PageBlockItem[] = [
+  {
+    collection: 'block_hero',
+    item: {
+      id: 'default-hero-en',
+      titular: 'International Virtual Pressroom for Madrid Nightlife & Culture',
+      subtitulo: 'Official media channel, press releases, high-resolution audiovisual assets, and direct access to the 96 venues associated with NocheMadrid.',
+      tipo_fondo: 'imagen',
+      cta_texto: 'Explore Press Releases',
+      cta_enlace: '/en/comunicados',
+    },
+  },
+  {
+    collection: 'block_press_grid',
+    item: {
+      id: 'default-press-en',
+      titular: 'Latest Official Press Releases',
+      mostrar_filtro_categorias: true,
+      mostrar_descarga_pdf: true,
+      limite: 6,
+    },
+  },
+  {
+    collection: 'block_rich_text',
+    item: {
+      id: 'default-rich-en',
+      titulo: 'Commitment to Journalistic Rigor and Global Reach',
+      contenido: '<p>Madrid Live Press serves as the direct media bridge between global newsrooms and Madrid’s premier nightlife industry.</p>',
+      cita_texto: 'Madrid offers the most vibrant, safe, and professional nightlife in the world. Our mission is to provide global journalists with reliable, verified facts.',
+      cita_autor: 'Vicente Pizcueta',
+      cita_cargo: 'Official Spokesperson, NocheMadrid',
+    },
+  },
+  {
+    collection: 'block_venues_map',
+    item: {
+      id: 'default-venues-en',
+      titulo: 'Network of 96 Venues & Clubs in Madrid',
+      descripcion: 'Access technical specifications, capacities, press relations contacts, and locations of our nightclubs, concert halls, and theaters.',
+      distrito_defecto: 'all',
+      tipo_local_defecto: 'all',
+    },
+  },
+  {
+    collection: 'block_media_kit',
+    item: {
+      id: 'default-media-en',
+      titulo: 'Press Kits & Royalty-Free Editorial Media Assets',
+      descripcion: 'Download annual statistical dossiers, vector brand assets, 4K b-roll footage, and high-resolution photo packs.',
+      tamanio_formato: 'Complete Editorial Media Kit (ZIP)',
+      especificaciones: 'Rights granted exclusively for editorial and news media coverage crediting NocheMadrid.',
+    },
+  },
+  {
+    collection: 'block_newsletter',
+    item: {
+      id: 'default-news-en',
+      titulo: 'Journalists Network & Press Alerts (Media CRM)',
+      descripcion: 'Subscribe to receive embargoed press releases, urgent media calls, and economic industry reports directly in your inbox.',
+      placeholder_input: 'newsroom@youroutlet.com',
+      texto_boton: 'Subscribe to Press Alerts',
+      texto_privacidad: 'Your data is strictly processed by NocheMadrid Press Office under GDPR compliance.',
+    },
+  },
+];
+
+const blocksToRender = currentLang === 'en' ? defaultBlocksEn : (page?.bloques || defaultBlocksEn);
+---
+
+<Layout title={title} description={description} image={seoImage} lang={currentLang}>
+  <BlockRenderer bloques={blocksToRender} lang={currentLang} />
+</Layout>

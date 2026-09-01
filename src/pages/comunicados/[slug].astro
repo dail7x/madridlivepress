@@ -1,0 +1,226 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { directus, getAssetUrl } from '@/lib/directus';
+import { readItems } from '@directus/sdk';
+import { useTranslations } from '@/lib/i18n';
+import type { Comunicado, Categoria, Portavoz } from '@/lib/directus';
+import {
+  Calendar,
+  Download,
+  Share2,
+  ArrowLeft,
+  Quote,
+  ShieldCheck,
+  Mail,
+  Phone,
+  FileText,
+  Clock,
+  Printer,
+} from 'lucide-astro';
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+const t = useTranslations('es');
+
+let item: Comunicado | null = null;
+
+try {
+  const res = await directus.request(
+    readItems('comunicados' as any, {
+      filter: {
+        slug: { _eq: slug },
+        status: { _eq: 'published' },
+      },
+      fields: [
+        'id',
+        'status',
+        'fecha_publicacion',
+        'slug',
+        'titulo',
+        'bajada',
+        'cuerpo',
+        'imagen_portada.*',
+        'archivo_pdf.*',
+        'audio_video_url',
+        'tags',
+        { categoria: ['id', 'nombre', 'slug', 'color'] },
+        { portavoz: ['id', 'nombre', 'cargo', 'bio', 'avatar.*', 'email_prensa'] },
+      ],
+      limit: 1,
+    })
+  );
+
+  item = ((res as any) && (res as any)[0]) || null;
+} catch (e) {
+  console.error(`Error loading press release "${slug}":`, e);
+}
+
+if (!item) {
+  return Astro.redirect('/404');
+}
+
+const cat = item.categoria as Categoria | undefined;
+const portavoz = item.portavoz as Portavoz | undefined;
+const coverUrl = item.imagen_portada ? getAssetUrl(item.imagen_portada, { width: 1400, height: 750, quality: 90, format: 'webp' }) : null;
+const pdfUrl = item.archivo_pdf ? getAssetUrl(item.archivo_pdf) : null;
+const avatarUrl = portavoz?.avatar ? getAssetUrl(portavoz.avatar, { width: 200, height: 200, format: 'webp' }) : null;
+---
+
+<Layout
+  title={item.titulo}
+  description={item.bajada || item.titulo}
+  image={coverUrl || undefined}
+  lang="es"
+>
+  <article class="max-w-4xl mx-auto space-y-10">
+    {/* Navigation Breadcrumb */}
+    <div class="flex items-center justify-between border-b border-white/10 pb-4">
+      <a
+        href="/comunicados"
+        class="inline-flex items-center gap-2 font-mono text-xs font-semibold text-zinc-400 hover:text-white transition-colors"
+      >
+        <ArrowLeft class="h-4 w-4" />
+        <span>{t.press.backToList}</span>
+      </a>
+
+      <div class="flex items-center gap-2">
+        <button
+          onclick="window.print()"
+          class="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-xs text-zinc-300 hover:bg-white/10 transition-colors"
+          title="Imprimir o guardar como PDF"
+        >
+          <Printer class="h-3.5 w-3.5" />
+          <span class="hidden sm:inline">Imprimir Nota</span>
+        </button>
+
+        {pdfUrl && (
+          <a
+            href={pdfUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            download
+            class="inline-flex items-center gap-1.5 rounded-lg bg-brand-primary px-3.5 py-1.5 font-mono text-xs font-semibold text-white shadow-lg hover:bg-brand-primary-hover transition-colors"
+          >
+            <Download class="h-3.5 w-3.5" />
+            <span>Descargar PDF Oficial</span>
+          </a>
+        )}
+      </div>
+    </div>
+
+    {/* Header Article */}
+    <header class="space-y-5">
+      <div class="flex flex-wrap items-center gap-3">
+        {cat && (
+          <span class="rounded-md bg-brand-primary/20 px-3 py-1 font-mono text-xs font-bold uppercase text-rose-300 border border-brand-primary/30">
+            {cat.nombre}
+          </span>
+        )}
+        <div class="flex items-center gap-1.5 font-mono text-xs text-zinc-400">
+          <Calendar class="h-3.5 w-3.5 text-zinc-500" />
+          <time datetime={item.fecha_publicacion}>
+            {new Date(item.fecha_publicacion || Date.now()).toLocaleDateString('es-ES', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            })}
+          </time>
+        </div>
+        <span class="font-mono text-xs text-zinc-500">•</span>
+        <span class="font-mono text-xs text-zinc-400">Madrid, España</span>
+      </div>
+
+      <h1 class="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-[1.15] tracking-tight">
+        {item.titulo}
+      </h1>
+
+      {item.bajada && (
+        <p class="font-sans text-xl sm:text-2xl font-medium text-zinc-300 leading-relaxed border-l-2 border-brand-primary pl-4">
+          {item.bajada}
+        </p>
+      )}
+    </header>
+
+    {/* Cover Image */}
+    {coverUrl && (
+      <div class="relative overflow-hidden rounded-3xl border border-white/10 shadow-2xl">
+        <img
+          src={coverUrl}
+          alt={item.titulo}
+          class="w-full h-auto max-h-[520px] object-cover"
+        />
+        <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-4 text-right">
+          <span class="font-mono text-[11px] text-zinc-300">
+            Foto oficial de libre uso editorial • NocheMadrid
+          </span>
+        </div>
+      </div>
+    )}
+
+    {/* Article Body */}
+    <div
+      class="prose prose-invert prose-zinc max-w-none font-sans text-lg leading-relaxed text-zinc-300
+      prose-headings:font-display prose-headings:font-bold prose-headings:text-white
+      prose-a:text-brand-primary hover:prose-a:text-brand-primary-hover
+      prose-strong:text-white prose-strong:font-semibold prose-blockquote:border-brand-primary"
+      set:html={item.cuerpo}
+    />
+
+    {/* Spokesperson Box if attached */}
+    {portavoz && (
+      <div class="rounded-3xl border border-white/10 bg-surface/80 p-6 sm:p-8 backdrop-blur-xl shadow-xl space-y-4">
+        <div class="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-400">
+          <Quote class="h-4 w-4" />
+          <span>Declaraciones Oficiales del Portavoz</span>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+          {avatarUrl && (
+            <img
+              src={avatarUrl}
+              alt={portavoz.nombre}
+              class="h-16 w-16 rounded-full object-cover border-2 border-amber-400/40 flex-shrink-0 shadow-md"
+            />
+          )}
+          <div class="space-y-1">
+            <h3 class="font-display text-lg font-bold text-white">{portavoz.nombre}</h3>
+            <p class="font-mono text-xs text-rose-300">{portavoz.cargo}</p>
+            {portavoz.email_prensa && (
+              <a
+                href={`mailto:${portavoz.email_prensa}`}
+                class="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-400 hover:text-white transition-colors pt-1"
+              >
+                <Mail class="h-3.5 w-3.5" />
+                <span>{portavoz.email_prensa}</span>
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* Media Contacts & Verification Seal */}
+    <div class="rounded-2xl border border-white/10 bg-black/40 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+      <div class="space-y-1">
+        <div class="flex items-center gap-2 text-xs font-mono font-semibold text-emerald-400">
+          <ShieldCheck class="h-4 w-4" />
+          <span>Información Oficial Verificada</span>
+        </div>
+        <p class="font-sans text-xs text-zinc-400">
+          Para entrevistas directas con portavoces o ampliación de datos estadísticos:
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <a
+          href="mailto:prensa@nochemadrid.org"
+          class="inline-flex items-center gap-2 rounded-xl bg-white/5 border border-white/10 px-4 py-2 font-mono text-xs font-semibold text-white hover:bg-white/10 transition-colors"
+        >
+          <Mail class="h-4 w-4 text-brand-primary" />
+          <span>prensa@nochemadrid.org</span>
+        </a>
+      </div>
+    </div>
+  </article>
+</Layout>

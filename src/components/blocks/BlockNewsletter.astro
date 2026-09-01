@@ -1,0 +1,111 @@
+---
+import type { BlockNewsletter } from '@/lib/directus';
+import { useTranslations } from '@/lib/i18n';
+import { Mail, CheckCircle2, ShieldCheck, ArrowRight, Loader2 } from 'lucide-astro';
+
+interface Props {
+  block: BlockNewsletter;
+  lang?: 'es' | 'en';
+}
+
+const { block, lang = 'es' } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section class="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-surface to-surface-light p-8 sm:p-12 lg:p-14 shadow-2xl backdrop-blur-xl">
+  {/* Background Glow */}
+  <div class="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-brand-primary/20 blur-3xl"></div>
+  <div class="pointer-events-none absolute -left-20 -bottom-20 h-72 w-72 rounded-full bg-amber-500/15 blur-3xl"></div>
+
+  <div class="relative z-10 max-w-3xl mx-auto text-center space-y-6">
+    <div class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 backdrop-blur-md">
+      <Mail class="h-4 w-4 text-rose-400" />
+      <span class="font-mono text-xs font-semibold uppercase tracking-widest text-zinc-300">
+        CRM Prensa & Alertas Embargadas
+      </span>
+    </div>
+
+    <h2 class="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight">
+      {block.titulo || t.newsletter.title}
+    </h2>
+
+    <p class="font-sans text-base sm:text-lg text-zinc-300 max-w-xl mx-auto leading-relaxed">
+      {block.descripcion || t.newsletter.subtitle}
+    </p>
+
+    {/* Form */}
+    <form id="newsletterForm" class="max-w-xl mx-auto space-y-4 pt-2">
+      <div class="flex flex-col sm:flex-row gap-3">
+        <div class="relative flex-grow">
+          <Mail class="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-500" />
+          <input
+            type="email"
+            id="newsletterEmail"
+            required
+            placeholder={block.placeholder_input || t.newsletter.placeholder}
+            class="w-full rounded-xl border border-white/15 bg-black/50 pl-12 pr-4 py-3.5 text-sm text-white placeholder:text-zinc-500 focus:border-brand-primary focus:outline-none focus:ring-1 focus:ring-brand-primary transition-all"
+          />
+        </div>
+        <button
+          type="submit"
+          id="newsletterBtn"
+          class="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-primary px-6 py-3.5 font-sans font-semibold text-white shadow-lg shadow-rose-600/30 transition-all hover:bg-brand-primary-hover hover:scale-[1.02] flex-shrink-0 disabled:opacity-50"
+        >
+          <span id="btnText">{block.texto_boton || t.newsletter.button}</span>
+          <ArrowRight id="btnIcon" class="h-4 w-4" />
+        </button>
+      </div>
+
+      <div class="flex items-center justify-center gap-2 text-xs font-sans text-zinc-400">
+        <ShieldCheck class="h-3.5 w-3.5 text-emerald-400 flex-shrink-0" />
+        <span>{block.texto_privacidad || t.newsletter.privacy}</span>
+      </div>
+
+      <div id="newsletterStatus" class="hidden font-mono text-xs p-3 rounded-lg text-center"></div>
+    </form>
+  </div>
+
+  <script is:inline>
+    const form = document.getElementById('newsletterForm');
+    const emailInput = document.getElementById('newsletterEmail');
+    const btn = document.getElementById('newsletterBtn');
+    const statusDiv = document.getElementById('newsletterStatus');
+    const btnText = document.getElementById('btnText');
+
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = emailInput?.value?.trim();
+      if (!email) return;
+
+      btn.disabled = true;
+      if (btnText) btnText.textContent = 'Enviando...';
+
+      try {
+        const res = await fetch('/api/newsletter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+
+        const data = await res.json();
+        statusDiv.classList.remove('hidden');
+
+        if (res.ok) {
+          statusDiv.className = 'font-mono text-xs p-3 rounded-lg text-center bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+          statusDiv.textContent = '✓ Registrado con éxito en la lista de distribución de medios.';
+          form.reset();
+        } else {
+          statusDiv.className = 'font-mono text-xs p-3 rounded-lg text-center bg-rose-500/20 text-rose-300 border border-rose-500/30';
+          statusDiv.textContent = data.message || 'Error al procesar la suscripción.';
+        }
+      } catch (err) {
+        statusDiv.classList.remove('hidden');
+        statusDiv.className = 'font-mono text-xs p-3 rounded-lg text-center bg-rose-500/20 text-rose-300 border border-rose-500/30';
+        statusDiv.textContent = 'Error de conexión. Por favor intente más tarde.';
+      } finally {
+        btn.disabled = false;
+        if (btnText) btnText.textContent = 'Suscribirse a Alertas';
+      }
+    });
+  </script>
+</section>

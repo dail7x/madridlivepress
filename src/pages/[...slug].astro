@@ -1,0 +1,39 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import BlockRenderer from '@/components/blocks/BlockRenderer.astro';
+import { getPageBySlug, getAssetUrl } from '@/lib/directus';
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+if (!slug || slug === 'index' || slug === '') {
+  return Astro.redirect('/');
+}
+
+const page = await getPageBySlug(slug);
+if (!page) {
+  return Astro.redirect('/404');
+}
+
+const title = page.seo_title || page.title;
+const description = page.seo_description;
+const seoImage = page.seo_image ? getAssetUrl(page.seo_image) : undefined;
+---
+
+<Layout title={title} description={description} image={seoImage} lang="es">
+  <div class="space-y-8">
+    <div class="border-b border-white/10 pb-6">
+      <h1 class="font-display text-4xl sm:text-5xl font-extrabold text-white tracking-tight">
+        {page.title}
+      </h1>
+    </div>
+
+    {page.bloques && page.bloques.length > 0 ? (
+      <BlockRenderer bloques={page.bloques} lang="es" />
+    ) : (
+      <div class="rounded-2xl border border-white/10 bg-surface/50 p-12 text-center text-zinc-400">
+        Esta página no contiene bloques de contenido configurados.
+      </div>
+    )}
+  </div>
+</Layout>

@@ -1,0 +1,264 @@
+---
+import type { BlockVenuesMap, Sala } from '@/lib/directus';
+import { directus, getAssetUrl } from '@/lib/directus';
+import { readItems } from '@directus/sdk';
+import { useTranslations } from '@/lib/i18n';
+import { Building2, MapPin, Users, Globe, ArrowUpRight, Search, SlidersHorizontal } from 'lucide-astro';
+
+interface Props {
+  block: BlockVenuesMap;
+  lang?: 'es' | 'en';
+}
+
+const { block, lang = 'es' } = Astro.props;
+const t = useTranslations(lang);
+
+let salas: Sala[] = [];
+try {
+  const res = await directus.request(
+    readItems('salas' as any, {
+      filter: { status: { _eq: 'published' } },
+      sort: ['-destacado', 'nombre'],
+      limit: 12,
+      fields: [
+        'id',
+        'nombre',
+        'slug',
+        'tipo_espacio',
+        'distrito',
+        'direccion',
+        'aforo',
+        'descripcion',
+        'logo.*',
+        'imagen_portada.*',
+        'contacto_prensa_email',
+        'contacto_prensa_nombre',
+        'dossier_pdf.*',
+        'sitio_web',
+        'instagram',
+        'destacado',
+      ],
+    })
+  );
+  salas = (res as any) || [];
+} catch (e) {
+  console.error('Error fetching venues in BlockVenuesMap:', e);
+}
+
+const districts = [
+  { label: 'Todos los distritos', value: 'all' },
+  { label: 'Centro / Sol / Gran Vía', value: 'centro' },
+  { label: 'Chamberí', value: 'chamberi' },
+  { label: 'Salamanca', value: 'salamanca' },
+  { label: 'Malasaña / Chueca', value: 'malasana_chueca' },
+  { label: 'Moncloa / Princesa', value: 'moncloa' },
+  { label: 'Retiro / Arganzuela', value: 'retiro_arganzuela' },
+];
+
+const types = [
+  { label: 'Todos los tipos', value: 'all' },
+  { label: 'Discoteca / Club', value: 'discoteca' },
+  { label: 'Sala de Conciertos', value: 'sala_conciertos' },
+  { label: 'Teatro Musical', value: 'teatro_musical' },
+  { label: 'Tablao Flamenco', value: 'tablao' },
+];
+---
+
+<section class="space-y-8" id="directorio-salas">
+  {/* Header */}
+  <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-4 border-b border-white/10">
+    <div class="space-y-2 max-w-2xl">
+      <div class="inline-flex items-center gap-2 text-rose-400 font-mono text-xs uppercase tracking-widest font-semibold">
+        <Building2 class="h-4 w-4" />
+        <span>Red de 96 Espacios NocheMadrid</span>
+      </div>
+      <h2 class="font-display text-3xl sm:text-4xl font-bold text-white tracking-tight">
+        {block.titulo || t.venues.title}
+      </h2>
+      <p class="font-sans text-base text-zinc-400">
+        {block.descripcion || t.venues.subtitle}
+      </p>
+    </div>
+
+    <a
+      href={lang === 'en' ? '/en/salas' : '/salas'}
+      class="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-5 py-2.5 font-mono text-xs font-semibold text-white hover:bg-white/10 hover:border-white/25 transition-all self-start md:self-auto"
+    >
+      <span>Ver las 96 salas</span>
+      <ArrowUpRight class="h-4 w-4" />
+    </a>
+  </div>
+
+  {/* Client Filters bar */}
+  <div class="rounded-2xl border border-white/10 bg-surface/60 p-4 backdrop-blur-md">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      {/* Search Input */}
+      <div class="relative">
+        <Search class="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+        <input
+          type="text"
+          id="venueSearchInput"
+          placeholder="Buscar sala por nombre o calle..."
+          class="w-full rounded-xl border border-white/10 bg-black/40 pl-10 pr-4 py-2 text-sm text-white placeholder:text-zinc-500 focus:border-brand-primary focus:outline-none"
+        />
+      </div>
+
+      {/* District Select */}
+      <div>
+        <select
+          id="venueDistrictSelect"
+          class="w-full rounded-xl border border-white/10 bg-black/40 px-3.5 py-2 text-sm text-white focus:border-brand-primary focus:outline-none"
+        >
+          {districts.map((d) => (
+            <option value={d.value}>{d.label}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Type Select */}
+      <div>
+        <select
+          id="venueTypeSelect"
+          class="w-full rounded-xl border border-white/10 bg-black/40 px-3.5 py-2 text-sm text-white focus:border-brand-primary focus:outline-none"
+        >
+          {types.map((t) => (
+            <option value={t.value}>{t.label}</option>
+          ))}
+        </select>
+      </div>
+    </div>
+  </div>
+
+  {/* Venues Grid */}
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="venuesGridContainer">
+    {salas.map((sala) => {
+      const coverUrl = sala.imagen_portada
+        ? getAssetUrl(sala.imagen_portada, { width: 600, height: 400, quality: 80, format: 'webp' })
+        : null;
+      const logoUrl = sala.logo ? getAssetUrl(sala.logo, { width: 120, height: 120, format: 'webp' }) : null;
+      const detailUrl = `${lang === 'en' ? '/en/salas/' : '/salas/'}${sala.slug}`;
+
+      return (
+        <div
+          class="venue-card group flex flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-surface/70 transition-all duration-300 hover:border-white/20 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/50 backdrop-blur-md"
+          data-name={sala.nombre.toLowerCase()}
+          data-district={sala.distrito}
+          data-type={sala.tipo_espacio}
+        >
+          <div>
+            {/* Image & Badges */}
+            <a href={detailUrl} class="relative block aspect-[16/10] w-full overflow-hidden bg-zinc-900">
+              {coverUrl ? (
+                <img
+                  src={coverUrl}
+                  alt={sala.nombre}
+                  class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                />
+              ) : (
+                <div class="flex h-full w-full items-center justify-center bg-gradient-to-br from-surface to-background text-zinc-600 font-mono text-xs">
+                  {sala.nombre}
+                </div>
+              )}
+              <div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent opacity-80"></div>
+
+              {logoUrl && (
+                <div class="absolute bottom-3 left-3 h-10 w-10 rounded-xl bg-black/80 p-1 border border-white/15 backdrop-blur-md overflow-hidden">
+                  <img src={logoUrl} alt={sala.nombre} class="h-full w-full object-contain" />
+                </div>
+              )}
+
+              {sala.destacado && (
+                <span class="absolute top-3 right-3 rounded-full bg-rose-500/90 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-white shadow-lg">
+                  Destacada
+                </span>
+              )}
+            </a>
+
+            {/* Content */}
+            <div class="p-5 space-y-3">
+              <div>
+                <span class="font-mono text-[11px] uppercase tracking-wider text-amber-300/90 font-semibold">
+                  {sala.tipo_espacio ? sala.tipo_espacio.replace('_', ' ') : 'Sala'}
+                </span>
+                <h3 class="font-display text-lg font-bold text-white group-hover:text-rose-400 transition-colors">
+                  <a href={detailUrl}>{sala.nombre}</a>
+                </h3>
+              </div>
+
+              <div class="space-y-1.5 font-sans text-xs text-zinc-400">
+                <div class="flex items-center gap-2">
+                  <MapPin class="h-3.5 w-3.5 text-zinc-500 flex-shrink-0" />
+                  <span class="truncate">{sala.direccion || sala.distrito}</span>
+                </div>
+                {sala.aforo && (
+                  <div class="flex items-center gap-2 font-mono text-zinc-300">
+                    <Users class="h-3.5 w-3.5 text-zinc-500 flex-shrink-0" />
+                    <span>Aforo: {sala.aforo.toLocaleString()} personas</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Card Footer */}
+          <div class="border-t border-white/10 px-5 py-3 bg-black/20 flex items-center justify-between">
+            <a
+              href={detailUrl}
+              class="font-mono text-xs font-semibold text-zinc-300 hover:text-white transition-colors inline-flex items-center gap-1"
+            >
+              <span>Ficha Técnica</span>
+              <ArrowUpRight class="h-3 w-3" />
+            </a>
+
+            {sala.sitio_web && (
+              <a
+                href={sala.sitio_web}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-zinc-400 hover:text-white transition-colors"
+                title="Web oficial"
+              >
+                <Globe class="h-3.5 w-3.5" />
+              </a>
+            )}
+          </div>
+        </div>
+      );
+    })}
+  </div>
+
+  {/* Client-side Filtering Script */}
+  <script is:inline>
+    const searchInput = document.getElementById('venueSearchInput');
+    const districtSelect = document.getElementById('venueDistrictSelect');
+    const typeSelect = document.getElementById('venueTypeSelect');
+    const cards = document.querySelectorAll('.venue-card');
+
+    function filterVenues() {
+      const q = (searchInput?.value || '').toLowerCase().trim();
+      const district = districtSelect?.value || 'all';
+      const type = typeSelect?.value || 'all';
+
+      cards.forEach((card) => {
+        const name = card.getAttribute('data-name') || '';
+        const cardDistrict = card.getAttribute('data-district') || '';
+        const cardType = card.getAttribute('data-type') || '';
+
+        const matchesQuery = !q || name.includes(q);
+        const matchesDistrict = district === 'all' || cardDistrict === district;
+        const matchesType = type === 'all' || cardType === type;
+
+        if (matchesQuery && matchesDistrict && matchesType) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    }
+
+    searchInput?.addEventListener('input', filterVenues);
+    districtSelect?.addEventListener('change', filterVenues);
+    typeSelect?.addEventListener('change', filterVenues);
+  </script>
+</section>
