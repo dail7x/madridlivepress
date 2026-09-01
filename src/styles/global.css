@@ -1,92 +1,77 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Geist:wght@400;500;600;700;800;900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
-@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&family=Geist:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --font-display: 'Geist', 'Inter', system-ui, -apple-system, sans-serif;
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-mono: 'Geist Mono', ui-monospace, monospace;
+@layer base {
+  :root {
+    --color-paper: #ffffff;
+    --color-canvas: #fbfbfb;
+    --color-ink: #09090b;
+    --color-ink-muted: #52525b;
+    --color-border: #e4e4e7;
+    --color-vermilion: #E11D48;
+  }
+
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: #ffffff;
+    color: #09090b;
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: #ffffff;
+    color: #09090b;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background-color: #E11D48;
+    color: #ffffff;
+  }
 }
 
-html {
-  font-family: var(--font-sans);
-  background-color: #090a0f;
-  color: #f3f4f6;
-  scroll-behavior: smooth;
-  color-scheme: dark;
+/* Swiss Editorial Utilities */
+.writing-vertical {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
 }
 
-body {
-  overflow-x: hidden;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background-image: 
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(225, 29, 72, 0.12), transparent 70%),
-    radial-gradient(ellipse 60% 40% at 100% 30%, rgba(99, 102, 241, 0.08), transparent 60%);
-  background-attachment: fixed;
+.text-wireframe {
+  color: transparent;
+  -webkit-text-stroke: 1.5px #09090b;
 }
 
-/* Typography Classes matching user specs */
-h1, h2, h3, .font-display {
-  font-family: var(--font-display);
-  letter-spacing: -0.02em;
+@media (max-width: 768px) {
+  .text-wireframe {
+    -webkit-text-stroke: 1px #09090b;
+  }
 }
 
-.font-mono, .badge, .dateline, .tag-pill {
-  font-family: var(--font-mono);
+/* Editorial Hairline Grid Borders */
+.border-hairline {
+  border-color: #e4e4e7;
 }
 
-/* Glassmorphism & Surface Cards */
-.glass-card {
-  background: rgba(18, 20, 28, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+.border-hairline-dark {
+  border-color: #09090b;
 }
 
-.glass-card:hover {
-  border-color: rgba(255, 255, 255, 0.18);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-}
-
-.glass-nav {
-  background: rgba(9, 10, 15, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-}
-
-/* Custom Scrollbar */
+/* Custom Clean Scrollbars */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
-
 ::-webkit-scrollbar-track {
-  background: #090a0f;
+  background: #ffffff;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 4px;
+  background: #d4d4d8;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(225, 29, 72, 0.4);
-}
-
-/* Gradient text utility */
-.text-gradient {
-  background: linear-gradient(135deg, #ffffff 0%, #f43f5e 50%, #fbbf24 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.text-gradient-subtle {
-  background: linear-gradient(180deg, #ffffff 20%, #9ca3af 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  background: #a1a1aa;
 }

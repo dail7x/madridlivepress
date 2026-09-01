@@ -2,69 +2,150 @@
 import Header from '@/components/ui/Header.astro';
 import Footer from '@/components/ui/Footer.astro';
 import DirectusLivePreview from '@/components/ui/DirectusLivePreview.astro';
-import type { Locale } from '@/lib/i18n';
-import { useTranslations } from '@/lib/i18n';
 import '@/styles/global.css';
 
 interface Props {
   title?: string;
   description?: string;
   image?: string;
-  lang?: Locale;
+  lang?: 'es' | 'en';
 }
 
 const {
-  title,
-  description,
-  image,
+  title = 'Madrid Live Press | Sala de Prensa de la Noche y la Cultura de Madrid',
+  description = 'Sala de prensa virtual internacional de la noche, el ocio cultural y los 96 espacios asociados de Madrid, gestionada por NocheMadrid.',
+  image = '/images/hero-backstage.webp',
   lang = 'es',
 } = Astro.props;
 
-const t = useTranslations(lang);
-const pageTitle = title ? `${title} | Madrid Live Press` : t.siteTitle;
-const pageDesc = description || t.siteDescription;
-const pageImage = image || '/og-image.jpg';
-const canonicalUrl = new URL(Astro.url.pathname, Astro.site || 'https://madridlivepress.116.203.118.1.sslip.io');
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://madridlivepress.116.203.118.1.sslip.io');
+const currentPath = Astro.url.pathname;
+const isEn = lang === 'en' || currentPath.startsWith('/en');
+const targetLangPath = isEn ? currentPath.replace(/^\/en/, '') || '/' : `/en${currentPath === '/' ? '' : currentPath}`;
 ---
 
 <!doctype html>
-<html lang={lang} class="dark">
+<html lang={lang} class="bg-paper text-ink">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
 
-    {/* Primary Meta Tags */}
-    <title>{pageTitle}</title>
-    <meta name="title" content={pageTitle} />
-    <meta name="description" content={pageDesc} />
-    <link rel="canonical" href={canonicalUrl} />
+    <!-- Primary Meta Tags -->
+    <title>{title}</title>
+    <meta name="title" content={title} />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
 
-    {/* Open Graph / Facebook */}
+    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content={canonicalUrl} />
-    <meta property="og:title" content={pageTitle} />
-    <meta property="og:description" content={pageDesc} />
-    <meta property="og:image" content={pageImage} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={image} />
 
-    {/* Twitter */}
+    <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content={canonicalUrl} />
-    <meta property="twitter:title" content={pageTitle} />
-    <meta property="twitter:description" content={pageDesc} />
-    <meta property="twitter:image" content={pageImage} />
+    <meta property="twitter:url" content={canonicalURL} />
+    <meta property="twitter:title" content={title} />
+    <meta property="twitter:description" content={description} />
+    <meta property="twitter:image" content={image} />
 
-    {/* Google Fonts Preconnect */}
+    <!-- Google Fonts Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   </head>
-  <body class="bg-background text-zinc-100 antialiased min-h-screen flex flex-col selection:bg-brand-primary selection:text-white">
-    <Header currentLang={lang} />
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-      <slot />
-    </main>
-    <Footer currentLang={lang} />
+  <body class="bg-paper text-ink antialiased min-h-screen selection:bg-vermilion selection:text-white">
+    <!-- Directus Live Preview & Visual Editing Controller -->
     <DirectusLivePreview />
+
+    <div class="flex min-h-screen">
+      <!-- Fixed Left Vertical Rail (Visible on md/lg screens - Swiss Editorial Design) -->
+      <aside
+        class="hidden md:flex flex-col justify-between items-center w-14 lg:w-16 border-r border-zinc-200 bg-paper py-8 select-none z-30 fixed top-0 bottom-0 left-0"
+        aria-label="Barra lateral de navegación y estado"
+      >
+        <!-- Top: Vertical Brand Title -->
+        <div class="pt-2 flex items-center">
+          <a
+            href={isEn ? '/en' : '/'}
+            class="writing-vertical font-mono text-[11px] font-bold tracking-[0.25em] text-zinc-900 hover:text-vermilion transition-colors uppercase whitespace-nowrap flex items-center gap-2"
+          >
+            <span>MADRID LIVE PRESS</span>
+            <span class="inline-block w-1.5 h-1.5 rounded-full bg-vermilion"></span>
+          </a>
+        </div>
+
+        <!-- Middle: Monogram Indicators -->
+        <div class="flex flex-col items-center gap-3 font-mono text-xs font-semibold text-zinc-400">
+          <span class="hover:text-zinc-900 transition-colors">N</span>
+          <span class="hover:text-zinc-900 transition-colors">R</span>
+          <span class="hover:text-zinc-900 transition-colors">A</span>
+        </div>
+
+        <!-- Bottom: Language Toggle & Madrid Clock -->
+        <div class="flex flex-col items-center gap-6 pb-2">
+          <!-- ES / EN Vertical Language Switcher -->
+          <div class="writing-vertical font-mono text-[11px] tracking-widest text-zinc-500">
+            <a
+              href={isEn ? targetLangPath : currentPath}
+              class={`hover:text-zinc-900 transition-colors ${!isEn ? 'text-zinc-900 font-bold' : 'text-zinc-400'}`}
+            >
+              ES
+            </a>
+            <span class="mx-1 text-zinc-300">/</span>
+            <a
+              href={!isEn ? targetLangPath : currentPath}
+              class={`hover:text-zinc-900 transition-colors ${isEn ? 'text-zinc-900 font-bold' : 'text-zinc-400'}`}
+            >
+              EN
+            </a>
+          </div>
+
+          <!-- Madrid Live Clock -->
+          <div class="writing-vertical font-mono text-[10px] tracking-widest text-zinc-600 font-medium whitespace-nowrap">
+            <span id="madridClock">MAD 12:00</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Column (Offset by left rail on desktop) -->
+      <div class="flex-1 md:pl-14 lg:pl-16 flex flex-col min-w-0">
+        <!-- Top Minimalist Navigation Header -->
+        <Header lang={lang} />
+
+        <!-- Main Page Content -->
+        <main class="flex-grow w-full">
+          <slot />
+        </main>
+
+        <!-- Minimalist Editorial Footer -->
+        <Footer lang={lang} />
+      </div>
+    </div>
+
+    <!-- Live Madrid Time Clock Script -->
+    <script is:inline>
+      function updateMadridTime() {
+        try {
+          const now = new Date();
+          const options = {
+            timeZone: 'Europe/Madrid',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+          };
+          const formatter = new Intl.DateTimeFormat('es-ES', options);
+          const timeStr = formatter.format(now);
+          const clockElem = document.getElementById('madridClock');
+          if (clockElem) {
+            clockElem.textContent = `MAD ${timeStr}`;
+          }
+        } catch (e) {}
+      }
+      updateMadridTime();
+      setInterval(updateMadridTime, 10000);
+    </script>
   </body>
 </html>

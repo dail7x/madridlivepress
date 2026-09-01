@@ -1,7 +1,6 @@
 ---
 import type { BlockNewsletter } from '@/lib/directus';
 import { useTranslations } from '@/lib/i18n';
-import { Mail, CheckCircle2, ShieldCheck, ArrowRight, Loader2 } from 'lucide-astro';
 
 interface Props {
   block: BlockNewsletter;
@@ -9,59 +8,48 @@ interface Props {
 }
 
 const { block, lang = 'es' } = Astro.props;
+const isEn = lang === 'en';
 const t = useTranslations(lang);
 ---
 
-<section class="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-surface to-surface-light p-8 sm:p-12 lg:p-14 shadow-2xl backdrop-blur-xl">
-  {/* Background Glow */}
-  <div class="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-brand-primary/20 blur-3xl"></div>
-  <div class="pointer-events-none absolute -left-20 -bottom-20 h-72 w-72 rounded-full bg-amber-500/15 blur-3xl"></div>
-
-  <div class="relative z-10 max-w-3xl mx-auto text-center space-y-6">
-    <div class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 backdrop-blur-md">
-      <Mail class="h-4 w-4 text-rose-400" />
-      <span class="font-mono text-xs font-semibold uppercase tracking-widest text-zinc-300">
-        CRM Prensa & Alertas Embargadas
-      </span>
+<section class="w-full bg-canvas border-b border-zinc-200 py-12 md:py-16">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+    <div class="space-y-2">
+      <div class="font-mono text-xs uppercase tracking-widest text-zinc-400 font-semibold">
+        {isEn ? 'JOURNALISTS DISTRIBUTION LIST' : 'LISTA DE DISTRIBUCIÓN PARA PERIODISTAS'}
+      </div>
+      <h2 class="font-display text-2xl sm:text-3xl font-bold text-zinc-950 tracking-tight">
+        {block.titulo || t.newsletter.title}
+      </h2>
+      <p class="font-sans text-sm sm:text-base text-zinc-600 leading-relaxed max-w-2xl">
+        {block.descripcion || t.newsletter.subtitle}
+      </p>
     </div>
 
-    <h2 class="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight">
-      {block.titulo || t.newsletter.title}
-    </h2>
-
-    <p class="font-sans text-base sm:text-lg text-zinc-300 max-w-xl mx-auto leading-relaxed">
-      {block.descripcion || t.newsletter.subtitle}
-    </p>
-
-    {/* Form */}
-    <form id="newsletterForm" class="max-w-xl mx-auto space-y-4 pt-2">
-      <div class="flex flex-col sm:flex-row gap-3">
-        <div class="relative flex-grow">
-          <Mail class="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-500" />
-          <input
-            type="email"
-            id="newsletterEmail"
-            required
-            placeholder={block.placeholder_input || t.newsletter.placeholder}
-            class="w-full rounded-xl border border-white/15 bg-black/50 pl-12 pr-4 py-3.5 text-sm text-white placeholder:text-zinc-500 focus:border-brand-primary focus:outline-none focus:ring-1 focus:ring-brand-primary transition-all"
-          />
-        </div>
+    <!-- Minimalist Subscription Form -->
+    <form id="newsletterForm" class="space-y-4 pt-2">
+      <div class="flex flex-col sm:flex-row gap-2">
+        <input
+          type="email"
+          id="newsletterEmail"
+          required
+          placeholder={block.placeholder_input || (isEn ? 'editor@media.com' : 'redaccion@medio.com')}
+          class="flex-1 border border-zinc-300 bg-paper px-4 py-3 font-mono text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-950 focus:outline-none transition-colors"
+        />
         <button
           type="submit"
           id="newsletterBtn"
-          class="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-primary px-6 py-3.5 font-sans font-semibold text-white shadow-lg shadow-rose-600/30 transition-all hover:bg-brand-primary-hover hover:scale-[1.02] flex-shrink-0 disabled:opacity-50"
+          class="bg-zinc-900 hover:bg-zinc-800 text-white px-6 py-3 font-mono text-xs uppercase tracking-wider font-semibold transition-colors flex-shrink-0"
         >
-          <span id="btnText">{block.texto_boton || t.newsletter.button}</span>
-          <ArrowRight id="btnIcon" class="h-4 w-4" />
+          <span id="btnText">{block.texto_boton || (isEn ? 'SUBSCRIBE TO ALERTS' : 'SUSCRIBIRSE A ALERTAS')}</span>
         </button>
       </div>
 
-      <div class="flex items-center justify-center gap-2 text-xs font-sans text-zinc-400">
-        <ShieldCheck class="h-3.5 w-3.5 text-emerald-400 flex-shrink-0" />
-        <span>{block.texto_privacidad || t.newsletter.privacy}</span>
+      <div class="font-mono text-[11px] text-zinc-500">
+        {block.texto_privacidad || (isEn ? 'Official institutional notifications only. Zero commercial spam.' : 'Exclusivo para profesionales de medios. Cero spam comercial.')}
       </div>
 
-      <div id="newsletterStatus" class="hidden font-mono text-xs p-3 rounded-lg text-center"></div>
+      <div id="newsletterStatus" class="hidden font-mono text-xs p-3 border"></div>
     </form>
   </div>
 
@@ -78,7 +66,7 @@ const t = useTranslations(lang);
       if (!email) return;
 
       btn.disabled = true;
-      if (btnText) btnText.textContent = 'Enviando...';
+      if (btnText) btnText.textContent = 'PROCESANDO...';
 
       try {
         const res = await fetch('/api/newsletter', {
@@ -91,20 +79,20 @@ const t = useTranslations(lang);
         statusDiv.classList.remove('hidden');
 
         if (res.ok) {
-          statusDiv.className = 'font-mono text-xs p-3 rounded-lg text-center bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
-          statusDiv.textContent = '✓ Registrado con éxito en la lista de distribución de medios.';
+          statusDiv.className = 'font-mono text-xs p-3 border border-zinc-900 bg-zinc-900 text-white';
+          statusDiv.textContent = '✓ Registrado con éxito en la lista oficial de medios.';
           form.reset();
         } else {
-          statusDiv.className = 'font-mono text-xs p-3 rounded-lg text-center bg-rose-500/20 text-rose-300 border border-rose-500/30';
-          statusDiv.textContent = data.message || 'Error al procesar la suscripción.';
+          statusDiv.className = 'font-mono text-xs p-3 border border-red-500 bg-red-50 text-red-700';
+          statusDiv.textContent = data.message || 'Error al procesar la solicitud.';
         }
       } catch (err) {
         statusDiv.classList.remove('hidden');
-        statusDiv.className = 'font-mono text-xs p-3 rounded-lg text-center bg-rose-500/20 text-rose-300 border border-rose-500/30';
-        statusDiv.textContent = 'Error de conexión. Por favor intente más tarde.';
+        statusDiv.className = 'font-mono text-xs p-3 border border-red-500 bg-red-50 text-red-700';
+        statusDiv.textContent = 'Error de conexión. Intente nuevamente.';
       } finally {
         btn.disabled = false;
-        if (btnText) btnText.textContent = 'Suscribirse a Alertas';
+        if (btnText) btnText.textContent = 'SUSCRIBIRSE A ALERTAS';
       }
     });
   </script>

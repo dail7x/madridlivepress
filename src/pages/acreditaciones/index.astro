@@ -2,13 +2,10 @@
 import Layout from '@/layouts/Layout.astro';
 import { directus } from '@/lib/directus';
 import { readItems } from '@directus/sdk';
-import { useTranslations } from '@/lib/i18n';
 import type { Evento } from '@/lib/directus';
-import { ShieldCheck, Send, CheckCircle2, AlertCircle, FileText } from 'lucide-astro';
 
 export const prerender = false;
 
-const t = useTranslations('es');
 const selectedEventoId = Astro.url.searchParams.get('evento');
 
 let eventos: Evento[] = [];
@@ -27,214 +24,222 @@ try {
 ---
 
 <Layout
-  title="Acreditación de Prensa Internacional"
-  description="Formulario de acreditación y pases de medios para periodistas internacionales y redacciones que cubren la noche de Madrid."
+  title="Acreditación Oficial de Prensa | Madrid Live Press"
+  description="Solicitud de acreditación oficial para redactores, fotoperiodistas y corresponsales extranjeros ante NocheMadrid."
   lang="es"
 >
-  <div class="max-w-3xl mx-auto space-y-10">
-    <div class="space-y-3 border-b border-white/10 pb-8 text-center sm:text-left">
-      <div class="inline-flex items-center gap-2 text-amber-400 font-mono text-xs uppercase tracking-widest font-semibold">
-        <ShieldCheck class="h-4 w-4" />
-        <span>Prensa Internacional & Agencias</span>
+  <div class="w-full bg-paper">
+    <!-- Top Monospaced Breadcrumb -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4">
+      <div class="font-mono text-xs text-zinc-400 uppercase tracking-widest flex items-center gap-3">
+        <a href="/" class="hover:text-zinc-950 transition-colors">PORTADA</a>
+        <span class="text-zinc-300">/</span>
+        <span class="text-zinc-900 font-semibold">ACREDITACIÓN DE PRENSA</span>
       </div>
-      <h1 class="font-display text-4xl sm:text-5xl font-extrabold text-white tracking-tight">
-        {t.accreditations.title}
-      </h1>
-      <p class="font-sans text-lg text-zinc-300">
-        {t.accreditations.subtitle}
-      </p>
     </div>
 
-    <form id="acreditacionForm" class="rounded-3xl border border-white/10 bg-surface/80 p-8 sm:p-10 backdrop-blur-2xl shadow-2xl space-y-6">
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        {/* Media Name */}
-        <div class="space-y-2">
-          <label for="medio" class="font-mono text-xs font-semibold uppercase tracking-wider text-zinc-300 block">
-            {t.accreditations.mediaName} *
-          </label>
-          <input
-            type="text"
-            id="medio"
-            name="medio"
-            required
-            placeholder="Ej. Reuters, El País, BBC Music, Mixmag..."
-            class="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-brand-primary focus:outline-none"
-          />
+    <!-- Header Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 border-b border-zinc-200">
+      <div class="space-y-3">
+        <div class="font-mono text-xs uppercase tracking-widest text-zinc-400 font-semibold">
+          GABINETE DE PRENSA NOCHEMADRID · SERVICIO A REDACCIONES
+        </div>
+        <h1 class="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-zinc-950 tracking-tight">
+          Acreditación para Periodistas y Medios
+        </h1>
+        <p class="font-sans text-base text-zinc-600 max-w-3xl leading-relaxed">
+          Punto único de acreditación para cobertura informativa de eventos, ruedas de prensa y acceso profesional a las 96 salas de la Federación NocheMadrid.
+        </p>
+      </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <form id="acreditacionForm" class="border border-zinc-200 bg-paper p-8 sm:p-12 space-y-8">
+        <div class="border-b border-zinc-200 pb-4">
+          <div class="font-mono text-xs font-bold uppercase tracking-wider text-zinc-950">
+            DATOS DE LA SOLICITUD
+          </div>
         </div>
 
-        {/* Media Type */}
-        <div class="space-y-2">
-          <label for="tipo_medio" class="font-mono text-xs font-semibold uppercase tracking-wider text-zinc-300 block">
-            Tipo de Medio *
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div class="space-y-1.5">
+            <label for="medio" class="font-mono text-[11px] font-semibold uppercase tracking-wider text-zinc-700 block">
+              Medio de Comunicación *
+            </label>
+            <input
+              type="text"
+              id="medio"
+              name="medio"
+              required
+              placeholder="Ej. Reuters, El País, BBC, Mixmag..."
+              class="w-full border border-zinc-300 bg-paper px-4 py-2.5 font-mono text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-950 focus:outline-none"
+            />
+          </div>
+
+          <div class="space-y-1.5">
+            <label for="tipo_medio" class="font-mono text-[11px] font-semibold uppercase tracking-wider text-zinc-700 block">
+              Tipología de Medio *
+            </label>
+            <select
+              id="tipo_medio"
+              name="tipo_medio"
+              required
+              class="w-full border border-zinc-300 bg-paper px-4 py-2.5 font-mono text-xs text-zinc-900 focus:border-zinc-950 focus:outline-none"
+            >
+              <option value="prensa_escrita">Prensa Escrita / Digital</option>
+              <option value="television">Televisión / Agencia Audiovisual</option>
+              <option value="radio">Radio / Podcast</option>
+              <option value="agencia">Agencia de Noticias Internacional</option>
+              <option value="fotoperiodismo">Fotoperiodista Independiente</option>
+            </select>
+          </div>
+
+          <div class="space-y-1.5">
+            <label for="nombre_solicitante" class="font-mono text-[11px] font-semibold uppercase tracking-wider text-zinc-700 block">
+              Nombre y Apellidos *
+            </label>
+            <input
+              type="text"
+              id="nombre_solicitante"
+              name="nombre_solicitante"
+              required
+              placeholder="Nombre del redactor o fotógrafo"
+              class="w-full border border-zinc-300 bg-paper px-4 py-2.5 font-mono text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-950 focus:outline-none"
+            />
+          </div>
+
+          <div class="space-y-1.5">
+            <label for="cargo" class="font-mono text-[11px] font-semibold uppercase tracking-wider text-zinc-700 block">
+              Cargo / Función *
+            </label>
+            <input
+              type="text"
+              id="cargo"
+              name="cargo"
+              required
+              placeholder="Redactor, Corresponsal, Jefe de Sección..."
+              class="w-full border border-zinc-300 bg-paper px-4 py-2.5 font-mono text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-950 focus:outline-none"
+            />
+          </div>
+
+          <div class="space-y-1.5">
+            <label for="email" class="font-mono text-[11px] font-semibold uppercase tracking-wider text-zinc-700 block">
+              Email Profesional *
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              placeholder="redaccion@medio.com"
+              class="w-full border border-zinc-300 bg-paper px-4 py-2.5 font-mono text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-950 focus:outline-none"
+            />
+          </div>
+
+          <div class="space-y-1.5">
+            <label for="telefono" class="font-mono text-[11px] font-semibold uppercase tracking-wider text-zinc-700 block">
+              Teléfono de Contacto
+            </label>
+            <input
+              type="tel"
+              id="telefono"
+              name="telefono"
+              placeholder="+34 600 000 000"
+              class="w-full border border-zinc-300 bg-paper px-4 py-2.5 font-mono text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-950 focus:outline-none"
+            />
+          </div>
+        </div>
+
+        <div class="space-y-1.5">
+          <label for="evento" class="font-mono text-[11px] font-semibold uppercase tracking-wider text-zinc-700 block">
+            Convocatoria o Sala Específica
           </label>
           <select
-            id="tipo_medio"
-            name="tipo_medio"
-            required
-            class="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white focus:border-brand-primary focus:outline-none"
+            id="evento"
+            name="evento"
+            class="w-full border border-zinc-300 bg-paper px-4 py-2.5 font-mono text-xs text-zinc-900 focus:border-zinc-950 focus:outline-none"
           >
-            <option value="Agencia de Noticias">Agencia de Noticias (EFE, Reuters, AFP...)</option>
-            <option value="Prensa Escrita / Diarios">Prensa Escrita / Diarios</option>
-            <option value="Medio Digital / Revista Especializada">Medio Digital / Revista Especializada</option>
-            <option value="Televisión / Radio">Televisión / Radio</option>
-            <option value="Creador de Contenido Especializado">Creador de Contenido Especializado / Podcast</option>
+            <option value="">Acreditación General para Coberturas Temporada 2026</option>
+            {eventos.map((e) => (
+              <option value={e.id} selected={selectedEventoId === String(e.id)}>
+                {e.titulo}
+              </option>
+            ))}
           </select>
         </div>
 
-        {/* Journalist Name */}
-        <div class="space-y-2">
-          <label for="periodista_nombre" class="font-mono text-xs font-semibold uppercase tracking-wider text-zinc-300 block">
-            {t.accreditations.journalistName} *
+        <div class="space-y-1.5">
+          <label for="motivo_cobertura" class="font-mono text-[11px] font-semibold uppercase tracking-wider text-zinc-700 block">
+            Detalle del Enfoque Informativo / Publicación Prevista
           </label>
-          <input
-            type="text"
-            id="periodista_nombre"
-            name="periodista_nombre"
-            required
-            placeholder="Nombre y apellidos"
-            class="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-brand-primary focus:outline-none"
-          />
+          <textarea
+            id="motivo_cobertura"
+            name="motivo_cobertura"
+            rows="3"
+            placeholder="Breve resumen de la pieza editorial o reportaje a realizar..."
+            class="w-full border border-zinc-300 bg-paper px-4 py-2.5 font-mono text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-950 focus:outline-none"
+          ></textarea>
         </div>
 
-        {/* Journalist Email */}
-        <div class="space-y-2">
-          <label for="periodista_email" class="font-mono text-xs font-semibold uppercase tracking-wider text-zinc-300 block">
-            {t.accreditations.journalistEmail} *
-          </label>
-          <input
-            type="email"
-            id="periodista_email"
-            name="periodista_email"
-            required
-            placeholder="redaccion@tumedio.com"
-            class="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-brand-primary focus:outline-none"
-          />
+        <div class="pt-4 border-t border-zinc-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="font-mono text-[11px] text-zinc-500">
+            Respuesta oficial en menos de 24 horas laborables.
+          </div>
+
+          <button
+            type="submit"
+            id="submitAcredBtn"
+            class="w-full sm:w-auto bg-zinc-900 hover:bg-zinc-800 text-white px-8 py-3 font-mono text-xs uppercase tracking-wider font-semibold transition-colors"
+          >
+            <span id="acredBtnText">ENVIAR SOLICITUD</span>
+          </button>
         </div>
 
-        {/* Journalist Phone */}
-        <div class="space-y-2">
-          <label for="periodista_telefono" class="font-mono text-xs font-semibold uppercase tracking-wider text-zinc-300 block">
-            {t.accreditations.journalistPhone}
-          </label>
-          <input
-            type="tel"
-            id="periodista_telefono"
-            name="periodista_telefono"
-            placeholder="+34 600 000 000"
-            class="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-brand-primary focus:outline-none"
-          />
-        </div>
-
-        {/* Country */}
-        <div class="space-y-2">
-          <label for="pais" class="font-mono text-xs font-semibold uppercase tracking-wider text-zinc-300 block">
-            {t.accreditations.country} *
-          </label>
-          <input
-            type="text"
-            id="pais"
-            name="pais"
-            required
-            placeholder="España, Reino Unido, Francia, etc."
-            class="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-brand-primary focus:outline-none"
-          />
-        </div>
-      </div>
-
-      {/* Target Event Selection */}
-      <div class="space-y-2">
-        <label for="evento" class="font-mono text-xs font-semibold uppercase tracking-wider text-zinc-300 block">
-          {t.accreditations.eventSelect}
-        </label>
-        <select
-          id="evento"
-          name="evento"
-          class="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white focus:border-brand-primary focus:outline-none"
-        >
-          <option value="">Acreditación general para el circuito NocheMadrid</option>
-          {eventos.map((ev) => (
-            <option value={ev.id} selected={selectedEventoId === String(ev.id)}>
-              {ev.titulo} ({new Date(ev.fecha_evento).toLocaleDateString('es-ES')})
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Notes / Planned Coverage */}
-      <div class="space-y-2">
-        <label for="observaciones" class="font-mono text-xs font-semibold uppercase tracking-wider text-zinc-300 block">
-          {t.accreditations.notes}
-        </label>
-        <textarea
-          id="observaciones"
-          name="observaciones"
-          rows="4"
-          placeholder="Describa el enfoque de la pieza periodística, fecha prevista de publicación o enlaces a reportajes anteriores..."
-          class="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-brand-primary focus:outline-none"
-        ></textarea>
-      </div>
-
-      <button
-        type="submit"
-        id="submitBtn"
-        class="w-full rounded-xl bg-brand-primary py-4 font-sans font-bold text-white shadow-xl shadow-rose-950/40 hover:bg-brand-primary-hover hover:scale-[1.01] transition-all flex items-center justify-center gap-2"
-      >
-        <Send class="h-4 w-4" />
-        <span id="submitText">{t.accreditations.submitButton}</span>
-      </button>
-
-      <div id="formFeedback" class="hidden p-4 rounded-xl font-mono text-xs text-center"></div>
-    </form>
+        <div id="acredStatus" class="hidden font-mono text-xs p-4 border"></div>
+      </form>
+    </div>
   </div>
 
   <script is:inline>
     const form = document.getElementById('acreditacionForm');
-    const submitBtn = document.getElementById('submitBtn');
-    const submitText = document.getElementById('submitText');
-    const feedback = document.getElementById('formFeedback');
+    const btn = document.getElementById('submitAcredBtn');
+    const btnText = document.getElementById('acredBtnText');
+    const statusDiv = document.getElementById('acredStatus');
 
     form?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      submitBtn.disabled = true;
-      if (submitText) submitText.textContent = 'Procesando solicitud...';
-
       const formData = new FormData(form);
-      const payload = {
-        medio: formData.get('medio'),
-        tipo_medio: formData.get('tipo_medio'),
-        periodista_nombre: formData.get('periodista_nombre'),
-        periodista_email: formData.get('periodista_email'),
-        periodista_telefono: formData.get('periodista_telefono'),
-        pais: formData.get('pais'),
-        evento: formData.get('evento') || null,
-        observaciones: formData.get('observaciones'),
-      };
+      const data = Object.fromEntries(formData.entries());
+
+      btn.disabled = true;
+      if (btnText) btnText.textContent = 'PROCESANDO...';
 
       try {
         const res = await fetch('/api/acreditacion', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(data),
         });
 
-        const data = await res.json();
-        feedback.classList.remove('hidden');
+        const resData = await res.json();
+        statusDiv.classList.remove('hidden');
 
         if (res.ok) {
-          feedback.className = 'p-4 rounded-xl font-mono text-xs text-center bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
-          feedback.textContent = data.message || 'Solicitud registrada correctamente.';
+          statusDiv.className = 'font-mono text-xs p-4 border border-zinc-900 bg-zinc-900 text-white';
+          statusDiv.textContent = '✓ Solicitud registrada con éxito. El departamento de prensa contactará para validar sus credenciales.';
           form.reset();
         } else {
-          feedback.className = 'p-4 rounded-xl font-mono text-xs text-center bg-rose-500/20 text-rose-300 border border-rose-500/30';
-          feedback.textContent = data.message || 'Error al tramitar la solicitud.';
+          statusDiv.className = 'font-mono text-xs p-4 border border-red-500 bg-red-50 text-red-700';
+          statusDiv.textContent = resData.message || 'Error al enviar la solicitud.';
         }
       } catch (err) {
-        feedback.classList.remove('hidden');
-        feedback.className = 'p-4 rounded-xl font-mono text-xs text-center bg-rose-500/20 text-rose-300 border border-rose-500/30';
-        feedback.textContent = 'Error de conexión con el servidor. Intente más tarde.';
+        statusDiv.classList.remove('hidden');
+        statusDiv.className = 'font-mono text-xs p-4 border border-red-500 bg-red-50 text-red-700';
+        statusDiv.textContent = 'Error de conexión. Intente nuevamente.';
       } finally {
-        submitBtn.disabled = false;
-        if (submitText) submitText.textContent = 'Enviar Solicitud de Acreditación';
+        btn.disabled = false;
+        if (btnText) btnText.textContent = 'ENVIAR SOLICITUD';
       }
     });
   </script>

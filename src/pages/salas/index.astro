@@ -2,13 +2,9 @@
 import Layout from '@/layouts/Layout.astro';
 import { directus, getAssetUrl } from '@/lib/directus';
 import { readItems } from '@directus/sdk';
-import { useTranslations } from '@/lib/i18n';
 import type { Sala } from '@/lib/directus';
-import { Building2, Search, MapPin, Users, Globe, ArrowUpRight, ShieldCheck } from 'lucide-astro';
 
 export const prerender = false;
-
-const t = useTranslations('es');
 
 let salas: Sala[] = [];
 try {
@@ -29,10 +25,8 @@ try {
         'imagen_portada.*',
         'contacto_prensa_email',
         'contacto_prensa_nombre',
-        'contacto_prensa_telefono',
         'dossier_pdf.*',
         'sitio_web',
-        'instagram',
         'destacado',
       ],
     })
@@ -44,210 +38,188 @@ try {
 
 const districts = [
   { label: 'Todos los distritos', value: 'all' },
-  { label: 'Centro / Sol / Gran Vía', value: 'centro' },
+  { label: 'Centro / Gran Vía', value: 'centro' },
   { label: 'Chamberí', value: 'chamberi' },
   { label: 'Salamanca', value: 'salamanca' },
   { label: 'Malasaña / Chueca', value: 'malasana_chueca' },
-  { label: 'Moncloa / Princesa', value: 'moncloa' },
-  { label: 'Retiro / Arganzuela', value: 'retiro_arganzuela' },
-  { label: 'Chamartín / Tetuán', value: 'chamartin_tetuan' },
-  { label: 'Periferia / Comunidad de Madrid', value: 'comunidad_madrid' },
-];
-
-const types = [
-  { label: 'Todas las tipologías', value: 'all' },
-  { label: 'Discoteca / Club', value: 'discoteca' },
-  { label: 'Sala de Conciertos', value: 'sala_conciertos' },
-  { label: 'Teatro Musical / Espectáculos', value: 'teatro_musical' },
-  { label: 'Tablao Flamenco', value: 'tablao' },
-  { label: 'Bar Especial / Lounge', value: 'bar_especial' },
+  { label: 'Moncloa', value: 'moncloa' },
+  { label: 'Arganzuela', value: 'arganzuela' },
 ];
 ---
 
 <Layout
-  title="Directorio Oficial de las 96 Salas y Espacios Asociados"
-  description="Fichas técnicas, aforos, datos de contacto de medios y ubicaciones de las 96 salas de ocio y cultura federadas en NocheMadrid."
+  title="Directorio de Espacios y Salas Asociadas | Madrid Live Press"
+  description="Censo oficial de las 96 salas, teatros y discotecas federadas en NocheMadrid. Fichas técnicas y contactos de prensa."
   lang="es"
 >
-  <div class="space-y-10">
-    {/* Header */}
-    <div class="space-y-3 border-b border-white/10 pb-8">
-      <div class="inline-flex items-center gap-2 text-rose-400 font-mono text-xs uppercase tracking-widest font-semibold">
-        <Building2 class="h-4 w-4" />
-        <span>Red Federada NocheMadrid</span>
+  <div class="w-full bg-paper">
+    <!-- Top Monospaced Breadcrumb -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4">
+      <div class="font-mono text-xs text-zinc-400 uppercase tracking-widest flex items-center gap-3">
+        <a href="/" class="hover:text-zinc-950 transition-colors">PORTADA</a>
+        <span class="text-zinc-300">/</span>
+        <span class="text-zinc-900 font-semibold">ARCHIVO DE SALAS</span>
       </div>
-      <h1 class="font-display text-4xl sm:text-5xl font-extrabold text-white tracking-tight">
-        {t.venues.title}
-      </h1>
-      <p class="font-sans text-lg text-zinc-300 max-w-3xl">
-        {t.venues.subtitle}
-      </p>
     </div>
 
-    {/* Search & Filters */}
-    <div class="rounded-3xl border border-white/10 bg-surface/80 p-6 backdrop-blur-xl shadow-xl space-y-4">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="relative">
-          <Search class="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+    <!-- Page Header (Swiss Minimalist) -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 border-b border-zinc-200">
+      <div class="space-y-3">
+        <div class="font-mono text-xs uppercase tracking-widest text-zinc-400 font-semibold">
+          CENSO OFICIAL NOCHEMADRID · 96 ASOCIADOS
+        </div>
+        <h1 class="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-zinc-950 tracking-tight">
+          Directorio de Salas y Espacios Escénicos
+        </h1>
+        <p class="font-sans text-base text-zinc-600 max-w-3xl leading-relaxed">
+          Catálogo arquitectónico y técnico de los 96 espacios culturales, salas de conciertos y recintos de ocio nocturno federados en la Comunidad de Madrid.
+        </p>
+      </div>
+
+      <!-- Search & Filters -->
+      <div class="mt-8 grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+        <div class="md:col-span-6">
           <input
             type="text"
-            id="salasSearch"
-            placeholder="Buscar por nombre, calle o zona..."
-            class="w-full rounded-xl border border-white/10 bg-black/50 pl-11 pr-4 py-3 text-sm text-white placeholder:text-zinc-500 focus:border-brand-primary focus:outline-none"
+            id="pageSearchInput"
+            placeholder="Buscar por nombre, distrito o tipología..."
+            class="w-full border border-zinc-200 bg-paper px-4 py-2.5 font-mono text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-900 focus:outline-none transition-colors"
           />
         </div>
 
-        <div>
-          <select
-            id="salasDistrict"
-            class="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white focus:border-brand-primary focus:outline-none"
-          >
-            {districts.map((d) => (
-              <option value={d.value}>{d.label}</option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <select
-            id="salasType"
-            class="w-full rounded-xl border border-white/10 bg-black/50 px-4 py-3 text-sm text-white focus:border-brand-primary focus:outline-none"
-          >
-            {types.map((tp) => (
-              <option value={tp.value}>{tp.label}</option>
-            ))}
-          </select>
+        <div class="md:col-span-6 flex flex-wrap gap-1.5 justify-start md:justify-end">
+          {districts.map((d) => (
+            <button
+              type="button"
+              data-district={d.value}
+              class="pageFilterBtn font-mono text-[11px] uppercase tracking-wider px-2.5 py-1 border border-zinc-200 hover:border-zinc-900 text-zinc-600 hover:text-zinc-950 transition-colors first:bg-zinc-900 first:text-white first:border-zinc-900"
+            >
+              {d.label}
+            </button>
+          ))}
         </div>
       </div>
     </div>
 
-    {/* Venues Grid */}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="salasGrid">
-      {salas.map((sala) => {
-        const coverUrl = sala.imagen_portada
-          ? getAssetUrl(sala.imagen_portada, { width: 600, height: 400, quality: 80, format: 'webp' })
-          : null;
-        const logoUrl = sala.logo ? getAssetUrl(sala.logo, { width: 120, height: 120, format: 'webp' }) : null;
-        const detailUrl = `/salas/${sala.slug}`;
+    <!-- Venues Grid -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div id="pageVenuesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {salas.map((sala) => {
+          const cover = sala.imagen_portada ? getAssetUrl(sala.imagen_portada, { width: 600, height: 400, format: 'webp' }) : null;
 
-        return (
-          <div
-            class="sala-card group flex flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-surface/80 transition-all duration-300 hover:border-white/20 hover:-translate-y-1 hover:shadow-2xl hover:shadow-black/50 backdrop-blur-md"
-            data-name={sala.nombre.toLowerCase()}
-            data-district={sala.distrito}
-            data-type={sala.tipo_espacio}
-          >
-            <div>
-              <a href={detailUrl} class="relative block aspect-[16/10] w-full overflow-hidden bg-zinc-900">
-                {coverUrl ? (
-                  <img
-                    src={coverUrl}
-                    alt={sala.nombre}
-                    class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div class="flex h-full w-full items-center justify-center bg-gradient-to-br from-surface to-background text-zinc-600 font-mono text-xs">
-                    {sala.nombre}
-                  </div>
-                )}
-                <div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent opacity-80"></div>
-
-                {logoUrl && (
-                  <div class="absolute bottom-3 left-3 h-10 w-10 rounded-xl bg-black/80 p-1 border border-white/15 backdrop-blur-md overflow-hidden">
-                    <img src={logoUrl} alt={sala.nombre} class="h-full w-full object-contain" />
+          return (
+            <article
+              class="venuePageCard border border-zinc-200 bg-paper hover:border-zinc-950 transition-colors flex flex-col justify-between"
+              data-name={sala.nombre.toLowerCase()}
+              data-district={(sala.distrito || '').toLowerCase()}
+              data-type={(sala.tipo_espacio || '').toLowerCase()}
+            >
+              <div>
+                {cover && (
+                  <div class="aspect-[16/10] w-full border-b border-zinc-200 overflow-hidden bg-zinc-100">
+                    <img
+                      src={cover}
+                      alt={sala.nombre}
+                      class="h-full w-full object-cover filter grayscale-[15%] contrast-105"
+                      loading="lazy"
+                    />
                   </div>
                 )}
 
-                {sala.destacado && (
-                  <span class="absolute top-3 right-3 rounded-full bg-rose-500/90 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-white shadow-lg">
-                    Destacada
-                  </span>
-                )}
-              </a>
+                <div class="p-6 space-y-4">
+                  <div class="flex items-center justify-between font-mono text-[11px] text-zinc-500 uppercase tracking-widest">
+                    <span class="text-zinc-950 font-semibold">{sala.tipo_espacio || 'Espacio'}</span>
+                    <span>{sala.distrito || 'Madrid'}</span>
+                  </div>
 
-              <div class="p-5 space-y-3">
-                <div>
-                  <span class="font-mono text-[11px] uppercase tracking-wider text-amber-300/90 font-semibold">
-                    {sala.tipo_espacio ? sala.tipo_espacio.replace('_', ' ') : 'Espacio'}
-                  </span>
-                  <h2 class="font-display text-lg font-bold text-white group-hover:text-rose-400 transition-colors">
-                    <a href={detailUrl}>{sala.nombre}</a>
+                  <h2 class="font-display text-xl font-bold text-zinc-950">
+                    <a href={`/salas/${sala.slug}`} class="hover:text-vermilion transition-colors">
+                      {sala.nombre}
+                    </a>
                   </h2>
-                </div>
 
-                <div class="space-y-1.5 font-sans text-xs text-zinc-400">
-                  <div class="flex items-center gap-2">
-                    <MapPin class="h-3.5 w-3.5 text-zinc-500 flex-shrink-0" />
-                    <span class="truncate">{sala.direccion || sala.distrito}</span>
+                  <div class="space-y-1 font-mono text-xs text-zinc-600">
+                    {sala.aforo && <div>AFORO HOMOLOGADO: {sala.aforo.toLocaleString()} PAX</div>}
+                    {sala.direccion && <div class="text-zinc-500 line-clamp-1">{sala.direccion}</div>}
                   </div>
-                  {sala.aforo && (
-                    <div class="flex items-center gap-2 font-mono text-zinc-300">
-                      <Users class="h-3.5 w-3.5 text-zinc-500 flex-shrink-0" />
-                      <span>Aforo: {sala.aforo.toLocaleString()} personas</span>
-                    </div>
+
+                  {sala.descripcion && (
+                    <p class="font-sans text-xs text-zinc-600 line-clamp-2 leading-relaxed pt-2 border-t border-zinc-100">
+                      {sala.descripcion}
+                    </p>
                   )}
                 </div>
               </div>
-            </div>
 
-            <div class="border-t border-white/10 px-5 py-3 bg-black/20 flex items-center justify-between">
-              <a
-                href={detailUrl}
-                class="font-mono text-xs font-semibold text-zinc-300 hover:text-white transition-colors inline-flex items-center gap-1"
-              >
-                <span>Ficha Técnica</span>
-                <ArrowUpRight class="h-3 w-3" />
-              </a>
-
-              {sala.sitio_web && (
+              <div class="p-6 pt-0 border-t border-zinc-100 flex items-center justify-between font-mono text-xs">
                 <a
-                  href={sala.sitio_web}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="text-zinc-400 hover:text-white transition-colors"
-                  title="Sitio web oficial"
+                  href={`/salas/${sala.slug}`}
+                  class="uppercase tracking-wider font-semibold text-zinc-950 hover:text-vermilion transition-colors"
                 >
-                  <Globe class="h-3.5 w-3.5" />
+                  FICHA TÉCNICA ↗
                 </a>
-              )}
-            </div>
-          </div>
-        );
-      })}
+
+                {sala.sitio_web && (
+                  <a
+                    href={sala.sitio_web}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-zinc-400 hover:text-zinc-900 transition-colors"
+                  >
+                    WEB
+                  </a>
+                )}
+              </div>
+            </article>
+          );
+        })}
+      </div>
     </div>
   </div>
 
-  <script is:inline>
-    const search = document.getElementById('salasSearch');
-    const district = document.getElementById('salasDistrict');
-    const type = document.getElementById('salasType');
-    const cards = document.querySelectorAll('.sala-card');
+  <script>
+    const searchInput = document.getElementById('pageSearchInput') as HTMLInputElement | null;
+    const filterBtns = document.querySelectorAll('.pageFilterBtn');
+    const cards = document.querySelectorAll('.venuePageCard') as NodeListOf<HTMLElement>;
 
-    function filter() {
-      const q = (search?.value || '').toLowerCase().trim();
-      const d = district?.value || 'all';
-      const t = type?.value || 'all';
+    let currentDistrict = 'all';
+    let currentQuery = '';
 
-      cards.forEach((c) => {
-        const name = c.getAttribute('data-name') || '';
-        const cardD = c.getAttribute('data-district') || '';
-        const cardT = c.getAttribute('data-type') || '';
+    function filterVenues() {
+      cards.forEach((card) => {
+        const name = card.dataset.name || '';
+        const district = card.dataset.district || '';
+        const type = card.dataset.type || '';
 
-        const mQ = !q || name.includes(q);
-        const mD = d === 'all' || cardD === d;
-        const mT = t === 'all' || cardT === t;
+        const matchesQuery = !currentQuery || name.includes(currentQuery) || district.includes(currentQuery) || type.includes(currentQuery);
+        const matchesDistrict = currentDistrict === 'all' || district.includes(currentDistrict);
 
-        if (mQ && mD && mT) {
-          c.classList.remove('hidden');
+        if (matchesQuery && matchesDistrict) {
+          card.classList.remove('hidden');
         } else {
-          c.classList.add('hidden');
+          card.classList.add('hidden');
         }
       });
     }
 
-    search?.addEventListener('input', filter);
-    district?.addEventListener('change', filter);
-    type?.addEventListener('change', filter);
+    searchInput?.addEventListener('input', (e) => {
+      currentQuery = (e.target as HTMLInputElement).value.toLowerCase().trim();
+      filterVenues();
+    });
+
+    filterBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach((b) => {
+          b.classList.remove('bg-zinc-900', 'text-white', 'border-zinc-900');
+          b.classList.add('text-zinc-600', 'border-zinc-200');
+        });
+
+        btn.classList.add('bg-zinc-900', 'text-white', 'border-zinc-900');
+        btn.classList.remove('text-zinc-600', 'border-zinc-200');
+
+        currentDistrict = btn.getAttribute('data-district') || 'all';
+        filterVenues();
+      });
+    });
   </script>
 </Layout>

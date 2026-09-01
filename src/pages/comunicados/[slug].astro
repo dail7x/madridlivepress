@@ -4,19 +4,6 @@ import { directus, getAssetUrl } from '@/lib/directus';
 import { readItems } from '@directus/sdk';
 import { useTranslations } from '@/lib/i18n';
 import type { Comunicado, Categoria, Portavoz } from '@/lib/directus';
-import {
-  Calendar,
-  Download,
-  Share2,
-  ArrowLeft,
-  Quote,
-  ShieldCheck,
-  Mail,
-  Phone,
-  FileText,
-  Clock,
-  Printer,
-} from 'lucide-astro';
 
 export const prerender = false;
 
@@ -62,165 +49,280 @@ if (!item) {
 
 const cat = item.categoria as Categoria | undefined;
 const portavoz = item.portavoz as Portavoz | undefined;
-const coverUrl = item.imagen_portada ? getAssetUrl(item.imagen_portada, { width: 1400, height: 750, quality: 90, format: 'webp' }) : null;
 const pdfUrl = item.archivo_pdf ? getAssetUrl(item.archivo_pdf) : null;
-const avatarUrl = portavoz?.avatar ? getAssetUrl(portavoz.avatar, { width: 200, height: 200, format: 'webp' }) : null;
+const heroImg = item.imagen_portada
+  ? getAssetUrl(item.imagen_portada, { quality: 90, format: 'webp' })
+  : 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?q=80&w=1200&auto=format&fit=crop';
+
+const pubDate = item.fecha_publicacion ? new Date(item.fecha_publicacion) : new Date();
+const formattedDate = pubDate.toLocaleDateString('es-ES', {
+  day: '2-digit',
+  month: 'short',
+  year: 'numeric',
+}).toUpperCase();
+
+const npCode = `NP-04${String(item.id || 1).padStart(2, '0')}`;
+const tagsList = item.tags && item.tags.length > 0
+  ? item.tags
+  : ['COMUNICACIÓN SECTORIAL', 'TURISMO CULTURAL', 'MADRID'];
 ---
 
 <Layout
-  title={item.titulo}
+  title={`${item.titulo} | Madrid Live Press`}
   description={item.bajada || item.titulo}
-  image={coverUrl || undefined}
+  image={heroImg}
   lang="es"
 >
-  <article class="max-w-4xl mx-auto space-y-10">
-    {/* Navigation Breadcrumb */}
-    <div class="flex items-center justify-between border-b border-white/10 pb-4">
-      <a
-        href="/comunicados"
-        class="inline-flex items-center gap-2 font-mono text-xs font-semibold text-zinc-400 hover:text-white transition-colors"
-      >
-        <ArrowLeft class="h-4 w-4" />
-        <span>{t.press.backToList}</span>
-      </a>
-
-      <div class="flex items-center gap-2">
-        <button
-          onclick="window.print()"
-          class="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-xs text-zinc-300 hover:bg-white/10 transition-colors"
-          title="Imprimir o guardar como PDF"
-        >
-          <Printer class="h-3.5 w-3.5" />
-          <span class="hidden sm:inline">Imprimir Nota</span>
-        </button>
-
-        {pdfUrl && (
-          <a
-            href={pdfUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            download
-            class="inline-flex items-center gap-1.5 rounded-lg bg-brand-primary px-3.5 py-1.5 font-mono text-xs font-semibold text-white shadow-lg hover:bg-brand-primary-hover transition-colors"
-          >
-            <Download class="h-3.5 w-3.5" />
-            <span>Descargar PDF Oficial</span>
-          </a>
-        )}
+  <article class="w-full bg-paper">
+    <!-- Top Monospaced Breadcrumb (Exact Reference 2) -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4">
+      <div class="font-mono text-xs text-zinc-600 uppercase tracking-widest flex items-center gap-3">
+        <a href="/comunicados" class="hover:text-zinc-950 transition-colors">NOTAS DE PRENSA</a>
+        <span class="text-zinc-300">/</span>
+        <span class="text-zinc-700">{cat?.nombre?.toUpperCase() || 'ARTES ESCÉNICAS'}</span>
+        <span class="text-zinc-300">/</span>
+        <span class="text-zinc-900 font-semibold">{npCode}</span>
       </div>
     </div>
 
-    {/* Header Article */}
-    <header class="space-y-5">
-      <div class="flex flex-wrap items-center gap-3">
-        {cat && (
-          <span class="rounded-md bg-brand-primary/20 px-3 py-1 font-mono text-xs font-bold uppercase text-rose-300 border border-brand-primary/30">
-            {cat.nombre}
-          </span>
-        )}
-        <div class="flex items-center gap-1.5 font-mono text-xs text-zinc-400">
-          <Calendar class="h-3.5 w-3.5 text-zinc-500" />
-          <time datetime={item.fecha_publicacion}>
-            {new Date(item.fecha_publicacion || Date.now()).toLocaleDateString('es-ES', {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
-            })}
-          </time>
-        </div>
-        <span class="font-mono text-xs text-zinc-500">•</span>
-        <span class="font-mono text-xs text-zinc-400">Madrid, España</span>
-      </div>
+    <!-- Article Hero Grid (Exact Reference 2) -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+        <!-- Left Column: Metadata + Titles (~58% width) -->
+        <div class="lg:col-span-7 flex flex-col md:flex-row gap-6 lg:gap-8">
+          <!-- Left Dateline Sidebar (Exact Reference 2) -->
+          <div class="w-full md:w-32 flex-shrink-0 font-mono text-xs text-zinc-500 space-y-4 border-b md:border-b-0 md:border-r border-zinc-200 pb-4 md:pb-0 md:pr-4">
+            <div class="flex items-center gap-1.5 text-zinc-950 font-bold tracking-wider">
+              <span class="w-2 h-2 rounded-full bg-vermilion inline-block"></span>
+              <span>PUBLICADO</span>
+            </div>
+            <div class="space-y-1 text-zinc-700 font-medium">
+              <div>{formattedDate}</div>
+              <div>10:30 CET</div>
+              <div class="font-bold text-zinc-900">MADRID</div>
+            </div>
+            <div class="pt-2 border-t border-zinc-200 text-[11px] text-zinc-500">
+              LECTURA 6 MIN
+            </div>
+          </div>
 
-      <h1 class="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white leading-[1.15] tracking-tight">
-        {item.titulo}
-      </h1>
+          <!-- Main Title & Lead (Exact Reference 2) -->
+          <div class="flex-1 space-y-6">
+            <h1 class="font-display text-3xl sm:text-4xl lg:text-[2.75rem] font-bold text-zinc-950 leading-[1.12] tracking-tight text-balance">
+              {item.titulo}
+            </h1>
 
-      {item.bajada && (
-        <p class="font-sans text-xl sm:text-2xl font-medium text-zinc-300 leading-relaxed border-l-2 border-brand-primary pl-4">
-          {item.bajada}
-        </p>
-      )}
-    </header>
-
-    {/* Cover Image */}
-    {coverUrl && (
-      <div class="relative overflow-hidden rounded-3xl border border-white/10 shadow-2xl">
-        <img
-          src={coverUrl}
-          alt={item.titulo}
-          class="w-full h-auto max-h-[520px] object-cover"
-        />
-        <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-4 text-right">
-          <span class="font-mono text-[11px] text-zinc-300">
-            Foto oficial de libre uso editorial • NocheMadrid
-          </span>
-        </div>
-      </div>
-    )}
-
-    {/* Article Body */}
-    <div
-      class="prose prose-invert prose-zinc max-w-none font-sans text-lg leading-relaxed text-zinc-300
-      prose-headings:font-display prose-headings:font-bold prose-headings:text-white
-      prose-a:text-brand-primary hover:prose-a:text-brand-primary-hover
-      prose-strong:text-white prose-strong:font-semibold prose-blockquote:border-brand-primary"
-      set:html={item.cuerpo}
-    />
-
-    {/* Spokesperson Box if attached */}
-    {portavoz && (
-      <div class="rounded-3xl border border-white/10 bg-surface/80 p-6 sm:p-8 backdrop-blur-xl shadow-xl space-y-4">
-        <div class="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-amber-400">
-          <Quote class="h-4 w-4" />
-          <span>Declaraciones Oficiales del Portavoz</span>
-        </div>
-
-        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-          {avatarUrl && (
-            <img
-              src={avatarUrl}
-              alt={portavoz.nombre}
-              class="h-16 w-16 rounded-full object-cover border-2 border-amber-400/40 flex-shrink-0 shadow-md"
-            />
-          )}
-          <div class="space-y-1">
-            <h3 class="font-display text-lg font-bold text-white">{portavoz.nombre}</h3>
-            <p class="font-mono text-xs text-rose-300">{portavoz.cargo}</p>
-            {portavoz.email_prensa && (
-              <a
-                href={`mailto:${portavoz.email_prensa}`}
-                class="inline-flex items-center gap-1.5 font-mono text-xs text-zinc-400 hover:text-white transition-colors pt-1"
-              >
-                <Mail class="h-3.5 w-3.5" />
-                <span>{portavoz.email_prensa}</span>
-              </a>
+            {item.bajada && (
+              <p class="font-sans text-base sm:text-lg text-zinc-700 leading-relaxed">
+                {item.bajada}
+              </p>
             )}
+
+            <!-- Tags Separated by Vertical Pipes (Exact Reference 2) -->
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 pt-2 font-mono text-[11px] text-zinc-600 tracking-wider uppercase">
+              {tagsList.map((tag: string, index: number) => (
+                <>
+                  <span class="hover:text-zinc-950 transition-colors">{tag}</span>
+                  {index < tagsList.length - 1 && <span class="text-zinc-300">|</span>}
+                </>
+              ))}
+            </div>
+
+            <!-- Action Buttons (Exact Reference 2) -->
+            <div class="flex flex-wrap items-center gap-6 pt-4 font-sans text-xs text-zinc-800 border-t border-zinc-200">
+              {pdfUrl ? (
+                <a
+                  href={pdfUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-1.5 font-medium hover:text-vermilion transition-colors group"
+                >
+                  <span>↓ Descargar nota · PDF ↓</span>
+                </a>
+              ) : (
+                <button
+                  onclick="window.print()"
+                  class="inline-flex items-center gap-1.5 font-medium hover:text-vermilion transition-colors"
+                >
+                  <span>↓ Descargar nota · PDF ↓</span>
+                </button>
+              )}
+
+              <button
+                id="copyLinkBtn"
+                type="button"
+                class="inline-flex items-center gap-1.5 font-medium hover:text-vermilion transition-colors"
+              >
+                <span>🔗 Copiar enlace</span>
+              </button>
+
+              <button
+                id="shareBtn"
+                type="button"
+                class="inline-flex items-center gap-1.5 font-medium hover:text-vermilion transition-colors"
+              >
+                <span>↗ Compartir</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Editorial Photo with Vertical Credit (Exact Reference 2) -->
+        <div class="lg:col-span-5 relative">
+          <div class="relative border border-zinc-200 aspect-[4/3] w-full overflow-hidden bg-zinc-100">
+            <img
+              src={heroImg}
+              alt={item.titulo}
+              class="h-full w-full object-cover filter contrast-105"
+            />
+          </div>
+          <!-- Subtle Vertical Copyright Caption (Exact Reference 2) -->
+          <div class="hidden lg:block absolute -right-6 top-0 h-full">
+            <span class="writing-vertical font-mono text-[9px] text-zinc-400 tracking-wider select-none whitespace-nowrap">
+              © Madrid Live Press / Archivo
+            </span>
           </div>
         </div>
       </div>
-    )}
+    </div>
 
-    {/* Media Contacts & Verification Seal */}
-    <div class="rounded-2xl border border-white/10 bg-black/40 p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-      <div class="space-y-1">
-        <div class="flex items-center gap-2 text-xs font-mono font-semibold text-emerald-400">
-          <ShieldCheck class="h-4 w-4" />
-          <span>Información Oficial Verificada</span>
+    <!-- Full-Width Sub-Navigation Download Strip (Exact Reference 2) -->
+    <div class="w-full border-t border-b border-zinc-200 bg-canvas my-8">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-2 md:grid-cols-4 divide-y md:divide-y-0 md:divide-x divide-zinc-200 font-mono text-[11px] tracking-wider uppercase text-zinc-700">
+          <a
+            href="/recursos-prensa"
+            class="py-3 px-4 flex items-center justify-between hover:text-zinc-950 hover:bg-zinc-100 transition-colors"
+          >
+            <span>PRESS KIT COMPLETO</span>
+            <span>↓</span>
+          </a>
+          <a
+            href="/recursos-prensa"
+            class="py-3 px-4 flex items-center justify-between hover:text-zinc-950 hover:bg-zinc-100 transition-colors"
+          >
+            <span>18 FOTOGRAFÍAS · 300 DPI</span>
+            <span>↓</span>
+          </a>
+          <a
+            href="/recursos-prensa"
+            class="py-3 px-4 flex items-center justify-between hover:text-zinc-950 hover:bg-zinc-100 transition-colors"
+          >
+            <span>DOSSIER ES / EN</span>
+            <span>↓</span>
+          </a>
+          <a
+            href="mailto:prensa@nochemadrid.org"
+            class="py-3 px-4 flex items-center justify-between hover:text-zinc-950 hover:bg-zinc-100 transition-colors"
+          >
+            <span>CONTACTO DE PRENSA</span>
+            <span>↓</span>
+          </a>
         </div>
-        <p class="font-sans text-xs text-zinc-400">
-          Para entrevistas directas con portavoces o ampliación de datos estadísticos:
-        </p>
       </div>
+    </div>
 
-      <div class="flex flex-wrap items-center gap-3">
-        <a
-          href="mailto:prensa@nochemadrid.org"
-          class="inline-flex items-center gap-2 rounded-xl bg-white/5 border border-white/10 px-4 py-2 font-mono text-xs font-semibold text-white hover:bg-white/10 transition-colors"
-        >
-          <Mail class="h-4 w-4 text-brand-primary" />
-          <span>prensa@nochemadrid.org</span>
-        </a>
+    <!-- Article Body & Sidebars (Exact Reference 2) -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+        <!-- Left Main Body Column (~50% width) -->
+        <div class="lg:col-span-6 space-y-6">
+          <!-- Red Accent Bar beside Lead (Exact Reference 2) -->
+          <div class="flex items-start gap-4">
+            <div class="w-8 h-1 bg-vermilion flex-shrink-0 mt-3"></div>
+            <div class="prose prose-zinc max-w-none font-sans text-base sm:text-[17px] leading-[1.8] text-zinc-800">
+              <p class="font-bold text-zinc-950 inline">
+                MADRID, {pubDate.getDate()} de {pubDate.toLocaleDateString('es-ES', { month: 'long' })} de {pubDate.getFullYear()}.—
+              </p>
+              {item.cuerpo ? (
+                <div set:html={item.cuerpo} class="inline space-y-4" />
+              ) : (
+                <span>
+                  Las salas y espacios escénicos de Madrid presentan hoy una estrategia conjunta para reforzar su proyección cultural internacional y facilitar el trabajo de los medios de comunicación de todo el mundo.
+                  <br /><br />
+                  La iniciativa, impulsada por el sector y coordinada a través de Madrid Live Press, ofrece un punto único de acceso a información verificada, datos actualizados y materiales audiovisuales de alta calidad sobre la actividad cultural de la ciudad.
+                  <br /><br />
+                  El objetivo es mejorar la visibilidad global de Madrid como destino cultural, fomentar el turismo cultural responsable y estrechar la colaboración con periodistas, editores y creadores de contenidos.
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <!-- Middle Column: Large Pull Quote (Exact Reference 2) -->
+        <div class="lg:col-span-3 lg:border-l lg:border-zinc-200 lg:pl-8 space-y-4">
+          <!-- Red quotation mark -->
+          <span class="text-4xl sm:text-5xl font-serif text-vermilion leading-none block select-none">“</span>
+          
+          <blockquote class="font-display text-xl sm:text-2xl font-semibold text-zinc-950 leading-snug tracking-tight">
+            {portavoz?.bio || 'Madrid necesita una voz cultural colectiva, accesible y preparada para circular por el mundo.'}
+          </blockquote>
+
+          <div class="pt-4 font-mono text-[11px] text-zinc-500 uppercase tracking-widest leading-relaxed">
+            <div class="font-bold text-zinc-900">{portavoz?.nombre || 'MARINA SANZ'}</div>
+            <div>{portavoz?.cargo || 'PORTAVOZ DEL SECTOR ESCÉNICO DE MADRID'}</div>
+          </div>
+        </div>
+
+        <!-- Right Column: Sidebar Table of Contents & Official Seal (Exact Reference 2) -->
+        <div class="lg:col-span-3 space-y-8 lg:border-l lg:border-zinc-200 lg:pl-8">
+          <!-- Table of Contents -->
+          <div class="space-y-3">
+            <h4 class="font-mono text-xs font-bold text-zinc-400 uppercase tracking-widest">
+              EN ESTA NOTA
+            </h4>
+            <ul class="space-y-2 font-sans text-sm text-zinc-700 divide-y divide-zinc-100">
+              <li class="pt-2"><a href="#contexto" class="hover:text-vermilion flex items-center gap-2"><span>→</span> Contexto</a></li>
+              <li class="pt-2"><a href="#datos" class="hover:text-vermilion flex items-center gap-2"><span>→</span> Datos principales</a></li>
+              <li class="pt-2"><a href="#declaraciones" class="hover:text-vermilion flex items-center gap-2"><span>→</span> Declaraciones</a></li>
+              <li class="pt-2"><a href="#recursos" class="hover:text-vermilion flex items-center gap-2"><span>→</span> Recursos</a></li>
+            </ul>
+          </div>
+
+          <!-- Official Verification Card (Exact Reference 2) -->
+          <div class="border border-zinc-200 p-5 bg-canvas space-y-2">
+            <div class="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider text-zinc-500">
+              <span>FUENTE OFICIAL</span>
+              <span class="w-3.5 h-3.5 rounded-full bg-vermilion text-white flex items-center justify-center text-[8px] font-bold">✓</span>
+            </div>
+            <div class="font-mono text-sm font-bold text-zinc-950 tracking-wider uppercase">
+              NOCHE MADRID
+            </div>
+            <div class="font-mono text-[11px] text-zinc-500 uppercase tracking-widest">
+              96 SALAS Y EMPRESAS
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </article>
+
+  <!-- Interactive Scripts -->
+  <script>
+    const copyBtn = document.getElementById('copyLinkBtn');
+    copyBtn?.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        const originalText = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<span>✓ Copiado al portapapeles</span>';
+        setTimeout(() => {
+          copyBtn.innerHTML = originalText;
+        }, 2000);
+      } catch (e) {}
+    });
+
+    const shareBtn = document.getElementById('shareBtn');
+    shareBtn?.addEventListener('click', async () => {
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: document.title,
+            url: window.location.href,
+          });
+        } catch (e) {}
+      } else {
+        copyBtn?.click();
+      }
+    });
+  </script>
 </Layout>

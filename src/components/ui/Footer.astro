@@ -1,103 +1,86 @@
 ---
 import type { Locale } from '@/lib/i18n';
 import { useTranslations } from '@/lib/i18n';
-import { Radio, Mail, Phone, MapPin, ExternalLink, ShieldCheck } from 'lucide-astro';
 
 interface Props {
+  lang?: 'es' | 'en';
   currentLang?: Locale;
 }
 
-const { currentLang = 'es' } = Astro.props;
-const t = useTranslations(currentLang);
-const base = currentLang === 'en' ? '/en' : '';
+const { lang = 'es', currentLang = 'es' } = Astro.props;
+const effectiveLang = lang || currentLang;
+const isEn = effectiveLang === 'en';
+const t = useTranslations(effectiveLang as Locale);
+const base = isEn ? '/en' : '';
 ---
 
-<footer class="border-t border-white/10 bg-black/60 pt-16 pb-12 mt-auto">
+<footer class="w-full bg-paper border-t border-zinc-200 pt-16 pb-12 mt-auto">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-      {/* Col 1: Brand & Bio */}
-      <div class="space-y-4">
-        <div class="flex items-center gap-3">
-          <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-brand-primary to-amber-500 p-0.5 shadow-lg">
-            <div class="h-full w-full rounded-[10px] bg-black flex items-center justify-center">
-              <Radio class="h-5 w-5 text-rose-400" />
-            </div>
-          </div>
-          <div>
-            <span class="font-display font-black text-lg text-white">
-              MADRID<span class="text-brand-primary">LIVE</span>PRESS
-            </span>
-            <span class="font-mono text-[10px] text-zinc-400 block -mt-1 uppercase">
-              Sala de Prensa Oficial
-            </span>
-          </div>
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12">
+      <!-- Col 1: Identity (~40%) -->
+      <div class="md:col-span-5 space-y-4">
+        <div class="flex items-center gap-2">
+          <span class="font-display font-bold text-lg tracking-tight text-zinc-950">
+            MADRID<span class="text-vermilion">LIVE</span>PRESS
+          </span>
+          <span class="w-1.5 h-1.5 rounded-full bg-vermilion inline-block"></span>
         </div>
-        <p class="font-sans text-xs text-zinc-400 leading-relaxed">
-          {t.footer.association} Plataforma oficial de comunicación y servicio informativo para redacciones de medios nacionales e internacionales.
+
+        <p class="font-sans text-xs text-zinc-600 leading-relaxed max-w-md">
+          {isEn
+            ? 'International virtual press room for Madrid nightlife and performing arts, managed by NocheMadrid. Serving national and international media newsrooms with certified sources and high-definition assets.'
+            : 'Sala de prensa virtual internacional de la noche y las artes escénicas de Madrid, gestionada por NocheMadrid. Al servicio de redacciones nacionales e internacionales con fuentes oficiales y recursos en alta resolución.'}
         </p>
+
+        <div class="pt-2 font-mono text-[11px] text-zinc-500 uppercase tracking-wider">
+          {isEn ? '96 ASSOCIATED VENUES · ONE SHARED VOICE' : '96 ESPACIOS ASOCIADOS · UNA VOZ COMPARTIDA'}
+        </div>
       </div>
 
-      {/* Col 2: Navigation */}
-      <div class="space-y-3">
-        <h4 class="font-mono text-xs font-bold uppercase tracking-wider text-white">
-          Navegación de Prensa
+      <!-- Col 2: Navigation (~25%) -->
+      <div class="md:col-span-3 space-y-3">
+        <h4 class="font-mono text-xs font-bold uppercase tracking-widest text-zinc-400">
+          {isEn ? 'PRESS DIRECTORY' : 'DIRECTORIO DE PRENSA'}
         </h4>
-        <ul class="space-y-2 font-sans text-xs text-zinc-400">
-          <li><a href={`${base}/comunicados`} class="hover:text-white transition-colors">{t.nav.pressReleases}</a></li>
-          <li><a href={`${base}/salas`} class="hover:text-white transition-colors">{t.nav.venues}</a></li>
-          <li><a href={`${base}/recursos-prensa`} class="hover:text-white transition-colors">{t.nav.mediaKit}</a></li>
-          <li><a href={`${base}/eventos`} class="hover:text-white transition-colors">{t.nav.events}</a></li>
-          <li><a href={`${base}/acreditaciones`} class="hover:text-white transition-colors">{t.nav.accreditations}</a></li>
+        <ul class="space-y-2 font-sans text-xs text-zinc-700">
+          <li><a href={`${base}/comunicados`} class="hover:text-vermilion transition-colors">{isEn ? 'Press Releases' : 'Notas de Prensa'}</a></li>
+          <li><a href={`${base}/salas`} class="hover:text-vermilion transition-colors">{isEn ? 'Venues Archive' : 'Archivo de Salas'}</a></li>
+          <li><a href={`${base}/recursos-prensa`} class="hover:text-vermilion transition-colors">{isEn ? 'Media Kits (300 DPI)' : 'Media Kits (300 DPI)'}</a></li>
+          <li><a href={`${base}/eventos`} class="hover:text-vermilion transition-colors">{isEn ? 'Media Agenda' : 'Agenda de Medios'}</a></li>
+          <li><a href={`${base}/acreditaciones`} class="hover:text-vermilion transition-colors">{isEn ? 'Accreditation Office' : 'Oficina de Acreditación'}</a></li>
         </ul>
       </div>
 
-      {/* Col 3: Media Relations Office */}
-      <div class="space-y-3">
-        <h4 class="font-mono text-xs font-bold uppercase tracking-wider text-white">
-          Gabinete de Comunicación
+      <!-- Col 3: Press Contacts & Official Source (~35%) -->
+      <div class="md:col-span-4 space-y-4">
+        <h4 class="font-mono text-xs font-bold uppercase tracking-widest text-zinc-400">
+          {isEn ? 'PRESS OFFICE' : 'GABINETE DE COMUNICACIÓN'}
         </h4>
-        <ul class="space-y-2 font-mono text-xs text-zinc-400">
-          <li class="flex items-center gap-2">
-            <Mail class="h-3.5 w-3.5 text-brand-primary flex-shrink-0" />
-            <a href="mailto:prensa@nochemadrid.org" class="hover:text-white transition-colors">prensa@nochemadrid.org</a>
-          </li>
-          <li class="flex items-center gap-2">
-            <Phone class="h-3.5 w-3.5 text-brand-primary flex-shrink-0" />
-            <span>+34 91 542 23 00</span>
-          </li>
-          <li class="flex items-center gap-2">
-            <MapPin class="h-3.5 w-3.5 text-brand-primary flex-shrink-0" />
-            <span>Madrid, España</span>
-          </li>
-        </ul>
-      </div>
+        <div class="font-mono text-xs text-zinc-600 space-y-1.5">
+          <div>prensa@nochemadrid.org</div>
+          <div>+34 91 542 23 00</div>
+          <div>Plaza Mayor, 1 · 28012 Madrid, España</div>
+        </div>
 
-      {/* Col 4: Institutional Seal */}
-      <div class="space-y-3">
-        <h4 class="font-mono text-xs font-bold uppercase tracking-wider text-white">
-          Federación NocheMadrid
-        </h4>
-        <div class="rounded-2xl border border-white/10 bg-surface/80 p-4 space-y-2">
-          <div class="flex items-center gap-2 text-rose-300 font-mono text-xs font-semibold">
-            <ShieldCheck class="h-4 w-4" />
-            <span>96 Espacios Federados</span>
+        <div class="border border-zinc-200 p-3.5 bg-canvas font-mono text-[11px] text-zinc-600 space-y-1">
+          <div class="flex items-center gap-1.5 font-bold text-zinc-950 uppercase">
+            <span class="w-2 h-2 rounded-full bg-vermilion inline-block"></span>
+            <span>NOCHE MADRID</span>
           </div>
-          <p class="font-sans text-[11px] text-zinc-400 leading-relaxed">
-            Representación unitaria del ocio nocturno, salas de conciertos y festivales de la Comunidad de Madrid.
-          </p>
+          <div>Federación de Asociaciones de Ocio y Espectáculos de Madrid</div>
         </div>
       </div>
     </div>
 
-    {/* Bottom Legal bar */}
-    <div class="border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs text-zinc-500">
-      <p>© {new Date().getFullYear()} Madrid Live Press • NocheMadrid. {t.footer.rights}</p>
-      <div class="flex items-center gap-4">
-        <span>Aviso Legal</span>
-        <span>•</span>
-        <span>Política de Privacidad</span>
-        <span>•</span>
-        <span>Acceso Directus CMS</span>
+    <!-- Bottom Bar -->
+    <div class="border-t border-zinc-200 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs text-zinc-500">
+      <p>© {new Date().getFullYear()} Madrid Live Press. {isEn ? 'All rights reserved.' : 'Todos los derechos reservados.'}</p>
+      <div class="flex items-center gap-4 text-[11px]">
+        <a href="/comunicados" class="hover:text-zinc-950">Aviso Legal</a>
+        <span>·</span>
+        <a href="/comunicados" class="hover:text-zinc-950">Privacidad</a>
+        <span>·</span>
+        <a href="https://mlpdirectus.116.203.118.1.sslip.io" target="_blank" rel="noopener noreferrer" class="hover:text-zinc-950">Directus CMS</a>
       </div>
     </div>
   </div>

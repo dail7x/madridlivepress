@@ -1,8 +1,6 @@
 ---
 import type { BlockHero, Comunicado } from '@/lib/directus';
-import { getAssetUrl } from '@/lib/directus';
-import { useTranslations } from '@/lib/i18n';
-import { ArrowRight, Newspaper, Flame, DownloadCloud } from 'lucide-astro';
+import { directus, readItems, getAssetUrl } from '@/lib/directus';
 
 interface Props {
   block: BlockHero;
@@ -10,109 +8,159 @@ interface Props {
 }
 
 const { block, lang = 'es' } = Astro.props;
-const t = useTranslations(lang);
+const isEn = lang === 'en';
+const prefix = isEn ? '/en' : '';
 
-const nota = block.nota_prioritaria as Comunicado | undefined;
-const fondoUrl = block.fondo ? getAssetUrl(block.fondo, { quality: 85, format: 'webp' }) : '';
-const ctaLink = block.cta_enlace || (lang === 'en' ? '/en/comunicados' : '/comunicados');
+// Pull linked priority story or fetch latest releases
+let latestStories: Comunicado[] = [];
+try {
+  const res = await directus.request(
+    readItems('comunicados' as any, {
+      filter: { status: { _eq: 'published' } },
+      sort: ['-fecha_publicacion', '-id'],
+      limit: 2,
+      fields: ['id', 'titulo', 'slug', 'fecha_publicacion'],
+    })
+  );
+  latestStories = (res as Comunicado[]) || [];
+} catch (e) {}
+
+const story1 = latestStories[0]?.titulo || (isEn ? 'The cultural sector presents its new data' : 'El sector cultural presenta sus nuevos datos');
+const story1Slug = latestStories[0]?.slug ? `${prefix}/comunicados/${latestStories[0].slug}` : `${prefix}/comunicados`;
+
+const story2 = latestStories[1]?.titulo || (isEn ? 'A visual archive of Madrid nightlife' : 'Un archivo visual de la noche madrileña');
+const story2Slug = latestStories[1]?.slug ? `${prefix}/comunicados/${latestStories[1].slug}` : `${prefix}/comunicados`;
+
+// Images
+const heroImage = block.fondo
+  ? getAssetUrl(block.fondo, { quality: 90, format: 'webp' })
+  : 'https://images.unsplash.com/photo-1514306191717-452ec28c7814?q=80&w=1600&auto=format&fit=crop';
+
+const thumbImage = 'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?q=80&w=800&auto=format&fit=crop';
 ---
 
-<section class="relative w-full overflow-hidden rounded-3xl border border-white/10 bg-surface/80 p-8 sm:p-12 lg:p-16 shadow-2xl backdrop-blur-xl">
-  {/* Ambient Background Glows */}
-  <div class="pointer-events-none absolute -top-24 -left-24 h-96 w-96 rounded-full bg-brand-primary/20 blur-3xl"></div>
-  <div class="pointer-events-none absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-brand-electric/15 blur-3xl"></div>
-
-  {/* Background Media if available */}
-  {fondoUrl && (
-    <div class="absolute inset-0 -z-10 overflow-hidden opacity-25">
-      {block.tipo_fondo === 'video' ? (
-        <video autoplay loop muted playsinline class="h-full w-full object-cover">
-          <source src={fondoUrl} type="video/mp4" />
-        </video>
-      ) : (
-        <img src={fondoUrl} alt={block.titular} class="h-full w-full object-cover" />
-      )}
-      <div class="absolute inset-0 bg-gradient-to-t from-background via-surface/90 to-surface/40"></div>
-    </div>
-  )}
-
-  <div class="relative z-10 max-w-4xl space-y-8">
-    {/* Official Badge */}
-    <div class="inline-flex items-center gap-2 rounded-full border border-brand-primary/40 bg-brand-primary/10 px-4 py-1.5 backdrop-blur-md">
-      <span class="relative flex h-2.5 w-2.5">
-        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-primary opacity-75"></span>
-        <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-brand-primary"></span>
-      </span>
-      <span class="font-mono text-xs font-medium uppercase tracking-widest text-rose-300">
-        {t.hero.badge} • NocheMadrid
+<section class="w-full bg-paper border-b border-zinc-200 overflow-hidden">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12">
+    <!-- Top Wireframe Typography "LIVE" (Exact Reference 1) -->
+    <div class="relative w-full select-none pointer-events-none -mb-8 sm:-mb-14 lg:-mb-20 z-0">
+      <span class="font-display font-black text-7xl sm:text-9xl lg:text-[14rem] tracking-tight leading-none text-wireframe block opacity-90">
+        LIVE
       </span>
     </div>
 
-    {/* Main Headline */}
-    <h1 class="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.1] text-balance">
-      {block.titular}
-    </h1>
+    <!-- Main Panoramic Hero Visual Frame -->
+    <div class="relative z-10 w-full border border-zinc-200 bg-zinc-100">
+      <!-- Panoramic High-Res Editorial Photography -->
+      <div class="relative aspect-[16/9] sm:aspect-[21/9] lg:aspect-[24/10] w-full overflow-hidden">
+        <img
+          src={heroImage}
+          alt={block.titular || 'Madrid Live Press Portada'}
+          class="h-full w-full object-cover object-center filter grayscale-[15%] contrast-105"
+          loading="eager"
+        />
 
-    {/* Subtitle */}
-    {block.subtitulo && (
-      <p class="font-sans text-lg sm:text-xl text-zinc-300 max-w-2xl leading-relaxed">
-        {block.subtitulo}
-      </p>
-    )}
+        <!-- Live Vermilion Vertical Badge (Exact Reference 1) -->
+        <div class="absolute top-0 right-0 h-full w-7 sm:w-8 bg-vermilion text-white flex items-center justify-center select-none shadow-sm z-20">
+          <span class="writing-vertical font-mono text-[9px] sm:text-[10px] font-bold tracking-widest uppercase">
+            {isEn ? 'LIVE UPDATE 12:38' : 'ACTUALIZADO 12:38'}
+          </span>
+        </div>
+      </div>
 
-    {/* CTAs */}
-    <div class="flex flex-wrap items-center gap-4 pt-2">
-      <a
-        href={ctaLink}
-        class="inline-flex items-center gap-2 rounded-xl bg-brand-primary px-6 py-3.5 font-sans font-semibold text-white transition-all duration-300 hover:bg-brand-primary-hover hover:scale-[1.02] shadow-lg shadow-rose-600/30"
-      >
-        <span>{block.cta_texto || t.hero.viewAll}</span>
-        <ArrowRight class="h-4 w-4" />
-      </a>
+      <!-- Floating Overlapping Editorial Card (Exact Reference 1) -->
+      <div class="relative sm:absolute sm:bottom-0 sm:left-0 max-w-xl bg-paper border-t sm:border-t-0 sm:border-r border-b border-zinc-200 p-6 sm:p-8 lg:p-10 z-20 shadow-sharp">
+        <!-- Dateline / Index -->
+        <div class="font-mono text-xs font-semibold text-zinc-500 tracking-wider uppercase mb-3">
+          {isEn ? 'COVER / 001' : 'PORTADA / 001'}
+        </div>
 
-      <a
-        href={lang === 'en' ? '/en/recursos-prensa' : '/recursos-prensa'}
-        class="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-6 py-3.5 font-sans font-medium text-zinc-200 backdrop-blur-md transition-all duration-300 hover:bg-white/10 hover:border-white/25"
-      >
-        <DownloadCloud class="h-4 w-4 text-amber-400" />
-        <span>{t.nav.mediaKit}</span>
-      </a>
-    </div>
+        <!-- Main Headline -->
+        <h1 class="font-display text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-zinc-950 leading-[1.15] mb-4 text-balance">
+          {block.titular || 'La ciudad sucede en directo.'}
+        </h1>
 
-    {/* Priority Press Release Card */}
-    {nota && (
-      <div class="mt-8 pt-6 border-t border-white/10">
+        <!-- Subtitle -->
+        <p class="font-sans text-sm sm:text-base text-zinc-600 leading-relaxed mb-6">
+          {block.subtitulo || 'Una fuente abierta para contar la cultura, los espacios y las personas que mantienen Madrid en movimiento.'}
+        </p>
+
+        <!-- Read Story CTA -->
         <a
-          href={`${lang === 'en' ? '/en/comunicados/' : '/comunicados/'}${nota.slug}`}
-          class="group block rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 sm:p-5 transition-all duration-300 hover:border-amber-500/40 hover:bg-amber-500/10"
+          href={block.cta_enlace || `${prefix}/comunicados`}
+          class="inline-flex items-center gap-1.5 font-sans text-sm font-semibold text-zinc-950 hover:text-vermilion border-b border-zinc-950 hover:border-vermilion pb-0.5 transition-all group"
         >
-          <div class="flex items-start sm:items-center justify-between gap-4">
-            <div class="space-y-1.5">
-              <div class="flex items-center gap-2">
-                <span class="inline-flex items-center gap-1 rounded-md bg-amber-500/20 px-2 py-0.5 font-mono text-xs font-semibold text-amber-300">
-                  <Flame class="h-3.5 w-3.5" />
-                  {t.hero.liveNotice}
-                </span>
-                {nota.fecha_publicacion && (
-                  <span class="font-mono text-xs text-zinc-400">
-                    {new Date(nota.fecha_publicacion).toLocaleDateString(lang === 'en' ? 'en-US' : 'es-ES', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
-                    })}
-                  </span>
-                )}
-              </div>
-              <h4 class="font-display text-base sm:text-lg font-bold text-white group-hover:text-amber-300 transition-colors">
-                {nota.titulo}
-              </h4>
-            </div>
-            <div class="flex-shrink-0 self-center rounded-xl bg-white/5 p-2 text-zinc-400 group-hover:bg-amber-500/20 group-hover:text-amber-300 transition-all">
-              <ArrowRight class="h-5 w-5 transform group-hover:translate-x-1 transition-transform" />
-            </div>
-          </div>
+          <span>{block.cta_texto || (isEn ? 'Read the story' : 'Leer la historia')}</span>
+          <span class="transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform">↗</span>
         </a>
       </div>
-    )}
+    </div>
+
+    <!-- Lower 3-Column Editorial Grid (Exact Reference 1) -->
+    <div class="mt-8 sm:mt-12 grid grid-cols-1 lg:grid-cols-12 border-t border-zinc-200 pt-8 gap-8 items-start">
+      <!-- Column 1: Latest Headlines (~55% width) -->
+      <div class="lg:col-span-6 space-y-6">
+        <div class="font-mono text-xs font-semibold text-zinc-400 uppercase tracking-widest">
+          {isEn ? 'LATEST / 03' : 'ÚLTIMAS / 03'}
+        </div>
+
+        <div class="space-y-4">
+          <div class="pb-4 border-b border-zinc-200">
+            <a
+              href={story1Slug}
+              class="font-display text-lg sm:text-xl font-medium text-zinc-900 hover:text-vermilion transition-colors block"
+            >
+              {story1}
+            </a>
+          </div>
+
+          <div class="pb-4 border-b border-zinc-200">
+            <a
+              href={story2Slug}
+              class="font-display text-lg sm:text-xl font-medium text-zinc-900 hover:text-vermilion transition-colors block"
+            >
+              {story2}
+            </a>
+          </div>
+        </div>
+
+        <!-- Subline -->
+        <p class="font-sans text-xs text-zinc-500 pt-2">
+          {isEn ? '96 venues. One shared voice.' : '96 espacios. Una voz compartida.'}
+        </p>
+      </div>
+
+      <!-- Column 2: Architectural Thumbnail Photo (~25% width) -->
+      <div class="lg:col-span-3">
+        <div class="border border-zinc-200 aspect-[4/3] overflow-hidden bg-zinc-100">
+          <img
+            src={thumbImage}
+            alt="Madrid Arquitectura & Cultura"
+            class="h-full w-full object-cover filter grayscale-[20%] contrast-110"
+            loading="lazy"
+          />
+        </div>
+      </div>
+
+      <!-- Column 3: Featured Resource Box (~20% width) -->
+      <div class="lg:col-span-3 lg:border-l lg:border-zinc-200 lg:pl-8 flex flex-col justify-between h-full space-y-4">
+        <div>
+          <span class="font-mono text-[11px] font-semibold text-zinc-400 uppercase tracking-widest block mb-1">
+            {isEn ? 'FEATURED RESOURCE' : 'RECURSO DESTACADO'}
+          </span>
+          <h4 class="font-mono text-xs font-bold text-zinc-900 tracking-wider uppercase">
+            {isEn ? 'VISUAL DOCUMENTARY' : 'DOCUMENTAL VISUAL'}
+          </h4>
+        </div>
+
+        <div class="pt-6">
+          <a
+            href={`${prefix}/recursos-prensa`}
+            class="inline-flex items-center gap-2 font-mono text-[11px] font-bold tracking-wider text-zinc-900 hover:text-vermilion transition-colors uppercase border-b border-zinc-900 hover:border-vermilion pb-1"
+          >
+            <span>{isEn ? 'PRESS KIT · 24 IMAGES · 300 DPI ↓' : 'PRESS KIT · 24 IMÁGENES · 300 DPI ↓'}</span>
+          </a>
+        </div>
+      </div>
+    </div>
   </div>
 </section>

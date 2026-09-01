@@ -1,4 +1,5 @@
-import { createDirectus, rest, staticToken, readItems } from '@directus/sdk';
+import { createDirectus, rest, staticToken, readItems, readItem, createItem, updateItem } from '@directus/sdk';
+export { readItems, readItem, createItem, updateItem };
 
 export const DIRECTUS_URL = import.meta.env.DIRECTUS_URL || import.meta.env.PUBLIC_DIRECTUS_URL || 'https://mlpdirectus.116.203.118.1.sslip.io';
 export const DIRECTUS_TOKEN = import.meta.env.DIRECTUS_STATIC_TOKEN || 'mlp_secret_directus_token_2026';

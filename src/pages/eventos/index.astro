@@ -2,13 +2,9 @@
 import Layout from '@/layouts/Layout.astro';
 import { directus, getAssetUrl } from '@/lib/directus';
 import { readItems } from '@directus/sdk';
-import { useTranslations } from '@/lib/i18n';
 import type { Evento, Sala } from '@/lib/directus';
-import { Calendar, MapPin, ShieldCheck, ArrowRight, Clock } from 'lucide-astro';
 
 export const prerender = false;
-
-const t = useTranslations('es');
 
 let eventos: Evento[] = [];
 try {
@@ -37,94 +33,103 @@ try {
 ---
 
 <Layout
-  title="Agenda de Medios & Convocatorias de Prensa"
-  description="Convocatorias oficiales, ruedas de prensa y acceso a pases prioritarios de medios para eventos de NocheMadrid."
+  title="Agenda de Convocatorias y Ruedas de Prensa | Madrid Live Press"
+  description="Convocatorias institucionales, ruedas de prensa del sector del ocio y reserva de pases de prensa para periodistas."
   lang="es"
 >
-  <div class="space-y-10">
-    <div class="space-y-3 border-b border-white/10 pb-8">
-      <div class="inline-flex items-center gap-2 text-rose-400 font-mono text-xs uppercase tracking-widest font-semibold">
-        <Calendar class="h-4 w-4" />
-        <span>Convocatorias & Ruedas de Prensa</span>
+  <div class="w-full bg-paper">
+    <!-- Top Monospaced Breadcrumb -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4">
+      <div class="font-mono text-xs text-zinc-400 uppercase tracking-widest flex items-center gap-3">
+        <a href="/" class="hover:text-zinc-950 transition-colors">PORTADA</a>
+        <span class="text-zinc-300">/</span>
+        <span class="text-zinc-900 font-semibold">AGENDA DE PRENSA</span>
       </div>
-      <h1 class="font-display text-4xl sm:text-5xl font-extrabold text-white tracking-tight">
-        {t.events.title}
-      </h1>
-      <p class="font-sans text-lg text-zinc-300 max-w-3xl">
-        {t.events.subtitle}
-      </p>
     </div>
 
-    {eventos.length === 0 ? (
-      <div class="rounded-2xl border border-white/10 bg-surface/50 p-12 text-center text-zinc-400">
-        No hay convocatorias de prensa abiertas en este momento.
+    <!-- Header Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 border-b border-zinc-200">
+      <div class="space-y-3">
+        <div class="font-mono text-xs uppercase tracking-widest text-zinc-400 font-semibold">
+          CALENDARIO OFICIAL DE PRENSA · NOCHEMADRID
+        </div>
+        <h1 class="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-zinc-950 tracking-tight">
+          Convocatorias y Ruedas de Prensa
+        </h1>
+        <p class="font-sans text-base text-zinc-600 max-w-3xl leading-relaxed">
+          Calendario de convocatorias presenciales y telemáticas para redactores, fotoperiodistas y equipos de televisión acreditados.
+        </p>
       </div>
-    ) : (
-      <div class="space-y-6">
-        {eventos.map((evento) => {
-          const sala = evento.sala as Sala | undefined;
-          const cover = evento.imagen_portada
-            ? getAssetUrl(evento.imagen_portada, { width: 400, height: 260, format: 'webp' })
-            : null;
+    </div>
 
-          return (
-            <div class="group rounded-3xl border border-white/10 bg-surface/80 p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 hover:border-white/20 hover:shadow-2xl backdrop-blur-xl transition-all">
-              <div class="flex flex-col sm:flex-row items-start gap-6">
-                {/* Date Box */}
-                <div class="rounded-2xl border border-brand-primary/30 bg-brand-primary/10 p-4 text-center flex-shrink-0 w-24 sm:w-28 space-y-0.5">
-                  <span class="font-mono text-xs font-bold uppercase tracking-wider text-rose-400 block">
-                    {new Date(evento.fecha_evento).toLocaleDateString('es-ES', { month: 'short' })}
-                  </span>
-                  <span class="font-display text-3xl sm:text-4xl font-extrabold text-white block">
-                    {new Date(evento.fecha_evento).toLocaleDateString('es-ES', { day: 'numeric' })}
-                  </span>
-                  <span class="font-mono text-[11px] text-zinc-400 block">
-                    {new Date(evento.fecha_evento).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}h
-                  </span>
-                </div>
+    <!-- Events List -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="divide-y divide-zinc-200 border-t border-b border-zinc-200">
+        {eventos.length === 0 ? (
+          <div class="py-16 text-center text-zinc-500 font-sans text-sm">
+            No hay convocatorias de prensa abiertas en este momento.
+          </div>
+        ) : (
+          eventos.map((ev) => {
+            const sala = ev.sala as Sala | undefined;
+            const eventDate = ev.fecha_evento ? new Date(ev.fecha_evento) : new Date();
+            const dateStr = eventDate.toLocaleDateString('es-ES', {
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric',
+            }).toUpperCase();
 
-                {/* Info */}
-                <div class="space-y-2 max-w-xl">
-                  {evento.categoria && (
-                    <span class="rounded-md bg-white/5 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-amber-300">
-                      {evento.categoria}
-                    </span>
-                  )}
-                  <h2 class="font-display text-xl sm:text-2xl font-bold text-white group-hover:text-rose-400 transition-colors">
-                    {evento.titulo}
-                  </h2>
+            const timeStr = eventDate.toLocaleTimeString('es-ES', {
+              hour: '2-digit',
+              minute: '2-digit',
+            });
+
+            return (
+              <article class="py-6 sm:py-8 grid grid-cols-1 md:grid-cols-12 gap-6 items-start group hover:bg-canvas transition-colors px-2">
+                <!-- Date & Status (~25%) -->
+                <div class="md:col-span-3 font-mono text-xs text-zinc-500 space-y-1">
+                  <div class="text-zinc-950 font-bold tracking-wider">{dateStr} · {timeStr} CET</div>
                   {sala && (
-                    <div class="flex items-center gap-2 font-sans text-xs text-zinc-400">
-                      <MapPin class="h-3.5 w-3.5 text-zinc-500 flex-shrink-0" />
-                      <span>{sala.nombre} {sala.direccion ? `(${sala.direccion})` : ''}</span>
+                    <div class="text-zinc-700 font-medium pt-1">
+                      {sala.nombre}
                     </div>
                   )}
-                  {evento.descripcion && (
-                    <div class="font-sans text-xs text-zinc-400 line-clamp-2" set:html={evento.descripcion} />
+                  {sala?.direccion && (
+                    <div class="text-zinc-400 text-[11px]">
+                      {sala.direccion}
+                    </div>
                   )}
                 </div>
-              </div>
 
-              {/* Action */}
-              <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 self-stretch md:self-auto justify-end border-t md:border-t-0 border-white/10 pt-4 md:pt-0">
-                {evento.fecha_limite_acreditacion && (
-                  <div class="font-mono text-[11px] text-zinc-400 flex items-center gap-1.5">
-                    <Clock class="h-3.5 w-3.5 text-amber-400" />
-                    <span>Límite: {new Date(evento.fecha_limite_acreditacion).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</span>
+                <!-- Event Details (~65%) -->
+                <div class="md:col-span-7 space-y-2">
+                  <div class="font-mono text-[11px] text-zinc-500 uppercase tracking-widest">
+                    {ev.categoria || 'Convocatoria Oficial'}
                   </div>
-                )}
-                <a
-                  href={`/acreditaciones?evento=${evento.id}`}
-                  class="inline-flex items-center justify-center gap-2 rounded-xl bg-brand-primary px-5 py-3 font-sans font-semibold text-white hover:bg-brand-primary-hover transition-all w-full sm:w-auto shadow-md shadow-rose-950/40"
-                >
-                  <ShieldCheck class="h-4 w-4" />
-                  <span>Acreditarse</span>
-                </a>
-              </div>
-            </div>
-          );
-        })}
+                  <h2 class="font-display text-lg sm:text-xl font-bold text-zinc-950 leading-snug">
+                    {ev.titulo}
+                  </h2>
+                  {ev.descripcion && (
+                    <p class="font-sans text-sm text-zinc-600 line-clamp-2 leading-relaxed">
+                      {ev.descripcion}
+                    </p>
+                  )}
+                </div>
+
+                <!-- Accreditation Action (~10%) -->
+                <div class="md:col-span-2 flex md:justify-end items-center pt-2 md:pt-0">
+                  <a
+                    href={`/acreditaciones?evento=${ev.slug}`}
+                    class="font-mono text-xs uppercase tracking-wider font-semibold text-zinc-950 hover:text-vermilion transition-colors border-b border-zinc-950 hover:border-vermilion pb-0.5"
+                  >
+                    ACREDITARSE ↗
+                  </a>
+                </div>
+              </article>
+            );
+          })
+        )}
       </div>
-    )}
+    </div>
   </div>
 </Layout>

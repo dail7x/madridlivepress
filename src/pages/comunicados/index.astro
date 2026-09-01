@@ -2,13 +2,10 @@
 import Layout from '@/layouts/Layout.astro';
 import { directus, getAssetUrl } from '@/lib/directus';
 import { readItems } from '@directus/sdk';
-import { useTranslations } from '@/lib/i18n';
 import type { Comunicado, Categoria } from '@/lib/directus';
-import { FileText, Download, Calendar, ArrowRight, ChevronRight, Tag } from 'lucide-astro';
 
 export const prerender = false;
 
-const t = useTranslations('es');
 const catSlug = Astro.url.searchParams.get('cat');
 
 let comunicados: Comunicado[] = [];
@@ -38,6 +35,7 @@ try {
     directus.request(
       readItems('categorias' as any, {
         fields: ['id', 'nombre', 'slug', 'color'],
+        sort: ['nombre'],
       })
     ),
   ]);
@@ -48,157 +46,140 @@ try {
   console.error('Error in /comunicados:', e);
 }
 
-// Filter by category if param is present
 const filteredComunicados = catSlug
   ? comunicados.filter((c) => (c.categoria as Categoria)?.slug === catSlug)
   : comunicados;
 ---
 
 <Layout
-  title="Sala de Comunicados y Notas de Prensa Oficiales"
-  description="Archivo completo de notas de prensa, balances económicos e informes oficiales de NocheMadrid."
+  title="Notas de Prensa y Comunicados Oficiales | Madrid Live Press"
+  description="Archivo completo de comunicados oficiales, balances sectoriales y convocatorias de prensa de NocheMadrid."
   lang="es"
 >
-  <div class="space-y-10">
-    {/* Page Header */}
-    <div class="space-y-3 border-b border-white/10 pb-8">
-      <div class="inline-flex items-center gap-2 text-brand-primary font-mono text-xs uppercase tracking-widest font-semibold">
-        <FileText class="h-4 w-4" />
-        <span>Hemeroteca de Medios</span>
+  <div class="w-full bg-paper">
+    <!-- Top Monospaced Breadcrumb -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4">
+      <div class="font-mono text-xs text-zinc-400 uppercase tracking-widest flex items-center gap-3">
+        <a href="/" class="hover:text-zinc-950 transition-colors">PORTADA</a>
+        <span class="text-zinc-300">/</span>
+        <span class="text-zinc-900 font-semibold">NOTAS DE PRENSA</span>
       </div>
-      <h1 class="font-display text-4xl sm:text-5xl font-extrabold text-white tracking-tight">
-        {t.press.title}
-      </h1>
-      <p class="font-sans text-lg text-zinc-300 max-w-3xl">
-        {t.press.subtitle}
-      </p>
     </div>
 
-    {/* Category Filter Chips */}
-    {categorias.length > 0 && (
-      <div class="flex flex-wrap items-center gap-2 pb-2">
+    <!-- Page Header (Swiss Minimalist) -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 border-b border-zinc-200">
+      <div class="space-y-3">
+        <h1 class="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-zinc-950 tracking-tight">
+          Hemeroteca de Notas de Prensa
+        </h1>
+        <p class="font-sans text-base text-zinc-600 max-w-3xl leading-relaxed">
+          Servicio informativo para periodistas, redacciones y medios internacionales. Acceso a declaraciones oficiales, datos del sector del ocio y material audiovisual verificado.
+        </p>
+      </div>
+
+      <!-- Filter Buttons -->
+      <div class="flex flex-wrap gap-2 pt-8">
         <a
           href="/comunicados"
-          class:list={[
-            'rounded-full px-4 py-2 font-mono text-xs font-medium transition-all',
+          class={`font-mono text-xs uppercase px-3 py-1.5 border tracking-wider transition-colors ${
             !catSlug
-              ? 'bg-brand-primary text-white shadow-md shadow-rose-950/40'
-              : 'bg-surface/80 text-zinc-300 border border-white/10 hover:border-white/20 hover:text-white',
-          ]}
+              ? 'border-zinc-900 bg-zinc-900 text-white'
+              : 'border-zinc-200 hover:border-zinc-900 text-zinc-700 hover:text-zinc-950'
+          }`}
         >
-          {t.press.filterAll}
+          Todas las notas
         </a>
-        {categorias.map((cat) => {
-          const isSelected = catSlug === cat.slug;
+        {categorias.map((c) => {
+          const isActive = catSlug === c.slug;
           return (
             <a
-              href={`/comunicados?cat=${cat.slug}`}
-              class:list={[
-                'rounded-full px-4 py-2 font-mono text-xs font-medium transition-all',
-                isSelected
-                  ? 'bg-brand-primary text-white shadow-md shadow-rose-950/40'
-                  : 'bg-surface/80 text-zinc-300 border border-white/10 hover:border-white/20 hover:text-white',
-              ]}
+              href={`/comunicados?cat=${c.slug}`}
+              class={`font-mono text-xs uppercase px-3 py-1.5 border tracking-wider transition-colors ${
+                isActive
+                  ? 'border-zinc-900 bg-zinc-900 text-white'
+                  : 'border-zinc-200 hover:border-zinc-900 text-zinc-700 hover:text-zinc-950'
+              }`}
             >
-              {cat.nombre}
+              {c.nombre}
             </a>
           );
         })}
       </div>
-    )}
+    </div>
 
-    {/* List of Releases */}
-    {filteredComunicados.length === 0 ? (
-      <div class="rounded-2xl border border-white/10 bg-surface/50 p-12 text-center text-zinc-400">
-        No se encontraron comunicados para esta categoría.
-      </div>
-    ) : (
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {filteredComunicados.map((item) => {
-          const coverUrl = item.imagen_portada
-            ? getAssetUrl(item.imagen_portada, { width: 800, height: 450, quality: 80, format: 'webp' })
-            : null;
-          const pdfUrl = item.archivo_pdf ? getAssetUrl(item.archivo_pdf) : null;
-          const cat = item.categoria as Categoria | undefined;
-          const detailUrl = `/comunicados/${item.slug}`;
+    <!-- Press Releases List -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div class="divide-y divide-zinc-200 border-t border-b border-zinc-200">
+        {filteredComunicados.length === 0 ? (
+          <div class="py-16 text-center text-zinc-500 font-sans text-sm">
+            No se han encontrado notas de prensa en esta categoría.
+          </div>
+        ) : (
+          filteredComunicados.map((item, index) => {
+            const cat = item.categoria as Categoria | undefined;
+            const pdf = item.archivo_pdf ? getAssetUrl(item.archivo_pdf) : null;
+            const pubDate = item.fecha_publicacion ? new Date(item.fecha_publicacion) : new Date();
+            const dateFormatted = pubDate.toLocaleDateString('es-ES', {
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric',
+            }).toUpperCase();
 
-          return (
-            <article class="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-white/10 bg-surface/80 transition-all duration-300 hover:border-white/20 hover:shadow-2xl hover:shadow-rose-950/20 backdrop-blur-md">
-              <div>
-                <a href={detailUrl} class="relative block aspect-[16/9] w-full overflow-hidden bg-zinc-900">
-                  {coverUrl ? (
-                    <img
-                      src={coverUrl}
-                      alt={item.titulo}
-                      class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div class="flex h-full w-full items-center justify-center bg-gradient-to-br from-surface to-background p-6">
-                      <span class="font-mono text-xs uppercase tracking-widest text-zinc-500">Madrid Live Press</span>
+            const npCode = `NP-04${String(item.id || index + 1).padStart(2, '0')}`;
+
+            return (
+              <article class="py-6 sm:py-8 grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-8 items-start group hover:bg-canvas transition-colors px-2">
+                <!-- Metadata (~25%) -->
+                <div class="md:col-span-3 font-mono text-xs text-zinc-500 space-y-1">
+                  <div class="text-zinc-950 font-bold tracking-wider">{dateFormatted}</div>
+                  <div class="text-zinc-400">{npCode}</div>
+                  {cat && (
+                    <div class="text-zinc-600 uppercase tracking-widest pt-1 font-semibold">
+                      {cat.nombre}
                     </div>
                   )}
-                  <div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent opacity-60"></div>
-                  {cat && (
-                    <span class="absolute top-3 left-3 rounded-md bg-black/70 px-2.5 py-1 font-mono text-[11px] font-semibold text-rose-300 border border-white/10 backdrop-blur-md">
-                      {cat.nombre}
-                    </span>
-                  )}
-                </a>
+                </div>
 
-                <div class="p-6 space-y-3">
-                  <div class="flex items-center gap-2 font-mono text-xs text-zinc-400">
-                    <Calendar class="h-3.5 w-3.5 text-zinc-500" />
-                    <time datetime={item.fecha_publicacion}>
-                      {new Date(item.fecha_publicacion || Date.now()).toLocaleDateString('es-ES', {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric',
-                      })}
-                    </time>
-                    <span class="text-zinc-600">•</span>
-                    <span>Madrid</span>
-                  </div>
-
-                  <h2 class="font-display text-xl font-bold text-white leading-snug group-hover:text-rose-400 transition-colors">
-                    <a href={detailUrl}>{item.titulo}</a>
+                <!-- Title & Bajada (~65%) -->
+                <div class="md:col-span-7 space-y-2">
+                  <h2 class="font-display text-lg sm:text-xl font-semibold text-zinc-950 leading-snug group-hover:text-vermilion transition-colors">
+                    <a href={`/comunicados/${item.slug}`}>
+                      {item.titulo}
+                    </a>
                   </h2>
 
                   {item.bajada && (
-                    <p class="font-sans text-sm text-zinc-400 line-clamp-3 leading-relaxed">
+                    <p class="font-sans text-sm text-zinc-600 line-clamp-2 leading-relaxed">
                       {item.bajada}
                     </p>
                   )}
                 </div>
-              </div>
 
-              <div class="flex items-center justify-between border-t border-white/10 px-6 py-4 bg-black/20">
-                <a
-                  href={detailUrl}
-                  class="inline-flex items-center gap-1.5 font-mono text-xs font-semibold text-zinc-300 hover:text-white transition-colors"
-                >
-                  <span>{t.press.readMore}</span>
-                  <ChevronRight class="h-3.5 w-3.5" />
-                </a>
+                <!-- Action (~10%) -->
+                <div class="md:col-span-2 flex md:justify-end items-center gap-3 pt-2 md:pt-0 font-sans text-xs">
+                  {pdf && (
+                    <a
+                      href={pdf}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="font-mono text-[11px] uppercase tracking-wider text-zinc-500 hover:text-vermilion transition-colors"
+                    >
+                      PDF ↓
+                    </a>
+                  )}
 
-                {pdfUrl && (
                   <a
-                    href={pdfUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    download
-                    class="inline-flex items-center gap-1 rounded-md bg-white/5 px-2.5 py-1 font-mono text-xs font-medium text-amber-300 border border-amber-400/20 hover:bg-amber-400/10 transition-colors"
-                    title={t.press.downloadPdf}
+                    href={`/comunicados/${item.slug}`}
+                    class="font-sans text-sm font-semibold text-zinc-900 group-hover:text-vermilion transition-colors"
                   >
-                    <Download class="h-3 w-3" />
-                    <span>PDF</span>
+                    ↗
                   </a>
-                )}
-              </div>
-            </article>
-          );
-        })}
+                </div>
+              </article>
+            );
+          })
+        )}
       </div>
-    )}
+    </div>
   </div>
 </Layout>
