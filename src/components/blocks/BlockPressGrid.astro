@@ -34,6 +34,7 @@ try {
           'slug',
           'titulo',
           'bajada',
+          'imagen_url_externa',
           'imagen_portada.*',
           'archivo_pdf.*',
           'tags',
@@ -108,6 +109,9 @@ try {
       ) : (
         comunicados.map((item, index) => {
           const cat = item.categoria as Categoria | undefined;
+          const coverImg = (item as any).imagen_url_externa || (item.imagen_portada
+            ? getAssetUrl(item.imagen_portada, { width: 600, height: 400, format: 'webp' })
+            : null);
           const pdf = item.archivo_pdf ? getAssetUrl(item.archivo_pdf) : null;
           const pubDate = item.fecha_publicacion ? new Date(item.fecha_publicacion) : new Date();
           const dateFormatted = pubDate.toLocaleDateString(isEn ? 'en-US' : 'es-ES', {

@@ -1,0 +1,113 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { directus, getAssetUrl } from '@/lib/directus';
+import { readItems } from '@directus/sdk';
+import type { Sala } from '@/lib/directus';
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+
+let item: Sala | null = null;
+try {
+  const res = await directus.request(
+    readItems('salas' as any, {
+      filter: { slug: { _eq: slug }, status: { _eq: 'published' } },
+      limit: 1,
+      fields: [
+        'id',
+        'status',
+        'nombre',
+        'slug',
+        'direccion',
+        'distrito',
+        'tipo_espacio',
+        'aforo',
+        'descripcion',
+        'imagen_portada.*',
+        'sitio_web',
+        'instagram_url',
+        'contacto_prensa_nombre',
+        'contacto_prensa_email',
+      ],
+    })
+  );
+  item = ((res as any) && (res as any)[0]) || null;
+} catch (e) {}
+
+if (!item) {
+  return Astro.redirect('/en/404');
+}
+
+const photoUrl = item.imagen_portada
+  ? getAssetUrl(item.imagen_portada, { quality: 90, format: 'webp' })
+  : 'https://images.unsplash.com/photo-1514306191717-452ec28c7814?q=80&w=1400&auto=format&fit=crop';
+const instaUrl = (item as any).instagram_url || 'https://www.instagram.com/nochemadrid/';
+---
+
+<Layout
+  title={`${item.nombre} | Official Directory | Madrid Live Press`}
+  description={item.descripcion || `Official technical specifications of ${item.nombre}, associated space of NocheMadrid.`}
+  image={photoUrl}
+  lang="en"
+>
+  <article class="w-full bg-paper pb-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-4">
+      <div class="font-mono text-[11px] sm:text-xs text-zinc-600 uppercase tracking-widest flex items-center gap-2">
+        <a href="/en/directorio" class="hover:text-zinc-950">DIRECTORY</a>
+        <span class="text-zinc-300">/</span>
+        <span class="text-zinc-700">{item.distrito || 'MADRID'}</span>
+        <span class="text-zinc-300">/</span>
+        <span class="text-zinc-950 font-bold">{item.nombre}</span>
+      </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div class="lg:col-span-7 space-y-6">
+          <div class="font-mono text-xs text-zinc-500 uppercase tracking-wider">
+            <span>OFFICIAL ASSOCIATE NOCHEMADRID ✓</span>
+          </div>
+
+          <h1 class="font-display text-3xl sm:text-5xl font-bold text-zinc-950 leading-tight">
+            {item.nombre}
+          </h1>
+
+          <p class="font-sans text-base sm:text-lg text-zinc-700 leading-relaxed">
+            {item.descripcion}
+          </p>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 p-4 border border-zinc-200 bg-canvas font-mono text-xs">
+            <div>
+              <span class="text-zinc-400 block text-[10px] uppercase">Certified Capacity</span>
+              <span class="font-bold text-zinc-950 text-sm">{item.aforo ? `${item.aforo} PAX` : 'Available on request'}</span>
+            </div>
+            <div>
+              <span class="text-zinc-400 block text-[10px] uppercase">District</span>
+              <span class="font-bold text-zinc-950 text-sm">{item.distrito || 'Centro'}</span>
+            </div>
+            <div>
+              <span class="text-zinc-400 block text-[10px] uppercase">Address</span>
+              <span class="font-bold text-zinc-950 text-sm">{item.direccion || 'Madrid'}</span>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-4 pt-2 font-mono text-xs">
+            <a href={instaUrl} target="_blank" rel="noopener noreferrer" class="font-bold text-zinc-950 hover:text-vermilion border border-zinc-200 px-3 py-1.5">
+              Instagram Official ↗
+            </a>
+            <a href="/en/acreditaciones" class="bg-zinc-950 hover:bg-vermilion text-white font-bold py-3 px-6 uppercase tracking-wider">
+              Request Press Pass ↗
+            </a>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 relative">
+          <div class="border border-zinc-200 aspect-[4/3] w-full overflow-hidden bg-zinc-100">
+            <img src={photoUrl} alt={item.nombre} class="w-full h-full object-cover filter contrast-105" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>
+</Layout>

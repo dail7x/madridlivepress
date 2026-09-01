@@ -1,0 +1,460 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import WireframeHeader from '@/components/ui/WireframeHeader.astro';
+import { directus, getAssetUrl } from '@/lib/directus';
+import { readItems } from '@directus/sdk';
+import type { Comunicado, Categoria } from '@/lib/directus';
+
+export const prerender = false;
+
+let items: Comunicado[] = [];
+try {
+  const res = await directus.request(
+    readItems('comunicados' as any, {
+      filter: { status: { _eq: 'published' } },
+      sort: ['-fecha_publicacion', '-id'],
+      limit: 50,
+      fields: [
+        'id',
+        'status',
+        'fecha_publicacion',
+        'slug',
+        'titulo',
+        'bajada',
+        'imagen_portada.*',
+        'archivo_pdf.*',
+        'tags',
+        { categoria: ['id', 'nombre', 'slug', 'color'] },
+      ],
+    })
+  );
+  items = (res as any) || [];
+} catch (e) {
+  console.error('Error loading /archivo:', e);
+}
+
+const DEFAULT_THUMBS = [
+  'https://images.unsplash.com/photo-1514306191717-452ec28c7814?q=80&w=600&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?q=80&w=600&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=600&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?q=80&w=600&auto=format&fit=crop',
+];
+---
+
+<Layout
+  title="Archivo Documental e Histórico | Madrid Live Press"
+  description="Todo lo publicado. Todo lo necesario para volver a contarlo. Repositorio integral de notas de prensa, fotografías, informes y dossiers de la noche y la cultura de Madrid."
+  lang="es"
+>
+  <div class="w-full bg-paper">
+    <!-- Top Wireframe Header "ARCHIVO" (Clean Baseline Cut) -->
+    <WireframeHeader
+      title="ARCHIVO"
+      subtitle="Todo lo publicado. Todo lo necesario para volver a contarlo."
+      badge="1.284 ELEMENTOS"
+      updatedTime="2023—2026"
+    />
+
+    <!-- Main Content & Filter Matrix -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- Left 9 Columns: Search, Filters, Timeline & Table -->
+        <div class="lg:col-span-9 space-y-6">
+          <!-- Universal Search Bar with Cmd+K -->
+          <div class="relative border-b-2 border-zinc-950 pb-2 flex items-center justify-between gap-4">
+            <input
+              id="archiveSearchInput"
+              type="text"
+              placeholder="Buscar por tema, sala, fecha o protagonista..."
+              class="w-full bg-transparent font-sans text-lg sm:text-xl text-zinc-950 placeholder:text-zinc-400 focus:outline-none"
+            />
+            <div class="flex items-center gap-2 flex-shrink-0 text-zinc-400 font-mono text-xs">
+              <svg class="w-5 h-5 text-zinc-800" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+              <kbd class="hidden sm:inline-block border border-zinc-300 rounded px-1.5 py-0.5 text-[10px] text-zinc-500 bg-canvas font-mono">
+                ⌘K
+              </kbd>
+            </div>
+          </div>
+
+          <!-- Filter Matrix Rows -->
+          <div class="space-y-3 font-mono text-xs border-b border-zinc-200 pb-6" id="filtersMatrix">
+            <!-- Row 1: TIPO -->
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-3 flex-wrap" id="typeFiltersGroup">
+                <span class="text-zinc-400 font-bold uppercase w-16">TIPO:</span>
+                <button type="button" class="type-filter-btn flex items-center gap-1 font-bold text-zinc-950 is-active" data-type="all">
+                  <span>Todo</span>
+                  <span class="dot w-1.5 h-1.5 rounded-full bg-vermilion inline-block"></span>
+                </button>
+                <span class="text-zinc-300">|</span>
+                <button type="button" class="type-filter-btn text-zinc-600 hover:text-zinc-950" data-type="nota">Notas de prensa</button>
+                <span class="text-zinc-300">|</span>
+                <button type="button" class="type-filter-btn text-zinc-600 hover:text-zinc-950" data-type="foto">Fotografías</button>
+                <span class="text-zinc-300">|</span>
+                <button type="button" class="type-filter-btn text-zinc-600 hover:text-zinc-950" data-type="informe">Informes</button>
+                <span class="text-zinc-300">|</span>
+                <button type="button" class="type-filter-btn text-zinc-600 hover:text-zinc-950" data-type="dossier">Dossiers</button>
+              </div>
+
+              <button id="clearFiltersBtn" type="button" class="text-zinc-400 hover:text-zinc-950 text-[11px] underline">
+                Limpiar filtros
+              </button>
+            </div>
+
+            <!-- Row 2: FECHA -->
+            <div class="flex items-center gap-3 flex-wrap" id="yearFiltersGroup">
+              <span class="text-zinc-400 font-bold uppercase w-16">FECHA:</span>
+              <button type="button" class="year-filter-btn flex items-center gap-1 font-bold text-zinc-950 is-active" data-year="all">
+                <span>2026</span>
+                <span class="dot w-1.5 h-1.5 rounded-full bg-vermilion inline-block"></span>
+              </button>
+              <span class="text-zinc-300">|</span>
+              <button type="button" class="year-filter-btn text-zinc-600 hover:text-zinc-950" data-year="2025">2025</button>
+              <span class="text-zinc-300">|</span>
+              <button type="button" class="year-filter-btn text-zinc-600 hover:text-zinc-950" data-year="2024">2024</button>
+              <span class="text-zinc-300">|</span>
+              <button type="button" class="year-filter-btn text-zinc-600 hover:text-zinc-950" data-year="2023">2023</button>
+            </div>
+
+            <!-- Row 3: SECTOR -->
+            <div class="flex items-center gap-3 flex-wrap" id="sectorFiltersGroup">
+              <span class="text-zinc-400 font-bold uppercase w-16">SECTOR:</span>
+              <button type="button" class="sector-filter-btn flex items-center gap-1 font-bold text-zinc-950 is-active" data-sector="all">
+                <span>Todos</span>
+                <span class="dot w-1.5 h-1.5 rounded-full bg-vermilion inline-block"></span>
+              </button>
+              <span class="text-zinc-300">|</span>
+              <button type="button" class="sector-filter-btn text-zinc-600 hover:text-zinc-950" data-sector="artes">Artes escénicas</button>
+              <span class="text-zinc-300">|</span>
+              <button type="button" class="sector-filter-btn text-zinc-600 hover:text-zinc-950" data-sector="musica">Música</button>
+              <span class="text-zinc-300">|</span>
+              <button type="button" class="sector-filter-btn text-zinc-600 hover:text-zinc-950" data-sector="espacios">Espacios</button>
+              <span class="text-zinc-300">|</span>
+              <button type="button" class="sector-filter-btn text-zinc-600 hover:text-zinc-950" data-sector="institucional">Institucional</button>
+            </div>
+
+            <!-- Row 4: IDIOMA -->
+            <div class="flex items-center gap-3 flex-wrap" id="langFiltersGroup">
+              <span class="text-zinc-400 font-bold uppercase w-16">IDIOMA:</span>
+              <button type="button" class="lang-filter-btn flex items-center gap-1 font-bold text-zinc-950 is-active" data-lang="all">
+                <span>ES</span>
+                <span class="dot w-1.5 h-1.5 rounded-full bg-vermilion inline-block"></span>
+              </button>
+              <span class="text-zinc-300">|</span>
+              <button type="button" class="lang-filter-btn text-zinc-600 hover:text-zinc-950" data-lang="en">EN</button>
+            </div>
+          </div>
+
+          <!-- Monthly Timeline Bar -->
+          <div class="relative border-b border-zinc-200 pb-3 flex items-center justify-between overflow-x-auto no-scrollbar font-mono text-xs text-zinc-600 select-none">
+            <div class="flex items-center gap-5 sm:gap-8">
+              <span class="font-display font-bold text-base text-zinc-950">2026</span>
+              <div class="relative flex flex-col items-center">
+                <span class="text-zinc-950 font-bold cursor-pointer hover:text-vermilion">SEP</span>
+                <div class="absolute -bottom-3 w-4 h-0.5 bg-vermilion"></div>
+              </div>
+              <span class="cursor-pointer hover:text-zinc-950">AGO</span>
+              <span class="cursor-pointer hover:text-zinc-950">JUL</span>
+              <span class="cursor-pointer hover:text-zinc-950">JUN</span>
+              <span class="cursor-pointer hover:text-zinc-950">MAY</span>
+              <span class="cursor-pointer hover:text-zinc-950">ABR</span>
+              <span class="cursor-pointer hover:text-zinc-950">MAR</span>
+              <span class="cursor-pointer hover:text-zinc-950">FEB</span>
+              <span class="cursor-pointer hover:text-zinc-950">ENE</span>
+            </div>
+
+            <div class="pl-4 flex items-center gap-1 text-zinc-400 hover:text-zinc-950 cursor-pointer">
+              <span>2025</span>
+              <span>→</span>
+            </div>
+          </div>
+
+          <!-- Archive Tabular Table with Expandable Accordion Rows -->
+          <div class="w-full">
+            <!-- Table Header -->
+            <div class="grid grid-cols-12 gap-4 pb-2 border-b border-zinc-200 font-mono text-[10px] sm:text-[11px] uppercase tracking-wider text-zinc-400 font-bold">
+              <div class="col-span-2">FECHA</div>
+              <div class="col-span-2">TIPO</div>
+              <div class="col-span-5">TÍTULO</div>
+              <div class="col-span-2">RECURSOS</div>
+              <div class="col-span-1 text-right">IDIOMA</div>
+            </div>
+
+            <!-- Table Rows -->
+            <div class="divide-y divide-zinc-200 font-mono text-xs" id="archiveRowsContainer">
+              {items.map((item, idx) => {
+                const dateObj = new Date(item.fecha_publicacion);
+                const dayMonth = dateObj.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }).toUpperCase();
+                const year = String(dateObj.getFullYear());
+                const cat = item.categoria as Categoria | undefined;
+                const catSlug = cat?.slug || 'general';
+
+                const typeKeys = ['nota', 'informe', 'foto', 'dossier'];
+                const typeLabels = ['NOTA DE PRENSA', 'INFORME', 'FOTOGRAFÍAS', 'DOSSIER'];
+                const typeKey = typeKeys[idx % 4];
+                const typeLabel = typeLabels[idx % 4];
+                const resourcesLabel = idx % 2 === 0 ? 'PDF · 18 FOTOS' : 'PDF';
+                const thumb = item.imagen_portada ? getAssetUrl(item.imagen_portada, { width: 450, height: 260, format: 'webp' }) : DEFAULT_THUMBS[idx % 4];
+                const rowId = `archive-row-${idx}`;
+
+                return (
+                  <div
+                    class="archive-row-item py-4 group hover:bg-canvas transition-colors"
+                    data-search={`${item.titulo} ${item.bajada || ''} ${typeLabel}`.toLowerCase()}
+                    data-type={typeKey}
+                    data-year={year}
+                    data-sector={catSlug.includes('artes') ? 'artes' : catSlug.includes('musica') || catSlug.includes('conciertos') ? 'musica' : catSlug.includes('espacio') ? 'espacios' : 'institucional'}
+                    data-lang="es"
+                  >
+                    <!-- Main Row Trigger -->
+                    <div class="grid grid-cols-12 gap-4 items-center cursor-pointer row-trigger-btn" data-target={rowId}>
+                      <div class="col-span-2 text-zinc-900 font-bold">{dayMonth}</div>
+                      <div class="col-span-2 text-zinc-500 uppercase text-[11px]">{typeLabel}</div>
+                      <div class="col-span-5 font-sans font-medium text-sm text-zinc-950 group-hover:text-vermilion transition-colors">
+                        {item.titulo}
+                      </div>
+                      <div class="col-span-2 text-zinc-500 text-[11px]">{resourcesLabel}</div>
+                      <div class="col-span-1 flex items-center justify-end gap-2 text-zinc-500 text-[11px]">
+                        <span>ES/EN</span>
+                        <span class="expand-icon text-zinc-400 group-hover:text-zinc-950 transition-transform">↓</span>
+                      </div>
+                    </div>
+
+                    <!-- Expandable Drawer Panel -->
+                    <div id={rowId} class="hidden pt-4 mt-4 border-t border-zinc-200">
+                      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 bg-canvas p-4 border border-zinc-200">
+                        <!-- Preview Image -->
+                        <div class="md:col-span-4 aspect-[16/9] overflow-hidden bg-zinc-100 border border-zinc-200">
+                          <img src={thumb} alt={item.titulo} class="w-full h-full object-cover filter contrast-105" />
+                        </div>
+
+                        <!-- Summary & Direct Actions -->
+                        <div class="md:col-span-8 flex flex-col justify-between space-y-3 font-sans">
+                          <div>
+                            <span class="font-mono text-[10px] text-zinc-400 uppercase tracking-widest block mb-1">Resumen</span>
+                            <p class="text-xs sm:text-sm text-zinc-700 leading-relaxed">
+                              {item.bajada || 'Información verificada, declaraciones oficiales y recursos descargables para medios.'}
+                            </p>
+                          </div>
+
+                          <div class="flex items-center gap-6 pt-2 font-mono text-xs">
+                            <a href={`/comunicados/${item.slug}`} class="font-bold text-zinc-950 hover:text-vermilion inline-flex items-center gap-1">
+                              <span>Ver ficha</span>
+                              <span>↗</span>
+                            </a>
+                            <a href={`/comunicados/${item.slug}`} class="font-bold text-zinc-950 hover:text-vermilion inline-flex items-center gap-1">
+                              <span>Descargar PDF</span>
+                              <span>↓</span>
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <!-- Empty State -->
+            <div id="noArchiveResults" class="hidden py-12 text-center space-y-2">
+              <p class="font-display font-bold text-base text-zinc-900">No se encontraron elementos en el archivo con estos filtros.</p>
+              <button id="resetArchiveFiltersBtn" class="font-mono text-xs text-vermilion underline">Restablecer filtros</button>
+            </div>
+
+            <!-- Footer Pagination Indicator -->
+            <div class="pt-8 border-t border-zinc-200 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs text-zinc-500">
+              <span id="archiveCountText">Mostrando {items.length} de 1.284 elementos</span>
+              <button type="button" class="font-bold text-zinc-950 hover:text-vermilion inline-flex items-center gap-1">
+                <span>Cargar 24 más</span>
+                <span>↓</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right 3 Columns: Metrics Sidebar & Help -->
+        <div class="lg:col-span-3 space-y-8 lg:border-l lg:border-zinc-200 lg:pl-8">
+          <!-- Archive Stats -->
+          <div class="space-y-6">
+            <h4 class="font-mono text-xs font-bold text-zinc-400 uppercase tracking-widest border-b border-zinc-200 pb-2">
+              ARCHIVO EN CIFRAS
+            </h4>
+
+            <div class="space-y-6 font-mono">
+              <div class="border-b border-zinc-100 pb-4">
+                <div class="font-display text-4xl sm:text-5xl font-bold text-zinc-950 leading-none">426</div>
+                <div class="text-xs text-zinc-500 uppercase tracking-widest mt-1">NOTAS</div>
+              </div>
+
+              <div class="border-b border-zinc-100 pb-4">
+                <div class="font-display text-4xl sm:text-5xl font-bold text-zinc-950 leading-none">8.4K</div>
+                <div class="text-xs text-zinc-500 uppercase tracking-widest mt-1">FOTOS</div>
+              </div>
+
+              <div class="pb-2">
+                <div class="font-display text-4xl sm:text-5xl font-bold text-zinc-950 leading-none">38</div>
+                <div class="text-xs text-zinc-500 uppercase tracking-widest mt-1">INFORMES</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Help Box -->
+          <div class="border border-zinc-200 p-6 bg-canvas space-y-3">
+            <p class="font-sans text-xs sm:text-sm text-zinc-800 font-medium">
+              ¿No encuentras algo?
+            </p>
+            <a
+              href="mailto:prensa@nochemadrid.org"
+              class="font-mono text-xs font-bold text-zinc-950 hover:text-vermilion inline-flex items-center gap-1 uppercase tracking-wider"
+            >
+              <span>Contacto de prensa</span>
+              <span>↗</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Client Script (Runs on page load & View Transitions) -->
+  <script is:inline>
+    function setupArchive() {
+      const searchInput = document.getElementById('archiveSearchInput');
+      const rows = document.querySelectorAll('.archive-row-item');
+      const countText = document.getElementById('archiveCountText');
+      const noResults = document.getElementById('noArchiveResults');
+
+      let selectedType = 'all';
+      let selectedYear = 'all';
+      let selectedSector = 'all';
+      let selectedLang = 'all';
+
+      function applyFilters() {
+        const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
+        let visibleCount = 0;
+
+        rows.forEach((row) => {
+          const text = row.getAttribute('data-search') || '';
+          const rowType = row.getAttribute('data-type') || '';
+          const rowYear = row.getAttribute('data-year') || '';
+          const rowSector = row.getAttribute('data-sector') || '';
+          const rowLang = row.getAttribute('data-lang') || '';
+
+          const matchesSearch = !query || text.includes(query);
+          const matchesType = selectedType === 'all' || rowType === selectedType;
+          const matchesYear = selectedYear === 'all' || rowYear === selectedYear;
+          const matchesSector = selectedSector === 'all' || rowSector.includes(selectedSector);
+          const matchesLang = selectedLang === 'all' || rowLang === selectedLang;
+
+          if (matchesSearch && matchesType && matchesYear && matchesSector && matchesLang) {
+            row.style.display = 'block';
+            visibleCount++;
+          } else {
+            row.style.display = 'none';
+          }
+        });
+
+        if (countText) {
+          countText.textContent = `Mostrando ${visibleCount} de 1.284 elementos`;
+        }
+
+        if (noResults) {
+          noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+      }
+
+      // Hook Button Groups
+      function setupButtonGroup(selector, onSelect) {
+        const btns = document.querySelectorAll(selector);
+        btns.forEach((btn) => {
+          btn.addEventListener('click', () => {
+            btns.forEach((b) => {
+              b.classList.remove('font-bold', 'text-zinc-950', 'is-active');
+              b.classList.add('text-zinc-600');
+              const dot = b.querySelector('.dot');
+              if (dot) dot.remove();
+            });
+
+            btn.classList.add('font-bold', 'text-zinc-950', 'is-active');
+            btn.classList.remove('text-zinc-600');
+            if (!btn.querySelector('.dot')) {
+              const dot = document.createElement('span');
+              dot.className = 'dot w-1.5 h-1.5 rounded-full bg-vermilion inline-block';
+              btn.appendChild(dot);
+            }
+
+            const val = btn.getAttribute('data-type') || btn.getAttribute('data-year') || btn.getAttribute('data-sector') || btn.getAttribute('data-lang') || 'all';
+            onSelect(val);
+            applyFilters();
+          });
+        });
+      }
+
+      setupButtonGroup('.type-filter-btn', (v) => { selectedType = v; });
+      setupButtonGroup('.year-filter-btn', (v) => { selectedYear = v; });
+      setupButtonGroup('.sector-filter-btn', (v) => { selectedSector = v; });
+      setupButtonGroup('.lang-filter-btn', (v) => { selectedLang = v; });
+
+      searchInput?.addEventListener('input', applyFilters);
+
+      // Keyboard Shortcut Cmd+K
+      window.addEventListener('keydown', (e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+          e.preventDefault();
+          searchInput?.focus();
+        }
+      });
+
+      // Expandable Accordions
+      const triggers = document.querySelectorAll('.row-trigger-btn');
+      triggers.forEach((trigger) => {
+        trigger.addEventListener('click', () => {
+          const targetId = trigger.getAttribute('data-target');
+          if (!targetId) return;
+          const panel = document.getElementById(targetId);
+          const icon = trigger.querySelector('.expand-icon');
+          if (panel) {
+            const isHidden = panel.classList.contains('hidden');
+            panel.classList.toggle('hidden');
+            if (icon) {
+              icon.textContent = isHidden ? '↑' : '↓';
+            }
+          }
+        });
+      });
+
+      // Reset / Clear
+      const clearBtn = document.getElementById('clearFiltersBtn');
+      const resetBtn = document.getElementById('resetArchiveFiltersBtn');
+      const resetAll = () => {
+        if (searchInput) searchInput.value = '';
+        selectedType = 'all';
+        selectedYear = 'all';
+        selectedSector = 'all';
+        selectedLang = 'all';
+        document.querySelectorAll('.type-filter-btn, .year-filter-btn, .sector-filter-btn, .lang-filter-btn').forEach((b) => {
+          b.classList.remove('font-bold', 'text-zinc-950', 'is-active');
+          b.classList.add('text-zinc-600');
+          const dot = b.querySelector('.dot');
+          if (dot) dot.remove();
+        });
+        document.querySelectorAll('.type-filter-btn[data-type="all"], .year-filter-btn[data-year="all"], .sector-filter-btn[data-sector="all"], .lang-filter-btn[data-lang="all"]').forEach((b) => {
+          b.classList.add('font-bold', 'text-zinc-950', 'is-active');
+          b.classList.remove('text-zinc-600');
+          const dot = document.createElement('span');
+          dot.className = 'dot w-1.5 h-1.5 rounded-full bg-vermilion inline-block';
+          b.appendChild(dot);
+        });
+        applyFilters();
+      };
+      clearBtn?.addEventListener('click', resetAll);
+      resetBtn?.addEventListener('click', resetAll);
+    }
+
+    document.addEventListener('astro:page-load', setupArchive);
+    setupArchive();
+  </script>
+</Layout>

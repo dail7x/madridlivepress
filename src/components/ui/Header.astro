@@ -9,43 +9,54 @@ const isEn = lang === 'en' || currentPath.startsWith('/en');
 const prefix = isEn ? '/en' : '';
 
 const navItems = [
-  { label: isEn ? 'News' : 'Noticias', href: `${prefix}/comunicados` },
-  { label: isEn ? 'Resources' : 'Recursos', href: `${prefix}/recursos-prensa` },
-  { label: isEn ? 'Venues' : 'Archivo', href: `${prefix}/salas` },
-  { label: isEn ? 'The Sector' : 'Sobre el sector', href: `${prefix}/eventos` },
+  { label: isEn ? 'NEWS' : 'NOTICIAS', href: `${prefix}/comunicados` },
+  { label: isEn ? 'COVERAGE' : 'COBERTURA', href: `${prefix}/cobertura` },
+  { label: isEn ? 'PRESS KITS' : 'PRESS KITS', href: `${prefix}/press-kits` },
+  { label: isEn ? 'DIRECTORY' : 'DIRECTORIO', href: `${prefix}/directorio` },
+  { label: isEn ? 'ARCHIVE' : 'ARCHIVO', href: `${prefix}/archivo` },
+  { label: isEn ? 'ABOUT THE SECTOR' : 'SOBRE EL SECTOR', href: `${prefix}/sobre-el-sector` },
 ];
 ---
 
-<header class="w-full bg-paper border-b border-zinc-200 z-20">
+<header class="w-full bg-paper border-b border-zinc-200 z-20 sticky top-0 md:relative backdrop-blur-md bg-paper/95">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-between h-16 md:h-20">
-      <!-- Left side (Mobile logo & Desktop subtle branding) -->
-      <div class="flex items-center gap-4">
-        <a href={isEn ? '/en' : '/'} class="md:hidden flex items-center gap-2 group">
-          <span class="font-display font-bold text-base tracking-tight text-zinc-900">
-            MADRID<span class="text-vermilion">LIVE</span>PRESS
+    <div class="flex items-center justify-between md:justify-center h-12 md:h-16 relative">
+      <!-- Centered Desktop Navigation Bar with Interactive Animated Home Button -->
+      <nav
+        id="desktopNav"
+        class="hidden md:flex items-center justify-center gap-1 sm:gap-2 lg:gap-3 font-mono text-xs text-zinc-900 relative py-2 whitespace-nowrap"
+        aria-label="Navegación principal"
+      >
+        <!-- Interactive Animated Home Return Button -->
+        <a
+          href={isEn ? '/en' : '/'}
+          data-astro-prefetch="hover"
+          class="group relative inline-flex items-center gap-2 px-3 py-1.5 border border-zinc-200 bg-paper hover:border-zinc-950 hover:bg-zinc-950 hover:text-white transition-all duration-300 font-mono text-[11px] font-bold uppercase tracking-wider active:scale-[0.96] shadow-sm mr-1"
+          title={isEn ? 'Return to Home / Live Pressroom' : 'Volver a Portada / Inicio'}
+        >
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-vermilion opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-vermilion"></span>
           </span>
-          <span class="w-1.5 h-1.5 rounded-full bg-vermilion inline-block"></span>
+          <span>{isEn ? 'PORTAL' : 'INICIO'}</span>
+          <span class="opacity-40 group-hover:opacity-100 group-hover:-translate-x-0.5 transition-all text-xs">⌂</span>
         </a>
 
-        <!-- Desktop breadcrumb / space -->
-        <div class="hidden md:flex items-center gap-2 font-mono text-xs text-zinc-400">
-          <a href={isEn ? '/en' : '/'} class="hover:text-zinc-900 transition-colors">
-            {isEn ? 'OFFICIAL PRESS ROOM' : 'SALA DE PRENSA OFICIAL'}
-          </a>
-          <span>/</span>
-          <span class="text-zinc-900 font-medium">{isEn ? 'NOCHEMADRID' : 'NOCHEMADRID'}</span>
-        </div>
-      </div>
+        <!-- Sliding Underline Indicator (NYC Newsroom Style) -->
+        <div
+          id="navHoverIndicator"
+          class="absolute bottom-0 h-0.5 bg-zinc-950 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] pointer-events-none opacity-0"
+        ></div>
 
-      <!-- Right side navigation links (Matching Reference Images 1 & 2) -->
-      <nav class="hidden md:flex items-center gap-8 font-sans text-sm text-zinc-800" aria-label="Navegación principal">
         {navItems.map((item) => {
           const isActive = currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href));
           return (
             <a
               href={item.href}
-              class={`hover:text-vermilion transition-colors ${isActive ? 'text-zinc-950 font-semibold' : 'text-zinc-700'}`}
+              data-astro-prefetch="hover"
+              class={`nav-link-item px-2.5 lg:px-3 py-1.5 font-bold uppercase tracking-wider transition-colors relative hover:text-vermilion active:scale-[0.98] whitespace-nowrap ${
+                isActive ? 'text-zinc-950 is-active font-extrabold' : 'text-zinc-700 font-semibold'
+              }`}
             >
               {item.label}
             </a>
@@ -54,8 +65,9 @@ const navItems = [
 
         <!-- Minimalist Search Icon -->
         <a
-          href={`${prefix}/comunicados`}
-          class="text-zinc-700 hover:text-zinc-950 p-1 transition-colors"
+          href={`${prefix}/archivo`}
+          data-astro-prefetch="hover"
+          class="text-zinc-700 hover:text-zinc-950 p-1.5 transition-colors active:scale-[0.95]"
           aria-label={isEn ? 'Search' : 'Buscar'}
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -64,21 +76,22 @@ const navItems = [
           </svg>
         </a>
 
-        <span class="text-zinc-300">|</span>
+        <span class="text-zinc-300 mx-1 select-none">|</span>
 
-        <!-- Accreditation CTA / Mobile trigger -->
+        <!-- Accreditation CTA Button -->
         <a
           href={`${prefix}/acreditaciones`}
-          class="font-mono text-xs uppercase tracking-wider text-zinc-900 hover:text-vermilion transition-colors"
+          data-astro-prefetch="hover"
+          class="font-mono text-xs uppercase tracking-wider text-zinc-900 hover:text-vermilion px-2.5 py-1 transition-colors font-bold whitespace-nowrap"
         >
-          {isEn ? 'Accreditation' : 'Acreditación'}
+          {isEn ? 'ACCREDITATION' : 'ACREDITACIÓN'}
         </a>
 
-        <!-- Hamburger Icon for full drawer -->
+        <!-- Drawer Toggle Button -->
         <button
           id="menuToggleBtn"
           type="button"
-          class="text-zinc-800 hover:text-zinc-950 p-1 transition-colors"
+          class="text-zinc-800 hover:text-zinc-950 p-1.5 transition-colors active:scale-[0.95]"
           aria-label="Abrir menú"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -89,25 +102,39 @@ const navItems = [
         </button>
       </nav>
 
-      <!-- Mobile Menu Toggle Button -->
-      <div class="flex items-center gap-2 md:hidden">
-        <button
-          id="mobileMenuBtn"
-          type="button"
-          class="p-2 text-zinc-700 hover:text-zinc-950"
-          aria-label="Menú"
-        >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <line x1="4" y1="6" x2="20" y2="6" />
-            <line x1="4" y1="12" x2="20" y2="12" />
-            <line x1="4" y1="18" x2="20" y2="18" />
-          </svg>
-        </button>
+      <!-- Mobile Top Bar: Language & Hamburger -->
+      <div class="flex items-center justify-between w-full md:hidden">
+        <a href={isEn ? '/en' : '/'} class="font-display font-bold text-xs tracking-wider text-zinc-950 uppercase flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-vermilion inline-block"></span>
+          <span>MADRID LIVE PRESS</span>
+        </a>
+
+        <div class="flex items-center gap-2">
+          <a
+            href={isEn ? currentPath.replace(/^\/en/, '') || '/' : `/en${currentPath === '/' ? '' : currentPath}`}
+            class="font-mono text-xs font-bold text-zinc-900 uppercase tracking-widest px-2 py-1"
+          >
+            {isEn ? 'EN' : 'ES'}
+          </a>
+
+          <button
+            id="mobileMenuBtn"
+            type="button"
+            class="p-1 text-zinc-900 active:scale-[0.95]"
+            aria-label="Menú"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <line x1="3" y1="7" x2="21" y2="7" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="17" x2="21" y2="17" />
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Full Drawer / Mobile Menu -->
+  <!-- Full Drawer Menu -->
   <div id="fullMenuDrawer" class="hidden border-t border-zinc-200 bg-paper px-4 py-8 space-y-6">
     <div class="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
       <div>
@@ -115,8 +142,11 @@ const navItems = [
           {isEn ? 'Navigation' : 'Navegación'}
         </h4>
         <div class="space-y-2">
+          <a href={isEn ? '/en' : '/'} class="block font-mono text-sm uppercase tracking-wider text-zinc-800 hover:text-vermilion font-bold">
+            {isEn ? 'Home / Portal' : 'Inicio / Portada'} ⌂
+          </a>
           {navItems.map((item) => (
-            <a href={item.href} class="block font-sans text-base text-zinc-800 hover:text-vermilion">
+            <a href={item.href} class="block font-mono text-sm uppercase tracking-wider text-zinc-800 hover:text-vermilion">
               {item.label}
             </a>
           ))}
@@ -125,26 +155,37 @@ const navItems = [
 
       <div>
         <h4 class="font-mono text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-3">
-          {isEn ? 'Press Office' : 'Oficina de Prensa'}
+          {isEn ? 'Press Office' : 'Gabinete de Prensa'}
         </h4>
-        <div class="space-y-2 font-sans text-sm text-zinc-600">
+        <div class="space-y-2 font-mono text-xs text-zinc-600">
           <a href={`${prefix}/acreditaciones`} class="block hover:text-vermilion">
             {isEn ? 'Request Accreditation' : 'Solicitar Acreditación'}
           </a>
-          <a href={`${prefix}/recursos-prensa`} class="block hover:text-vermilion">
-            {isEn ? 'Media Kits & B-Roll' : 'Media Kits y Recursos'}
+          <a href={`${prefix}/press-kits`} class="block hover:text-vermilion">
+            {isEn ? 'Press Kits & B-Roll' : 'Press Kits y B-Roll Oficial'}
           </a>
           <a href={`${prefix}/eventos`} class="block hover:text-vermilion">
-            {isEn ? 'Media Agenda' : 'Agenda de Medios'}
+            {isEn ? 'Media Agenda & Calls' : 'Agenda de Convocatorias'}
           </a>
         </div>
       </div>
 
       <div>
         <h4 class="font-mono text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-3">
+          {isEn ? 'Associated Federation' : 'Federación Oficial'}
+        </h4>
+        <p class="font-mono text-xs text-zinc-600 leading-relaxed">
+          NOCHEMADRID<br />
+          Asociados de Ocio y Espectáculos de Madrid<br />
+          prensa@nochemadrid.org
+        </p>
+      </div>
+
+      <div>
+        <h4 class="font-mono text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-3">
           {isEn ? 'Language' : 'Idioma'}
         </h4>
-        <div class="flex gap-4 font-mono text-sm">
+        <div class="flex gap-4 font-mono text-xs">
           <a href={currentPath.replace(/^\/en/, '') || '/'} class={!isEn ? 'font-bold text-vermilion' : 'text-zinc-600'}>
             Castellano (ES)
           </a>
@@ -154,30 +195,60 @@ const navItems = [
           </a>
         </div>
       </div>
-
-      <div>
-        <h4 class="font-mono text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-3">
-          {isEn ? 'Direct Contact' : 'Contacto Directo'}
-        </h4>
-        <p class="font-sans text-sm text-zinc-600">
-          prensa@nochemadrid.org<br />
-          +34 91 542 23 31<br />
-          Madrid, España
-        </p>
-      </div>
     </div>
   </div>
 
-  <script>
-    const toggleBtn = document.getElementById('menuToggleBtn');
-    const mobileBtn = document.getElementById('mobileMenuBtn');
-    const drawer = document.getElementById('fullMenuDrawer');
+  <script is:inline>
+    function setupHeader() {
+      const nav = document.getElementById('desktopNav');
+      const indicator = document.getElementById('navHoverIndicator');
+      const links = document.querySelectorAll('.nav-link-item');
+      const activeLink = document.querySelector('.nav-link-item.is-active');
 
-    const toggle = () => {
-      drawer?.classList.toggle('hidden');
-    };
+      function positionIndicator(elem) {
+        if (!elem || !indicator || !nav) {
+          if (indicator) indicator.style.opacity = '0';
+          return;
+        }
+        const navRect = nav.getBoundingClientRect();
+        const elemRect = elem.getBoundingClientRect();
 
-    toggleBtn?.addEventListener('click', toggle);
-    mobileBtn?.addEventListener('click', toggle);
+        indicator.style.width = `${elemRect.width}px`;
+        indicator.style.left = `${elemRect.left - navRect.left}px`;
+        indicator.style.opacity = '1';
+      }
+
+      if (activeLink) {
+        positionIndicator(activeLink);
+      }
+
+      links.forEach((link) => {
+        link.addEventListener('mouseenter', () => {
+          positionIndicator(link);
+        });
+      });
+
+      nav?.addEventListener('mouseleave', () => {
+        if (activeLink) {
+          positionIndicator(activeLink);
+        } else if (indicator) {
+          indicator.style.opacity = '0';
+        }
+      });
+
+      const toggleBtn = document.getElementById('menuToggleBtn');
+      const mobileBtn = document.getElementById('mobileMenuBtn');
+      const drawer = document.getElementById('fullMenuDrawer');
+
+      const toggle = () => {
+        drawer?.classList.toggle('hidden');
+      };
+
+      toggleBtn?.addEventListener('click', toggle);
+      mobileBtn?.addEventListener('click', toggle);
+    }
+
+    document.addEventListener('astro:page-load', setupHeader);
+    setupHeader();
   </script>
 </header>

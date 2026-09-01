@@ -1,0 +1,39 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import WireframeHeader from '@/components/ui/WireframeHeader.astro';
+import BlockPressMentions from '@/components/blocks/BlockPressMentions.astro';
+
+export const prerender = false;
+---
+
+<Layout
+  title="Cobertura en Medios y Clipping | Madrid Live Press"
+  description="Reportajes, entrevistas a portavoces de NocheMadrid y repercusión del ocio nocturno y los espectáculos en prensa, radio y televisión."
+  lang="es"
+>
+  <div class="w-full bg-paper pb-16">
+    <!-- Top Wireframe Header "COBERTURA" (Clean Uniform Baseline Cut) -->
+    <WireframeHeader
+      title="COBERTURA"
+      subtitle="Repercusión en prensa nacional e internacional, entrevistas a portavoces oficiales y seguimiento mediático."
+      badge="CLIPPING DE PRENSA"
+      updatedTime="MEDIOS AUDITADOS"
+    />
+
+    <!-- Main Mentions Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+      <!-- Media Outlets Logos Bar -->
+      <div class="border border-zinc-200 bg-canvas p-6 flex flex-wrap items-center justify-around gap-6 font-display font-black text-xl sm:text-2xl text-zinc-400 select-none">
+        <span class="hover:text-zinc-950 transition-colors">ABC</span>
+        <span class="hover:text-zinc-950 transition-colors">EL MUNDO</span>
+        <span class="hover:text-zinc-950 transition-colors">HOSTELTUR</span>
+        <span class="hover:text-zinc-950 transition-colors">TELEMADRID</span>
+        <span class="hover:text-zinc-950 transition-colors">CADENA SER</span>
+        <span class="hover:text-zinc-950 transition-colors">EUROPA PRESS</span>
+      </div>
+
+      <!-- Press Mentions Block -->
+      <BlockPressMentions lang="es" />
+    </div>
+  </div>
+</Layout>

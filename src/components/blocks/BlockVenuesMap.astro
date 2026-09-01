@@ -30,7 +30,6 @@ try {
         'direccion',
         'aforo',
         'descripcion',
-        'logo.*',
         'imagen_portada.*',
         'contacto_prensa_email',
         'contacto_prensa_nombre',
@@ -50,15 +49,23 @@ const districts = [
   { label: 'Centro / Gran Vía', value: 'centro' },
   { label: 'Chamberí', value: 'chamberi' },
   { label: 'Salamanca', value: 'salamanca' },
-  { label: 'Malasaña / Chueca', value: 'malasana_chueca' },
-  { label: 'Moncloa', value: 'moncloa' },
-  { label: 'Arganzuela', value: 'arganzuela' },
+  { label: 'Malasaña / Chueca', value: 'malasana' },
+  { label: 'Chamartín / Tetuán', value: 'chamartin' },
+  { label: 'Retiro / Arganzuela', value: 'retiro' },
+];
+
+const DEFAULT_VENUE_PHOTOS = [
+  'https://images.unsplash.com/photo-1514306191717-452ec28c7814?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1574391884720-bbc3740c59d1?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=800&auto=format&fit=crop',
 ];
 ---
 
 <section class="w-full bg-paper border-b border-zinc-200 py-12 md:py-16">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-    <!-- Header (Swiss Minimalist) -->
+    <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-zinc-200">
       <div class="space-y-2">
         <div class="font-mono text-xs uppercase tracking-widest text-zinc-400 font-semibold">
@@ -70,7 +77,8 @@ const districts = [
       </div>
 
       <a
-        href={`${prefix}/salas`}
+        href={`${prefix}/directorio`}
+        data-astro-prefetch="hover"
         class="inline-flex items-center gap-1 font-mono text-xs uppercase tracking-wider text-zinc-800 hover:text-vermilion transition-colors group"
       >
         <span>{isEn ? 'Full directory' : 'Directorio completo'}</span>
@@ -78,23 +86,27 @@ const districts = [
       </a>
     </div>
 
-    <!-- Search & Filter Bar (Minimalist) -->
+    <!-- Search & Filter Bar -->
     <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
       <div class="md:col-span-6 relative">
         <input
           type="text"
-          id="venuesSearchInput"
+          id="homeVenuesSearchInput"
           placeholder={isEn ? 'Search venue by name, district or type...' : 'Buscar sala por nombre, distrito o tipología...'}
           class="w-full border border-zinc-200 bg-paper px-4 py-2.5 font-mono text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-900 focus:outline-none transition-colors"
         />
       </div>
 
       <div class="md:col-span-6 flex flex-wrap gap-1.5 justify-start md:justify-end">
-        {districts.map((d) => (
+        {districts.map((d, index) => (
           <button
             type="button"
             data-district={d.value}
-            class="districtFilterBtn font-mono text-[11px] uppercase tracking-wider px-2.5 py-1 border border-zinc-200 hover:border-zinc-900 text-zinc-600 hover:text-zinc-950 transition-colors first:bg-zinc-900 first:text-white first:border-zinc-900"
+            class={`homeDistrictFilterBtn font-mono text-[11px] uppercase tracking-wider px-2.5 py-1 border transition-colors ${
+              index === 0
+                ? 'bg-zinc-900 text-white border-zinc-900'
+                : 'border-zinc-200 text-zinc-600 hover:text-zinc-950 hover:border-zinc-900'
+            }`}
           >
             {d.label}
           </button>
@@ -102,29 +114,34 @@ const districts = [
       </div>
     </div>
 
-    <!-- Venues Grid (Architectural Cards) -->
-    <div id="venuesGridContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
-      {salas.map((sala) => {
-        const cover = sala.imagen_portada ? getAssetUrl(sala.imagen_portada, { width: 600, height: 400, format: 'webp' }) : null;
+    <!-- Venues Grid -->
+    <div id="homeVenuesGridContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
+      {salas.map((sala, idx) => {
+        const cover = sala.imagen_portada
+          ? getAssetUrl(sala.imagen_portada, { width: 600, height: 400, format: 'webp' })
+          : DEFAULT_VENUE_PHOTOS[idx % DEFAULT_VENUE_PHOTOS.length];
+        const monogram = sala.nombre.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase();
 
         return (
           <article
-            class="venueCard border border-zinc-200 bg-paper hover:border-zinc-950 transition-colors flex flex-col justify-between"
+            class="homeVenueCard border border-zinc-200 bg-paper hover:border-zinc-950 transition-colors flex flex-col justify-between"
             data-name={sala.nombre.toLowerCase()}
             data-district={(sala.distrito || '').toLowerCase()}
             data-type={(sala.tipo_espacio || '').toLowerCase()}
           >
             <div>
-              {cover && (
-                <div class="aspect-[16/10] w-full border-b border-zinc-200 overflow-hidden bg-zinc-100">
-                  <img
-                    src={cover}
-                    alt={sala.nombre}
-                    class="h-full w-full object-cover filter grayscale-[15%] contrast-105"
-                    loading="lazy"
-                  />
+              <div class="relative aspect-[16/10] w-full border-b border-zinc-200 overflow-hidden bg-zinc-100">
+                <img
+                  src={cover}
+                  alt={sala.nombre}
+                  class="h-full w-full object-cover filter contrast-105"
+                  loading="lazy"
+                />
+                <div class="absolute top-3 left-3 bg-paper/95 backdrop-blur-sm border border-zinc-200 px-2.5 py-1 flex items-center gap-1.5 shadow-sm">
+                  <span class="w-1.5 h-1.5 rounded-full bg-vermilion inline-block"></span>
+                  <span class="font-mono text-[10px] font-bold text-zinc-950 uppercase tracking-wider">{monogram}</span>
                 </div>
-              )}
+              </div>
 
               <div class="p-6 space-y-4">
                 <div class="flex items-center justify-between font-mono text-[11px] text-zinc-500 uppercase tracking-widest">
@@ -133,7 +150,7 @@ const districts = [
                 </div>
 
                 <h3 class="font-display text-xl font-bold text-zinc-950">
-                  <a href={`${prefix}/salas/${sala.slug}`} class="hover:text-vermilion transition-colors">
+                  <a href={`${prefix}/directorio/${sala.slug}`} data-astro-prefetch="hover" class="hover:text-vermilion transition-colors">
                     {sala.nombre}
                   </a>
                 </h3>
@@ -142,34 +159,17 @@ const districts = [
                   {sala.aforo && <div>AFORO HOMOLOGADO: {sala.aforo.toLocaleString()} PAX</div>}
                   {sala.direccion && <div class="text-zinc-500 line-clamp-1">{sala.direccion}</div>}
                 </div>
-
-                {sala.descripcion && (
-                  <p class="font-sans text-xs text-zinc-600 line-clamp-2 leading-relaxed pt-2 border-t border-zinc-100">
-                    {sala.descripcion}
-                  </p>
-                )}
               </div>
             </div>
 
             <div class="p-6 pt-0 border-t border-zinc-100 flex items-center justify-between font-mono text-xs">
               <a
-                href={`${prefix}/salas/${sala.slug}`}
+                href={`${prefix}/directorio/${sala.slug}`}
+                data-astro-prefetch="hover"
                 class="uppercase tracking-wider font-semibold text-zinc-950 hover:text-vermilion transition-colors"
               >
                 {isEn ? 'TECHNICAL SHEET' : 'FICHA TÉCNICA'} ↗
               </a>
-
-              {sala.sitio_web && (
-                <a
-                  href={sala.sitio_web}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="text-zinc-400 hover:text-zinc-900 transition-colors"
-                  title="Web Oficial"
-                >
-                  WEB
-                </a>
-              )}
             </div>
           </article>
         );
@@ -177,49 +177,64 @@ const districts = [
     </div>
   </div>
 
-  <script>
-    const searchInput = document.getElementById('venuesSearchInput') as HTMLInputElement | null;
-    const filterBtns = document.querySelectorAll('.districtFilterBtn');
-    const cards = document.querySelectorAll('.venueCard') as NodeListOf<HTMLElement>;
+  <script is:inline>
+    function setupHomeVenues() {
+      function normalize(str) {
+        return (str || '')
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .trim();
+      }
 
-    let currentDistrict = 'all';
-    let currentQuery = '';
+      const searchInput = document.getElementById('homeVenuesSearchInput');
+      const filterBtns = document.querySelectorAll('.homeDistrictFilterBtn');
+      const cards = document.querySelectorAll('.homeVenueCard');
 
-    function filterVenues() {
-      cards.forEach((card) => {
-        const name = card.dataset.name || '';
-        const district = card.dataset.district || '';
-        const type = card.dataset.type || '';
+      let currentDistrict = 'all';
 
-        const matchesQuery = !currentQuery || name.includes(currentQuery) || district.includes(currentQuery) || type.includes(currentQuery);
-        const matchesDistrict = currentDistrict === 'all' || district.includes(currentDistrict);
+      function filter() {
+        const query = normalize(searchInput ? searchInput.value : '');
+        const normDist = normalize(currentDistrict);
 
-        if (matchesQuery && matchesDistrict) {
-          card.classList.remove('hidden');
-        } else {
-          card.classList.add('hidden');
-        }
+        cards.forEach((card) => {
+          const name = normalize(card.getAttribute('data-name'));
+          const district = normalize(card.getAttribute('data-district'));
+          const type = card.getAttribute('data-type') || '';
+
+          const matchesQuery = !query || name.includes(query) || district.includes(query) || type.includes(query);
+          let matchesDistrict = true;
+          if (normDist !== 'all') {
+            matchesDistrict = district.includes(normDist);
+          }
+
+          if (matchesQuery && matchesDistrict) {
+            card.style.display = 'flex';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      }
+
+      searchInput?.addEventListener('input', filter);
+
+      filterBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          filterBtns.forEach((b) => {
+            b.classList.remove('bg-zinc-900', 'text-white', 'border-zinc-900');
+            b.classList.add('text-zinc-600', 'border-zinc-200');
+          });
+
+          btn.classList.add('bg-zinc-900', 'text-white', 'border-zinc-900');
+          btn.classList.remove('text-zinc-600', 'border-zinc-200');
+
+          currentDistrict = btn.getAttribute('data-district') || 'all';
+          filter();
+        });
       });
     }
 
-    searchInput?.addEventListener('input', (e) => {
-      currentQuery = (e.target as HTMLInputElement).value.toLowerCase().trim();
-      filterVenues();
-    });
-
-    filterBtns.forEach((btn) => {
-      btn.addEventListener('click', () => {
-        filterBtns.forEach((b) => {
-          b.classList.remove('bg-zinc-900', 'text-white', 'border-zinc-900');
-          b.classList.add('text-zinc-600', 'border-zinc-200');
-        });
-
-        btn.classList.add('bg-zinc-900', 'text-white', 'border-zinc-900');
-        btn.classList.remove('text-zinc-600', 'border-zinc-200');
-
-        currentDistrict = btn.getAttribute('data-district') || 'all';
-        filterVenues();
-      });
-    });
+    document.addEventListener('astro:page-load', setupHomeVenues);
+    setupHomeVenues();
   </script>
 </section>

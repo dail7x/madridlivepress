@@ -1,0 +1,37 @@
+---
+interface Props {
+  title: string;
+  subtitle?: string;
+  badge?: string;
+  updatedTime?: string;
+}
+
+const {
+  title,
+  subtitle = "El pulso cultural de Madrid, verificado y listo para publicar.",
+  badge,
+  updatedTime = "ACTUALIZADO 12:38"
+} = Astro.props;
+---
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
+  <!-- Giant Wireframe Outline Title (Compact Uniform Baseline Cut) -->
+  <div class="w-full h-12 sm:h-16 lg:h-20 overflow-hidden flex items-end select-none pointer-events-none">
+    <span class="font-display font-black text-5xl sm:text-7xl lg:text-[7rem] tracking-tight leading-none text-wireframe block translate-y-2 sm:translate-y-4">
+      {title}
+    </span>
+  </div>
+
+  <!-- Subtitle & Live Status Row -->
+  <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 pt-2 pb-3 border-b border-zinc-200">
+    <p class="font-sans text-xs sm:text-sm text-zinc-700 font-medium max-w-3xl">
+      {subtitle}
+    </p>
+
+    <div class="font-mono text-[11px] sm:text-xs text-zinc-500 uppercase tracking-wider flex items-center gap-2 flex-shrink-0">
+      {badge && <span class="font-bold text-zinc-950">{badge}</span>}
+      {badge && updatedTime && <span class="text-zinc-300">·</span>}
+      {updatedTime && <span>{updatedTime}</span>}
+    </div>
+  </div>
+</div>

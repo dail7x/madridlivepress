@@ -61,7 +61,7 @@ const directZipUrl = block.archivo_zip ? getAssetUrl(block.archivo_zip) : null;
           <div class="flex items-center gap-3 font-mono text-xs text-zinc-500 uppercase tracking-wider">
             <span class="font-bold text-zinc-950">{isEn ? 'OFFICIAL MEDIA KIT' : 'MEDIA KIT OFICIAL'}</span>
             <span class="text-zinc-300">/</span>
-            <span>{block.tamanio_formato || '300 DPI · ZIP'}</span>
+            <span>{block.tamanio_formato || 'ALTA RESOLUCIÓN · ZIP'}</span>
           </div>
 
           <h3 class="font-display text-xl sm:text-2xl font-bold text-zinc-950">
@@ -89,7 +89,7 @@ const directZipUrl = block.archivo_zip ? getAssetUrl(block.archivo_zip) : null;
         <div class="lg:col-span-4 border border-zinc-200 p-4 bg-paper font-mono text-xs text-zinc-600 space-y-2">
           <div class="text-zinc-950 font-bold uppercase">{isEn ? 'TECHNICAL SPECS' : 'ESPECIFICACIONES'}</div>
           <div class="text-[11px] text-zinc-500">FORMATO: ZIP (RGB + CMYK)</div>
-          <div class="text-[11px] text-zinc-500">RESOLUCIÓN: 300 DPI ALTA DEFINICIÓN</div>
+          <div class="text-[11px] text-zinc-500">RESOLUCIÓN: ALTA RESOLUCIÓN</div>
           <div class="text-[11px] text-zinc-500">LICENCIA: LIBRE USO EDITORIAL</div>
         </div>
       </div>
@@ -106,7 +106,7 @@ const directZipUrl = block.archivo_zip ? getAssetUrl(block.archivo_zip) : null;
               <div class="space-y-3">
                 <div class="flex items-center justify-between font-mono text-[11px] text-zinc-500 uppercase tracking-wider">
                   <span class="text-zinc-950 font-semibold">{item.categoria_recurso || 'Recurso'}</span>
-                  <span>{item.peso || '300 DPI'}</span>
+                  <span>{item.peso || 'ALTA RESOLUCIÓN'}</span>
                 </div>
 
                 <h4 class="font-display text-base font-bold text-zinc-950">

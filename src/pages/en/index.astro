@@ -1,21 +1,11 @@
 ---
 import Layout from '@/layouts/Layout.astro';
 import BlockRenderer from '@/components/blocks/BlockRenderer.astro';
-import { getPageBySlug, getAssetUrl } from '@/lib/directus';
+import BlockPressMentions from '@/components/blocks/BlockPressMentions.astro';
 import type { PageBlockItem } from '@/lib/directus';
 
 export const prerender = false;
 
-const { lang } = Astro.params;
-const currentLang = lang === 'en' ? 'en' : 'es';
-
-// Fetch home page with blocks
-const page = await getPageBySlug('/');
-const title = currentLang === 'en' ? 'Madrid Nightlife Virtual Pressroom' : page?.seo_title || page?.title;
-const description = currentLang === 'en' ? 'Official international pressroom and media platform for Madrid nightlife and culture, managed by NocheMadrid.' : page?.seo_description;
-const seoImage = page?.seo_image ? getAssetUrl(page.seo_image) : undefined;
-
-// Fallback blocks for English
 const defaultBlocksEn: PageBlockItem[] = [
   {
     collection: 'block_hero',
@@ -24,7 +14,7 @@ const defaultBlocksEn: PageBlockItem[] = [
       titular: 'The city happens live.',
       subtitulo: 'An open source to tell the story of the culture, venues, and people keeping Madrid in motion.',
       tipo_fondo: 'imagen',
-      cta_texto: 'Read the story',
+      cta_texto: 'Enter the pressroom',
       cta_enlace: '/en/comunicados',
     },
   },
@@ -45,7 +35,7 @@ const defaultBlocksEn: PageBlockItem[] = [
       titulo: 'Commitment to Journalistic Rigor and Global Reach',
       contenido: '<p>Madrid Live Press serves as the direct media bridge between global newsrooms and Madrid’s premier nightlife industry.</p>',
       cita_texto: 'Madrid offers the most vibrant, safe, and professional nightlife in the world. Our mission is to provide global journalists with reliable, verified facts.',
-      cita_autor: 'Vicente Pizcueta',
+      cita_autor: 'Marina Sanz',
       cita_cargo: 'Official Spokesperson, NocheMadrid',
     },
   },
@@ -53,7 +43,7 @@ const defaultBlocksEn: PageBlockItem[] = [
     collection: 'block_venues_map',
     item: {
       id: 'default-venues-en',
-      titulo: 'Network of 96 Venues & Clubs in Madrid',
+      titulo: 'Network of Associated Venues & Clubs in Madrid',
       descripcion: 'Access technical specifications, capacities, press relations contacts, and locations of our nightclubs, concert halls, and theaters.',
       distrito_defecto: 'all',
       tipo_local_defecto: 'all',
@@ -81,10 +71,13 @@ const defaultBlocksEn: PageBlockItem[] = [
     },
   },
 ];
-
-const blocksToRender = currentLang === 'en' ? defaultBlocksEn : (page?.bloques || defaultBlocksEn);
 ---
 
-<Layout title={title} description={description} image={seoImage} lang={currentLang}>
-  <BlockRenderer bloques={blocksToRender} lang={currentLang} />
+<Layout
+  title="Madrid Live Press | Madrid Nightlife Virtual Pressroom"
+  description="Official international pressroom and media platform for Madrid nightlife, culture, and associated venues, managed by NocheMadrid."
+  lang="en"
+>
+  <BlockRenderer bloques={defaultBlocksEn} lang="en" />
+  <BlockPressMentions lang="en" />
 </Layout>

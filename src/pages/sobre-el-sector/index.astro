@@ -1,0 +1,125 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import WireframeHeader from '@/components/ui/WireframeHeader.astro';
+
+export const prerender = false;
+---
+
+<Layout
+  title="Sobre el Sector y NocheMadrid | Madrid Live Press"
+  description="Conoce la federación NocheMadrid: 96 espacios asociados, historia, impacto económico, modelo de convivencia y gobernanza del ocio cultural de Madrid."
+  lang="es"
+>
+  <div class="w-full bg-paper pb-16">
+    <!-- Top Wireframe Header "SOBRE EL SECTOR" (Clean Baseline Cut) -->
+    <WireframeHeader
+      title="EL SECTOR"
+      subtitle="La federación que representa, defiende y proyecta internacionalmente el ocio cultural y las artes escénicas de Madrid."
+      badge="96 ASOCIADOS"
+      updatedTime="DESDE 2010"
+    />
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+      <!-- Section 1: Intro Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div class="lg:col-span-7 space-y-6">
+          <h2 class="font-display text-2xl sm:text-4xl font-bold text-zinc-950 tracking-tight leading-tight">
+            Una voz compartida para la noche más vibrante del mundo.
+          </h2>
+
+          <div class="prose prose-zinc max-w-none font-sans text-sm sm:text-base text-zinc-700 leading-relaxed space-y-4">
+            <p>
+              <strong>NOCHE MADRID</strong> es la principal organización empresarial y federativa del sector del ocio nocturno, la música en directo y los espectáculos de la Comunidad de Madrid. Integra a <strong>96 empresas y salas asociadas</strong>, reuniendo a los recintos más emblemáticos de la capital: teatros musicales, salas de conciertos históricas, discotecas de referencia global, tablaos flamencos y espacios gastronómicos nocturnos.
+            </p>
+            <p>
+              Nacida en 2010 como resultado de la unión entre <strong>ASFYDIS</strong> (Asociación de Empresarios de Espectáculos y Salas de Fiesta) y <strong>ECO</strong> (Asociación Madrileña por la Calidad del Ocio), la federación trabaja de forma permanente para la dignificación profesional, la seguridad, la innovación tecnológica y la convivencia vecinal.
+            </p>
+          </div>
+
+          <div class="pt-2 flex flex-wrap gap-4 font-mono text-xs">
+            <a
+              href="/directorio"
+              class="bg-zinc-950 text-white hover:bg-vermilion px-5 py-3 font-bold uppercase tracking-wider transition-colors inline-flex items-center gap-1.5"
+            >
+              <span>Ver los 96 Espacios Federados</span>
+              <span>↗</span>
+            </a>
+            <a
+              href="/comunicados"
+              class="border border-zinc-950 hover:bg-zinc-100 text-zinc-950 px-5 py-3 font-bold uppercase tracking-wider transition-colors inline-flex items-center gap-1.5"
+            >
+              <span>Notas de Prensa Oficiales</span>
+              <span>→</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Right Side: Stats Grid -->
+        <div class="lg:col-span-5 grid grid-cols-2 gap-4 bg-canvas p-6 border border-zinc-200 font-mono">
+          <div class="border-b border-zinc-200 pb-4">
+            <div class="font-display text-3xl sm:text-4xl font-bold text-zinc-950">96</div>
+            <div class="text-[10px] sm:text-xs text-zinc-500 uppercase tracking-widest mt-1">Salas Federadas</div>
+          </div>
+
+          <div class="border-b border-zinc-200 pb-4">
+            <div class="font-display text-3xl sm:text-4xl font-bold text-zinc-950">+28K</div>
+            <div class="text-[10px] sm:text-xs text-zinc-500 uppercase tracking-widest mt-1">Empleos Directos</div>
+          </div>
+
+          <div class="pt-2">
+            <div class="font-display text-3xl sm:text-4xl font-bold text-zinc-950">14.5K</div>
+            <div class="text-[10px] sm:text-xs text-zinc-500 uppercase tracking-widest mt-1">Sesiones Anuales</div>
+          </div>
+
+          <div class="pt-2">
+            <div class="font-display text-3xl sm:text-4xl font-bold text-zinc-950">2.0M</div>
+            <div class="text-[10px] sm:text-xs text-zinc-500 uppercase tracking-widest mt-1">Turistas Internacionales</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Leadership & Governance -->
+      <div class="border-t border-zinc-200 pt-10">
+        <h3 class="font-mono text-xs font-bold text-zinc-400 uppercase tracking-widest mb-6">
+          ÓRGANOS DE GOBIERNO Y PORTAVOCÍA
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div class="border border-zinc-200 p-6 bg-paper space-y-4">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-full bg-zinc-900 text-white font-mono text-sm font-bold flex items-center justify-center">
+                AZ
+              </div>
+              <div>
+                <h4 class="font-display text-lg font-bold text-zinc-950">Alejandro Zamarro</h4>
+                <p class="font-mono text-xs text-zinc-500 uppercase">Presidente de NocheMadrid</p>
+              </div>
+            </div>
+            <p class="font-sans text-xs sm:text-sm text-zinc-600 leading-relaxed">
+              Ingeniero y gestor cultural con más de dos décadas de experiencia en el ocio y la producción de espectáculos. Lidera la transformación digital del sector y los planes de proyección internacional.
+            </p>
+          </div>
+
+          <div class="border border-zinc-200 p-6 bg-paper space-y-4">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-full bg-vermilion text-white font-mono text-sm font-bold flex items-center justify-center">
+                GP
+              </div>
+              <div>
+                <h4 class="font-display text-lg font-bold text-zinc-950">Gabinete de Comunicación</h4>
+                <p class="font-mono text-xs text-zinc-500 uppercase">Atención a Medios & Agencias</p>
+              </div>
+            </div>
+            <p class="font-sans text-xs sm:text-sm text-zinc-600 leading-relaxed">
+              Servicio permanente para periodistas, agencias y corresponsales internacionales. Gestión de acreditaciones, entrevistas con portavoces y acceso a materiales en alta resolución.
+            </p>
+            <div class="font-mono text-xs text-vermilion font-bold">
+              prensa@nochemadrid.org · +34 91 542 23 00
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>

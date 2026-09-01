@@ -1,0 +1,327 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import WireframeHeader from '@/components/ui/WireframeHeader.astro';
+import { directus, getAssetUrl } from '@/lib/directus';
+import { readItems } from '@directus/sdk';
+import type { Sala } from '@/lib/directus';
+
+export const prerender = false;
+
+let salas: Sala[] = [];
+try {
+  const res = await directus.request(
+    readItems('salas' as any, {
+      filter: { status: { _eq: 'published' } },
+      sort: ['nombre'],
+      limit: -1,
+      fields: [
+        'id',
+        'status',
+        'nombre',
+        'slug',
+        'direccion',
+        'distrito',
+        'tipo_espacio',
+        'aforo',
+        'descripcion',
+        'destacado',
+        'imagen_portada.*',
+        'sitio_web',
+        'instagram_url',
+        'contacto_prensa_email',
+      ],
+    })
+  );
+  salas = (res as any) || [];
+} catch (e) {
+  console.error('Error loading /directorio:', e);
+}
+
+const districts = [
+  'Todos',
+  'Centro / Gran Vía',
+  'Chamberí',
+  'Salamanca',
+  'Malasaña / Chueca',
+  'Chamartín / Tetuán',
+  'Retiro / Arganzuela',
+  'Moncloa',
+  'Comunidad de Madrid',
+];
+
+const spaceTypes = [
+  { label: 'Todos los tipos', value: 'all' },
+  { label: 'Salas de Conciertos', value: 'sala_conciertos' },
+  { label: 'Discotecas & Clubs', value: 'discoteca' },
+  { label: 'Teatros Musicales', value: 'teatro_musical' },
+  { label: 'Tablaos Flamencos', value: 'tablao' },
+  { label: 'Bares Especiales', value: 'bar_especial' },
+];
+
+const typeLabelMap: Record<string, string> = {
+  sala_conciertos: 'SALA DE CONCIERTOS',
+  discoteca: 'DISCOTECA & CLUB',
+  teatro_musical: 'TEATRO MUSICAL',
+  tablao: 'TABLAO FLAMENCO',
+  bar_especial: 'BAR ESPECIAL',
+};
+
+const VENUE_PHOTOS_POOL = [
+  'https://images.unsplash.com/photo-1514306191717-452ec28c7814?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1574391884720-bbc3740c59d1?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1516307365426-bea591f05011?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?q=80&w=800&auto=format&fit=crop',
+];
+---
+
+<Layout
+  title="Directorio Oficial del Sector | Madrid Live Press"
+  description="Directorio oficial de los espacios asociados a NocheMadrid: salas de conciertos, discotecas, teatros musicales, tablaos flamencos y bares especiales de la Comunidad de Madrid."
+  lang="es"
+>
+  <div class="w-full bg-paper">
+    <!-- Top Wireframe Header "DIRECTORIO" -->
+    <WireframeHeader
+      title="DIRECTORIO"
+      subtitle="Directorio Oficial del Sector del Ocio, la Cultura, las Artes Escénicas y los Espectáculos de Madrid (Espacios Asociados a NocheMadrid)."
+      badge={`${salas.length} ASOCIADOS`}
+      updatedTime="NOCHEMADRID"
+    />
+
+    <!-- Filter & Search Control Center -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 border-b border-zinc-200 space-y-6">
+      <!-- Search input & Select -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+        <div class="md:col-span-8 relative">
+          <input
+            id="venueSearchInput"
+            type="text"
+            placeholder="Buscar por nombre de sala, dirección o distrito (ej: Kapital, Barceló, Chamberí, Gran Vía)..."
+            class="w-full bg-paper border border-zinc-200 px-4 py-3 font-sans text-sm text-zinc-950 placeholder:text-zinc-400 focus:outline-none focus:border-zinc-950 transition-colors"
+          />
+          <span class="absolute right-3 top-3.5 text-zinc-400">🔍</span>
+        </div>
+
+        <div class="md:col-span-4">
+          <select
+            id="venueTypeSelect"
+            class="w-full bg-paper border border-zinc-200 px-4 py-3 font-mono text-xs uppercase tracking-wider text-zinc-800 focus:outline-none focus:border-zinc-950 transition-colors cursor-pointer"
+          >
+            {spaceTypes.map((st) => (
+              <option value={st.value}>{st.label.toUpperCase()}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <!-- District Filter Buttons -->
+      <div>
+        <div class="font-mono text-[10px] uppercase tracking-widest text-zinc-400 mb-2 font-bold">
+          FILTRAR POR DISTRITO / UBICACIÓN:
+        </div>
+        <div class="flex items-center gap-2 sm:gap-3 flex-wrap font-mono text-xs" id="districtButtonsContainer">
+          {districts.map((d, index) => (
+            <button
+              type="button"
+              class={`district-btn px-3 py-1.5 border transition-all active:scale-[0.95] ${
+                index === 0
+                  ? 'border-zinc-950 bg-zinc-950 text-white font-bold is-active'
+                  : 'border-zinc-200 bg-paper text-zinc-700 hover:border-zinc-950'
+              }`}
+              data-district={d}
+            >
+              {d}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <!-- Venues Directory Grid -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div id="venuesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {salas.map((sala, index) => {
+          const photoUrl = sala.imagen_portada
+            ? getAssetUrl(sala.imagen_portada, { width: 600, height: 400, format: 'webp' })
+            : VENUE_PHOTOS_POOL[index % VENUE_PHOTOS_POOL.length];
+
+          const typeLabel = typeLabelMap[sala.tipo_espacio] || 'ESPACIO ASOCIADO';
+          const monogram = sala.nombre.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase();
+          const instaUrl = (sala as any).instagram_url || `https://www.instagram.com/nochemadrid/`;
+
+          return (
+            <div
+              class="venue-card group border border-zinc-200 bg-paper hover:border-zinc-950 transition-all flex flex-col justify-between"
+              data-name={sala.nombre.toLowerCase()}
+              data-district={sala.distrito ? sala.distrito.toLowerCase() : ''}
+              data-type={sala.tipo_espacio || 'all'}
+              data-address={sala.direccion ? sala.direccion.toLowerCase() : ''}
+            >
+              <!-- Card Image & Logo Monogram -->
+              <div class="relative aspect-[16/10] overflow-hidden bg-zinc-100 border-b border-zinc-200">
+                <img
+                  src={photoUrl}
+                  alt={sala.nombre}
+                  class="h-full w-full object-cover filter contrast-105 group-hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                />
+
+                <!-- Logo Monogram Badge -->
+                <div class="absolute top-3 left-3 bg-paper/95 backdrop-blur-sm border border-zinc-200 px-2.5 py-1 flex items-center gap-1.5 shadow-sm">
+                  <span class="w-1.5 h-1.5 rounded-full bg-vermilion inline-block"></span>
+                  <span class="font-mono text-[10px] font-bold text-zinc-950 uppercase tracking-wider">{monogram}</span>
+                </div>
+
+                <!-- Verified Badge -->
+                <div class="absolute top-3 right-3 bg-zinc-950 text-white font-mono text-[9px] font-bold px-2 py-0.5 uppercase tracking-wider">
+                  ✓ ASOCIADO
+                </div>
+              </div>
+
+              <!-- Card Content -->
+              <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
+                <div class="space-y-2">
+                  <div class="font-mono text-[10px] uppercase tracking-wider text-zinc-500 flex items-center justify-between">
+                    <span class="font-semibold text-zinc-900">{typeLabel}</span>
+                    <span>{sala.aforo ? `${sala.aforo} PAX` : 'AFORO OFICIAL'}</span>
+                  </div>
+
+                  <h3 class="font-display text-lg font-bold text-zinc-950 group-hover:text-vermilion transition-colors leading-tight">
+                    <a href={`/directorio/${sala.slug}`} data-astro-prefetch="hover">
+                      {sala.nombre}
+                    </a>
+                  </h3>
+
+                  <p class="font-mono text-xs text-zinc-600 flex items-center gap-1.5">
+                    <span>📍</span>
+                    <span>{sala.direccion || 'Madrid'}</span>
+                  </p>
+
+                  <div class="font-mono text-[11px] text-zinc-500 pt-1 flex items-center justify-between">
+                    <div>
+                      <span>Distrito: </span>
+                      <span class="font-semibold text-zinc-900">{sala.distrito || 'Centro'}</span>
+                    </div>
+
+                    <!-- Instagram Link -->
+                    <a
+                      href={instaUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="text-zinc-600 hover:text-vermilion transition-colors inline-flex items-center gap-1 text-[11px] font-bold"
+                      title="Instagram Oficial"
+                    >
+                      <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                      </svg>
+                      <span>Instagram</span>
+                    </a>
+                  </div>
+                </div>
+
+                <!-- Footer Card Action -->
+                <div class="pt-3 border-t border-zinc-100 flex items-center justify-between font-mono text-xs text-zinc-900 font-bold">
+                  <a href={`/directorio/${sala.slug}`} data-astro-prefetch="hover" class="hover:text-vermilion transition-colors inline-flex items-center gap-1">
+                    <span>VER FICHA TÉCNICA</span>
+                    <span>↗</span>
+                  </a>
+                  {sala.sitio_web && (
+                    <a href={sala.sitio_web} target="_blank" rel="noopener noreferrer" class="text-zinc-400 hover:text-zinc-950 font-normal">
+                      WEB
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div id="noVenuesResults" class="hidden py-16 text-center space-y-3">
+        <p class="font-display text-lg font-bold text-zinc-900">No se encontraron espacios con estos filtros.</p>
+        <p class="font-mono text-xs text-zinc-500">Prueba a seleccionar "Todos" o busca por otro término.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Client-side script attached to View Transitions -->
+  <script is:inline>
+    function setupDirectorio() {
+      function normalize(str) {
+        return (str || '')
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .trim();
+      }
+
+      const searchInput = document.getElementById('venueSearchInput');
+      const typeSelect = document.getElementById('venueTypeSelect');
+      const districtBtns = document.querySelectorAll('.district-btn');
+      const cards = document.querySelectorAll('.venue-card');
+      const noResults = document.getElementById('noVenuesResults');
+
+      let currentDistrict = 'Todos';
+
+      function applyFilter() {
+        const query = normalize(searchInput ? searchInput.value : '');
+        const activeType = typeSelect ? typeSelect.value : 'all';
+        const normDist = normalize(currentDistrict);
+
+        let visibleCount = 0;
+
+        cards.forEach((card) => {
+          const name = normalize(card.getAttribute('data-name'));
+          const district = normalize(card.getAttribute('data-district'));
+          const address = normalize(card.getAttribute('data-address'));
+          const type = card.getAttribute('data-type') || 'all';
+
+          const matchesSearch = !query || name.includes(query) || district.includes(query) || address.includes(query);
+          const matchesType = activeType === 'all' || type === activeType;
+
+          let matchesDistrict = true;
+          if (normDist !== 'todos') {
+            const key = normDist.split('/')[0].trim();
+            matchesDistrict = district.includes(key) || district.includes(normDist);
+          }
+
+          if (matchesSearch && matchesType && matchesDistrict) {
+            card.style.display = 'flex';
+            visibleCount++;
+          } else {
+            card.style.display = 'none';
+          }
+        });
+
+        if (noResults) {
+          noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+      }
+
+      searchInput?.addEventListener('input', applyFilter);
+      typeSelect?.addEventListener('change', applyFilter);
+
+      districtBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          districtBtns.forEach((b) => {
+            b.classList.remove('border-zinc-950', 'bg-zinc-950', 'text-white', 'font-bold', 'is-active');
+            b.classList.add('border-zinc-200', 'bg-paper', 'text-zinc-700');
+          });
+
+          btn.classList.add('border-zinc-950', 'bg-zinc-950', 'text-white', 'font-bold', 'is-active');
+          btn.classList.remove('border-zinc-200', 'bg-paper', 'text-zinc-700');
+
+          currentDistrict = btn.getAttribute('data-district') || 'Todos';
+          applyFilter();
+        });
+      });
+    }
+
+    document.addEventListener('astro:page-load', setupDirectorio);
+    setupDirectorio();
+  </script>
+</Layout>

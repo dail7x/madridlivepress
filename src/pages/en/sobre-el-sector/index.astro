@@ -1,0 +1,69 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import WireframeHeader from '@/components/ui/WireframeHeader.astro';
+
+export const prerender = false;
+---
+
+<Layout
+  title="About the Nightlife & Performing Arts Sector | Madrid Live Press"
+  description="Discover NocheMadrid: associated cultural venues, history, economic impact, sustainability model and governance."
+  lang="en"
+>
+  <div class="w-full bg-paper pb-16">
+    <WireframeHeader
+      title="THE SECTOR"
+      subtitle="The federation representing, defending, and internationally projecting Madrid’s nightlife and performing arts."
+      badge="ASSOCIATED SPACES"
+      updatedTime="ESTABLISHED 2010"
+    />
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div class="lg:col-span-7 space-y-6">
+          <h2 class="font-display text-2xl sm:text-4xl font-bold text-zinc-950 tracking-tight leading-tight">
+            A shared voice for the most vibrant cultural nightlife in the world.
+          </h2>
+
+          <div class="prose prose-zinc max-w-none font-sans text-base text-zinc-700 leading-relaxed space-y-4">
+            <p>
+              <strong>NOCHEMADRID</strong> is the premier business and federative organization representing the nightlife, live music, and performing arts industry across the Community of Madrid. It brings together historic musical theaters, premier concert venues, globally celebrated nightclubs, and authentic flamenco tablaos.
+            </p>
+            <p>
+              Founded in 2010 through the merger of <strong>ASFYDIS</strong> and <strong>ECO</strong>, the federation consistently champions professional dignity, public safety, technological innovation, and sustainable coexistence with local neighborhoods.
+            </p>
+          </div>
+
+          <div class="pt-2 flex flex-wrap gap-4 font-mono text-xs">
+            <a href="/en/directorio" class="bg-zinc-950 text-white hover:bg-vermilion px-5 py-3 font-bold uppercase tracking-wider transition-colors inline-flex items-center gap-1.5">
+              <span>View Associated Spaces Directory</span>
+              <span>↗</span>
+            </a>
+            <a href="/en/comunicados" class="border border-zinc-950 hover:bg-zinc-100 text-zinc-950 px-5 py-3 font-bold uppercase tracking-wider transition-colors">
+              Official Press Releases →
+            </a>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 grid grid-cols-2 gap-4 bg-canvas p-6 border border-zinc-200 font-mono">
+          <div class="border-b border-zinc-200 pb-4">
+            <div class="font-display text-3xl sm:text-4xl font-bold text-zinc-950">96+</div>
+            <div class="text-[10px] sm:text-xs text-zinc-500 uppercase tracking-widest mt-1">Associated Spaces</div>
+          </div>
+          <div class="border-b border-zinc-200 pb-4">
+            <div class="font-display text-3xl sm:text-4xl font-bold text-zinc-950">+28K</div>
+            <div class="text-[10px] sm:text-xs text-zinc-500 uppercase tracking-widest mt-1">Direct Jobs</div>
+          </div>
+          <div class="pt-2">
+            <div class="font-display text-3xl sm:text-4xl font-bold text-zinc-950">14.5K</div>
+            <div class="text-[10px] sm:text-xs text-zinc-500 uppercase tracking-widest mt-1">Annual Live Sessions</div>
+          </div>
+          <div class="pt-2">
+            <div class="font-display text-3xl sm:text-4xl font-bold text-zinc-950">2.0M</div>
+            <div class="text-[10px] sm:text-xs text-zinc-500 uppercase tracking-widest mt-1">International Tourists</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>

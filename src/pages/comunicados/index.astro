@@ -1,12 +1,11 @@
 ---
 import Layout from '@/layouts/Layout.astro';
+import WireframeHeader from '@/components/ui/WireframeHeader.astro';
 import { directus, getAssetUrl } from '@/lib/directus';
 import { readItems } from '@directus/sdk';
 import type { Comunicado, Categoria } from '@/lib/directus';
 
 export const prerender = false;
-
-const catSlug = Astro.url.searchParams.get('cat');
 
 let comunicados: Comunicado[] = [];
 let categorias: Categoria[] = [];
@@ -17,6 +16,7 @@ try {
       readItems('comunicados' as any, {
         filter: { status: { _eq: 'published' } },
         sort: ['-fecha_publicacion', '-id'],
+        limit: 50,
         fields: [
           'id',
           'status',
@@ -24,6 +24,7 @@ try {
           'slug',
           'titulo',
           'bajada',
+          'imagen_url_externa',
           'imagen_portada.*',
           'archivo_pdf.*',
           'tags',
@@ -43,143 +44,495 @@ try {
   comunicados = (comunicadosRes as any) || [];
   categorias = (categoriasRes as any) || [];
 } catch (e) {
-  console.error('Error in /comunicados:', e);
+  console.error('Error loading /comunicados:', e);
 }
 
-const filteredComunicados = catSlug
-  ? comunicados.filter((c) => (c.categoria as Categoria)?.slug === catSlug)
-  : comunicados;
+// Fallback high-res editorial images
+const DEFAULT_IMAGES = [
+  'https://images.unsplash.com/photo-1514306191717-452ec28c7814?q=80&w=1200&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1574391884720-bbc3740c59d1?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1516307365426-bea591f05011?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?q=80&w=800&auto=format&fit=crop',
+];
+
+const featuredItem = comunicados[0] || null;
+const stackedItems = comunicados.slice(1, 4);
+const allRemainingItems = comunicados.slice(4);
 ---
 
 <Layout
-  title="Notas de Prensa y Comunicados Oficiales | Madrid Live Press"
-  description="Archivo completo de comunicados oficiales, balances sectoriales y convocatorias de prensa de NocheMadrid."
+  title="Noticias y Comunicados Oficiales | Madrid Live Press"
+  description="El pulso cultural de Madrid, verificado y listo para publicar. Sala de prensa oficial de NocheMadrid."
   lang="es"
 >
   <div class="w-full bg-paper">
-    <!-- Top Monospaced Breadcrumb -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4">
-      <div class="font-mono text-xs text-zinc-400 uppercase tracking-widest flex items-center gap-3">
-        <a href="/" class="hover:text-zinc-950 transition-colors">PORTADA</a>
-        <span class="text-zinc-300">/</span>
-        <span class="text-zinc-900 font-semibold">NOTAS DE PRENSA</span>
+    <!-- Top Wireframe Header "NOTICIAS" (Ultra Compact for First Viewport in Desktop) -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
+      <div class="w-full h-12 sm:h-16 lg:h-20 overflow-hidden flex items-end select-none pointer-events-none">
+        <span class="font-display font-black text-5xl sm:text-7xl lg:text-[7rem] tracking-tight leading-none text-wireframe block translate-y-2 sm:translate-y-4">
+          NOTICIAS
+        </span>
       </div>
-    </div>
 
-    <!-- Page Header (Swiss Minimalist) -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 border-b border-zinc-200">
-      <div class="space-y-3">
-        <h1 class="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-zinc-950 tracking-tight">
-          Hemeroteca de Notas de Prensa
-        </h1>
-        <p class="font-sans text-base text-zinc-600 max-w-3xl leading-relaxed">
-          Servicio informativo para periodistas, redacciones y medios internacionales. Acceso a declaraciones oficiales, datos del sector del ocio y material audiovisual verificado.
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 pt-2 pb-3 border-b border-zinc-200">
+        <p class="font-sans text-xs sm:text-sm text-zinc-700 font-medium">
+          El pulso cultural de Madrid, verificado y listo para publicar.
         </p>
-      </div>
 
-      <!-- Filter Buttons -->
-      <div class="flex flex-wrap gap-2 pt-8">
-        <a
-          href="/comunicados"
-          class={`font-mono text-xs uppercase px-3 py-1.5 border tracking-wider transition-colors ${
-            !catSlug
-              ? 'border-zinc-900 bg-zinc-900 text-white'
-              : 'border-zinc-200 hover:border-zinc-900 text-zinc-700 hover:text-zinc-950'
-          }`}
-        >
-          Todas las notas
-        </a>
-        {categorias.map((c) => {
-          const isActive = catSlug === c.slug;
-          return (
-            <a
-              href={`/comunicados?cat=${c.slug}`}
-              class={`font-mono text-xs uppercase px-3 py-1.5 border tracking-wider transition-colors ${
-                isActive
-                  ? 'border-zinc-900 bg-zinc-900 text-white'
-                  : 'border-zinc-200 hover:border-zinc-900 text-zinc-700 hover:text-zinc-950'
-              }`}
-            >
-              {c.nombre}
-            </a>
-          );
-        })}
+        <div class="font-mono text-[11px] sm:text-xs text-zinc-500 uppercase tracking-wider flex items-center gap-2 flex-shrink-0">
+          <span id="newsTotalCount" class="font-bold text-zinc-950">{comunicados.length} RESULTADOS</span>
+          <span class="text-zinc-300">·</span>
+          <span>ACTUALIZADO 12:38</span>
+        </div>
       </div>
     </div>
 
-    <!-- Press Releases List -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="divide-y divide-zinc-200 border-t border-b border-zinc-200">
-        {filteredComunicados.length === 0 ? (
-          <div class="py-16 text-center text-zinc-500 font-sans text-sm">
-            No se han encontrado notas de prensa en esta categoría.
-          </div>
-        ) : (
-          filteredComunicados.map((item, index) => {
-            const cat = item.categoria as Categoria | undefined;
-            const pdf = item.archivo_pdf ? getAssetUrl(item.archivo_pdf) : null;
-            const pubDate = item.fecha_publicacion ? new Date(item.fecha_publicacion) : new Date();
-            const dateFormatted = pubDate.toLocaleDateString('es-ES', {
-              day: '2-digit',
-              month: 'short',
-              year: 'numeric',
-            }).toUpperCase();
+    <!-- Category Filter & View Controls Bar -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 border-b border-zinc-200">
+      <div class="flex items-center justify-between gap-4 flex-wrap">
+        <!-- Categories with red dot -->
+        <div class="flex items-center gap-4 sm:gap-6 overflow-x-auto no-scrollbar font-sans text-xs text-zinc-600 font-medium py-1" id="newsCatFilters">
+          <button
+            type="button"
+            class="cat-filter-btn flex items-center gap-1.5 whitespace-nowrap text-zinc-950 font-bold is-active"
+            data-cat="all"
+          >
+            <span>Todo</span>
+            <span class="dot w-1.5 h-1.5 rounded-full bg-vermilion inline-block"></span>
+          </button>
 
-            const npCode = `NP-04${String(item.id || index + 1).padStart(2, '0')}`;
+          {categorias.map((cat) => (
+            <button
+              type="button"
+              class="cat-filter-btn flex items-center gap-1.5 whitespace-nowrap text-zinc-600 hover:text-zinc-950 transition-colors"
+              data-cat={cat.slug}
+            >
+              <span>{cat.nombre}</span>
+            </button>
+          ))}
+        </div>
+
+        <!-- Sort & Layout Toggle Controls -->
+        <div class="flex items-center gap-4 font-mono text-xs text-zinc-600 flex-shrink-0">
+          <div class="relative">
+            <select
+              id="newsSortSelect"
+              class="bg-transparent border-0 font-mono text-xs text-zinc-800 font-semibold cursor-pointer focus:outline-none hover:text-zinc-950"
+            >
+              <option value="desc">Más reciente ↓</option>
+              <option value="asc">Más antiguo ↑</option>
+            </select>
+          </div>
+
+          <span class="text-zinc-300">|</span>
+
+          <!-- Grid / List View Toggle -->
+          <div class="flex items-center gap-2 text-sm" id="viewToggleGroup">
+            <button
+              id="viewListBtn"
+              type="button"
+              title="Vista Lista / Editorial"
+              class="p-1 text-zinc-950 font-bold cursor-pointer is-active hover:text-vermilion transition-colors"
+            >
+              ☰
+            </button>
+            <button
+              id="viewGridBtn"
+              type="button"
+              title="Vista Cuadrícula / Fotos"
+              class="p-1 text-zinc-400 cursor-pointer hover:text-zinc-950 transition-colors"
+            >
+              ⊞
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main News Grid (Compact Desktop First-Viewport) -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8" id="newsMainContentContainer">
+      <!-- Top Grid: 1 Featured Hero (60%) + 3 Stacked Horizontal Cards (40%) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start" id="topNewsGrid">
+        <!-- Left: Featured Story -->
+        {featuredItem && (
+          <div class="lg:col-span-7 news-item-card" data-cat={(featuredItem.categoria as Categoria)?.slug || ''} data-date={featuredItem.fecha_publicacion}>
+            <a
+              href={`/comunicados/${featuredItem.slug}`}
+              data-astro-prefetch="hover"
+              class="group block border border-zinc-200 bg-paper hover:border-zinc-950 transition-all active:scale-[0.99]"
+            >
+              <!-- Panoramic Landscape Aspect Ratio to fit viewport -->
+              <div class="aspect-[21/9] sm:aspect-[16/8] max-h-56 lg:max-h-64 w-full overflow-hidden bg-zinc-100 border-b border-zinc-200">
+                <img
+                  src={(featuredItem as any).imagen_url_externa || (featuredItem.imagen_portada ? getAssetUrl(featuredItem.imagen_portada, { width: 900, height: 400, format: 'webp' }) : DEFAULT_IMAGES[0])}
+                  alt={featuredItem.titulo}
+                  class="h-full w-full object-cover filter contrast-105 group-hover:scale-[1.02] transition-transform duration-500"
+                />
+              </div>
+
+              <div class="p-4 sm:p-6 space-y-2">
+                <div class="font-mono text-[10px] uppercase tracking-wider text-zinc-500 flex items-center gap-2">
+                  <span class="text-zinc-950 font-bold">PORTADA</span>
+                  <span class="text-zinc-300">·</span>
+                  <span>{(featuredItem.categoria as Categoria)?.nombre?.toUpperCase() || 'ARTES ESCÉNICAS'}</span>
+                </div>
+
+                <h2 class="font-display text-xl sm:text-2xl font-bold text-zinc-950 leading-snug group-hover:text-vermilion transition-colors">
+                  {featuredItem.titulo}
+                </h2>
+
+                <p class="font-sans text-xs text-zinc-600 line-clamp-2 leading-relaxed">
+                  {featuredItem.bajada}
+                </p>
+
+                <div class="flex items-center justify-between pt-2 border-t border-zinc-100 font-mono text-[10px] text-zinc-500">
+                  <div class="flex items-center gap-2">
+                    <span class="text-zinc-900 font-semibold">
+                      {new Date(featuredItem.fecha_publicacion).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()}
+                    </span>
+                    <span class="text-zinc-300">·</span>
+                    <span>PRESS KIT</span>
+                    <span class="text-zinc-300">·</span>
+                    <span>ALTA RESOLUCIÓN</span>
+                  </div>
+                  <span class="text-zinc-950 text-base font-bold group-hover:translate-x-1 transition-transform">→</span>
+                </div>
+              </div>
+            </a>
+          </div>
+        )}
+
+        <!-- Right: 3 Stacked Horizontal Cards -->
+        <div class="lg:col-span-5 space-y-3">
+          {stackedItems.map((item, idx) => {
+            const cat = item.categoria as Categoria | undefined;
+            const imgUrl = (item as any).imagen_url_externa || (item.imagen_portada ? getAssetUrl(item.imagen_portada, { width: 350, height: 250, format: 'webp' }) : DEFAULT_IMAGES[idx + 1]);
+            const dateStr = new Date(item.fecha_publicacion).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase();
 
             return (
-              <article class="py-6 sm:py-8 grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-8 items-start group hover:bg-canvas transition-colors px-2">
-                <!-- Metadata (~25%) -->
-                <div class="md:col-span-3 font-mono text-xs text-zinc-500 space-y-1">
-                  <div class="text-zinc-950 font-bold tracking-wider">{dateFormatted}</div>
-                  <div class="text-zinc-400">{npCode}</div>
-                  {cat && (
-                    <div class="text-zinc-600 uppercase tracking-widest pt-1 font-semibold">
-                      {cat.nombre}
+              <a
+                href={`/comunicados/${item.slug}`}
+                data-astro-prefetch="hover"
+                class="news-item-card group block border border-zinc-200 bg-paper p-3 hover:border-zinc-950 transition-all active:scale-[0.99]"
+                data-cat={cat?.slug || ''}
+                data-date={item.fecha_publicacion}
+              >
+                <div class="grid grid-cols-12 gap-3 items-center">
+                  <div class="col-span-4 aspect-[4/3] overflow-hidden bg-zinc-100 border border-zinc-200">
+                    <img
+                      src={imgUrl}
+                      alt={item.titulo}
+                      class="h-full w-full object-cover filter contrast-105 group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+
+                  <div class="col-span-8 flex flex-col justify-between h-full space-y-1">
+                    <div class="font-mono text-[9px] uppercase tracking-wider text-zinc-500">
+                      <span class="font-semibold text-zinc-900">{cat?.nombre?.toUpperCase() || 'INFORMACIÓN'}</span>
+                      <span class="text-zinc-300">·</span>
+                      <span>{dateStr}</span>
                     </div>
-                  )}
-                </div>
 
-                <!-- Title & Bajada (~65%) -->
-                <div class="md:col-span-7 space-y-2">
-                  <h2 class="font-display text-lg sm:text-xl font-semibold text-zinc-950 leading-snug group-hover:text-vermilion transition-colors">
-                    <a href={`/comunicados/${item.slug}`}>
+                    <h3 class="font-display text-xs sm:text-sm font-bold text-zinc-950 leading-snug group-hover:text-vermilion transition-colors line-clamp-2">
                       {item.titulo}
-                    </a>
-                  </h2>
+                    </h3>
 
-                  {item.bajada && (
-                    <p class="font-sans text-sm text-zinc-600 line-clamp-2 leading-relaxed">
-                      {item.bajada}
-                    </p>
-                  )}
+                    <div class="flex justify-end">
+                      <span class="text-zinc-900 text-xs font-bold group-hover:translate-x-1 transition-transform">→</span>
+                    </div>
+                  </div>
                 </div>
-
-                <!-- Action (~10%) -->
-                <div class="md:col-span-2 flex md:justify-end items-center gap-3 pt-2 md:pt-0 font-sans text-xs">
-                  {pdf && (
-                    <a
-                      href={pdf}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="font-mono text-[11px] uppercase tracking-wider text-zinc-500 hover:text-vermilion transition-colors"
-                    >
-                      PDF ↓
-                    </a>
-                  )}
-
-                  <a
-                    href={`/comunicados/${item.slug}`}
-                    class="font-sans text-sm font-semibold text-zinc-900 group-hover:text-vermilion transition-colors"
-                  >
-                    ↗
-                  </a>
-                </div>
-              </article>
+              </a>
             );
-          })
-        )}
+          })}
+        </div>
+      </div>
+
+      <!-- Lower Section: Numbered Feed (or Grid View) + Promo Card + Monthly Timeline -->
+      <div class="border-t border-zinc-200 pt-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- Main Feed Container (Switches between List and Grid) -->
+        <div class="lg:col-span-9" id="feedLayoutWrapper">
+          <!-- List View (Default) -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6" id="newsListView">
+            {allRemainingItems.map((item, index) => {
+              const num = String(index + 4).padStart(2, '0');
+              const cat = item.categoria as Categoria | undefined;
+              const dateObj = new Date(item.fecha_publicacion);
+              const dateStr = dateObj.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase();
+              const isSample = item.titulo.includes('ciclo') || item.titulo.includes('residencias') || item.titulo.includes('Radiografía');
+
+              return (
+                <a
+                  href={`/comunicados/${item.slug}`}
+                  data-astro-prefetch="hover"
+                  class="news-item-card group block pb-5 border-b border-zinc-200 hover:border-zinc-950 transition-colors active:scale-[0.99]"
+                  data-cat={cat?.slug || ''}
+                  data-date={item.fecha_publicacion}
+                >
+                  <div class="flex items-start gap-4">
+                    <span class="font-mono text-base font-bold text-zinc-400 group-hover:text-zinc-950 transition-colors">
+                      {num}
+                    </span>
+
+                    <div class="flex-1 space-y-1.5">
+                      <div class="font-mono text-[10px] uppercase tracking-wider text-zinc-500 flex items-center gap-1.5 flex-wrap">
+                        {isSample && <span class="text-zinc-400 font-bold">[MUESTRA] ·</span>}
+                        <span>{dateStr}</span>
+                        <span class="text-zinc-300">·</span>
+                        <span class="text-zinc-900 font-semibold">{cat?.nombre?.toUpperCase() || 'SECTOR'}</span>
+                        <span class="text-zinc-300">·</span>
+                        <span>COMUNICADO</span>
+                      </div>
+
+                      <div class="flex items-center justify-between gap-2">
+                        <h4 class="font-display text-sm sm:text-base font-medium text-zinc-900 group-hover:text-vermilion transition-colors leading-snug">
+                          {item.titulo}
+                        </h4>
+                        <span class="text-zinc-400 group-hover:text-zinc-950 group-hover:translate-x-0.5 transition-transform flex-shrink-0">→</span>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+
+          <!-- Grid / Photo View (Toggled with ⊞) -->
+          <div class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="newsGridView">
+            {comunicados.map((item, idx) => {
+              const cat = item.categoria as Categoria | undefined;
+              const imgUrl = (item as any).imagen_url_externa || (item.imagen_portada ? getAssetUrl(item.imagen_portada, { width: 450, height: 300, format: 'webp' }) : DEFAULT_IMAGES[idx % DEFAULT_IMAGES.length]);
+              const dateStr = new Date(item.fecha_publicacion).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase();
+
+              return (
+                <a
+                  href={`/comunicados/${item.slug}`}
+                  data-astro-prefetch="hover"
+                  class="news-grid-card group border border-zinc-200 bg-paper hover:border-zinc-950 transition-all flex flex-col justify-between"
+                  data-cat={cat?.slug || ''}
+                  data-date={item.fecha_publicacion}
+                >
+                  <div class="aspect-[16/10] overflow-hidden bg-zinc-100 border-b border-zinc-200">
+                    <img src={imgUrl} alt={item.titulo} class="w-full h-full object-cover filter contrast-105 group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                  </div>
+                  <div class="p-4 space-y-2 flex-1 flex flex-col justify-between">
+                    <div class="space-y-1.5">
+                      <div class="font-mono text-[9px] uppercase tracking-wider text-zinc-500 flex items-center justify-between">
+                        <span class="font-semibold text-zinc-900">{cat?.nombre?.toUpperCase() || 'SECTOR'}</span>
+                        <span>{dateStr}</span>
+                      </div>
+                      <h4 class="font-display text-sm font-bold text-zinc-950 group-hover:text-vermilion transition-colors line-clamp-2">
+                        {item.titulo}
+                      </h4>
+                    </div>
+                    <div class="pt-2 border-t border-zinc-100 flex justify-end font-mono text-xs font-bold text-zinc-950 group-hover:text-vermilion">
+                      <span>Leer nota →</span>
+                    </div>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        </div>
+
+        <!-- Right Side: Promo Download Card + Monthly Timeline Selector -->
+        <div class="lg:col-span-3 flex flex-col sm:flex-row lg:flex-col gap-6 lg:border-l lg:border-zinc-200 lg:pl-8">
+          <!-- Download Promo Card -->
+          <a
+            href="/press-kits"
+            data-astro-prefetch="hover"
+            class="group border border-zinc-200 p-6 bg-canvas hover:border-zinc-950 transition-all flex-1 text-center space-y-3 block active:scale-[0.98]"
+          >
+            <div class="flex justify-center text-zinc-900">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+            </div>
+            <div class="space-y-1">
+              <div class="font-mono text-xs uppercase tracking-wider text-zinc-500">Sin registro previo</div>
+              <div class="font-display text-sm font-bold text-zinc-950">Press Kits & B-Roll</div>
+            </div>
+            <div class="pt-2 text-zinc-900 text-sm font-bold group-hover:translate-y-0.5 transition-transform">
+              →
+            </div>
+          </a>
+
+          <!-- Interactive Monthly Selector -->
+          <div class="space-y-4 font-mono text-xs" id="monthFilterGroup">
+            <div class="space-y-2">
+              <button
+                type="button"
+                class="month-filter-btn flex items-center gap-2 text-vermilion font-bold cursor-pointer is-active w-full text-left"
+                data-month="all"
+              >
+                <span>—</span>
+                <span>TODOS LOS MESES</span>
+              </button>
+              <button
+                type="button"
+                class="month-filter-btn text-zinc-500 hover:text-zinc-950 cursor-pointer pl-4 w-full text-left"
+                data-month="2026-09"
+              >
+                SEP 26
+              </button>
+              <button
+                type="button"
+                class="month-filter-btn text-zinc-500 hover:text-zinc-950 cursor-pointer pl-4 w-full text-left"
+                data-month="2026-08"
+              >
+                AGO 26
+              </button>
+              <button
+                type="button"
+                class="month-filter-btn text-zinc-500 hover:text-zinc-950 cursor-pointer pl-4 w-full text-left"
+                data-month="2026-07"
+              >
+                JUL 26
+              </button>
+            </div>
+
+            <!-- Decorative Dot Matrix Pattern -->
+            <div class="pt-4 grid grid-cols-4 gap-1.5 w-16 opacity-30 select-none">
+              {Array.from({ length: 16 }).map(() => (
+                <span class="w-1 h-1 rounded-full bg-zinc-900 inline-block"></span>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- Interactive Client Script -->
+  <script is:inline>
+    function setupNoticias() {
+      const catBtns = document.querySelectorAll('.cat-filter-btn');
+      const monthBtns = document.querySelectorAll('.month-filter-btn');
+      const sortSelect = document.getElementById('newsSortSelect');
+      const viewListBtn = document.getElementById('viewListBtn');
+      const viewGridBtn = document.getElementById('viewGridBtn');
+      const listView = document.getElementById('newsListView');
+      const gridView = document.getElementById('newsGridView');
+      const topGrid = document.getElementById('topNewsGrid');
+      const cards = document.querySelectorAll('.news-item-card, .news-grid-card');
+      const totalCount = document.getElementById('newsTotalCount');
+
+      let currentCat = 'all';
+      let currentMonth = 'all';
+      let isGridView = false;
+
+      function filterItems() {
+        let visible = 0;
+        cards.forEach((card) => {
+          const cat = card.getAttribute('data-cat') || '';
+          const date = card.getAttribute('data-date') || '';
+
+          const matchCat = currentCat === 'all' || cat === currentCat;
+          const matchMonth = currentMonth === 'all' || date.startsWith(currentMonth);
+
+          if (matchCat && matchMonth) {
+            card.style.display = '';
+            visible++;
+          } else {
+            card.style.display = 'none';
+          }
+        });
+
+        if (totalCount) {
+          totalCount.textContent = `${visible} RESULTADOS`;
+        }
+      }
+
+      // Categories
+      catBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          catBtns.forEach((b) => {
+            b.classList.remove('text-zinc-950', 'font-bold', 'is-active');
+            b.classList.add('text-zinc-600');
+            const dot = b.querySelector('.dot');
+            if (dot) dot.remove();
+          });
+
+          btn.classList.add('text-zinc-950', 'font-bold', 'is-active');
+          btn.classList.remove('text-zinc-600');
+          if (!btn.querySelector('.dot')) {
+            const dot = document.createElement('span');
+            dot.className = 'dot w-1.5 h-1.5 rounded-full bg-vermilion inline-block';
+            btn.appendChild(dot);
+          }
+
+          currentCat = btn.getAttribute('data-cat') || 'all';
+          filterItems();
+        });
+      });
+
+      // Months
+      monthBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          monthBtns.forEach((b) => {
+            b.classList.remove('text-vermilion', 'font-bold', 'is-active');
+            b.classList.add('text-zinc-500');
+          });
+
+          btn.classList.add('text-vermilion', 'font-bold', 'is-active');
+          btn.classList.remove('text-zinc-500');
+
+          currentMonth = btn.getAttribute('data-month') || 'all';
+          filterItems();
+        });
+      });
+
+      // View Toggle
+      viewGridBtn?.addEventListener('click', () => {
+        isGridView = true;
+        viewGridBtn.classList.add('text-zinc-950', 'font-bold');
+        viewGridBtn.classList.remove('text-zinc-400');
+        viewListBtn?.classList.remove('text-zinc-950', 'font-bold');
+        viewListBtn?.classList.add('text-zinc-400');
+
+        listView?.classList.add('hidden');
+        gridView?.classList.remove('hidden');
+        if (topGrid) topGrid.classList.add('hidden');
+        filterItems();
+      });
+
+      viewListBtn?.addEventListener('click', () => {
+        isGridView = false;
+        viewListBtn.classList.add('text-zinc-950', 'font-bold');
+        viewListBtn.classList.remove('text-zinc-400');
+        viewGridBtn?.classList.remove('text-zinc-950', 'font-bold');
+        viewGridBtn?.classList.add('text-zinc-400');
+
+        gridView?.classList.add('hidden');
+        listView?.classList.remove('hidden');
+        if (topGrid) topGrid.classList.remove('hidden');
+        filterItems();
+      });
+
+      // Sort
+      sortSelect?.addEventListener('change', () => {
+        const order = sortSelect.value;
+        const container = isGridView ? gridView : listView;
+        if (!container) return;
+        const items = Array.from(container.children);
+        items.sort((a, b) => {
+          const dateA = a.getAttribute('data-date') || '';
+          const dateB = b.getAttribute('data-date') || '';
+          return order === 'asc' ? dateA.localeCompare(dateB) : dateB.localeCompare(dateA);
+        });
+        items.forEach((item) => container.appendChild(item));
+      });
+    }
+
+    document.addEventListener('astro:page-load', setupNoticias);
+    setupNoticias();
+  </script>
 </Layout>

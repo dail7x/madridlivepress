@@ -1,0 +1,170 @@
+---
+interface PressMention {
+  medio: string;
+  titular: string;
+  cita: string;
+  fecha: string;
+  enlace: string;
+  tag: string;
+  imagen: string;
+}
+
+interface Props {
+  lang?: 'es' | 'en';
+}
+
+const { lang = 'es' } = Astro.props;
+const isEn = lang === 'en';
+
+const mentions: PressMention[] = [
+  {
+    medio: 'ABC',
+    titular: isEn
+      ? 'Madrid nightlife tourism breaks records: 2 million international visitors this summer'
+      : 'El turismo de ocio nocturno en Madrid bate récords: dos millones de visitantes internacionales este verano',
+    cita: isEn
+      ? '«Alejandro Zamarro, President of NocheMadrid, highlights the role of global travelers in sustaining over 28,000 sector jobs.»'
+      : '«Alejandro Zamarro, presidente de NocheMadrid, destaca el papel del público extranjero en el sostenimiento de más de 28.000 empleos directos.»',
+    fecha: '28 JUL 2026',
+    enlace: 'https://www.abc.es/espana/madrid/',
+    tag: isEn ? 'NATIONAL PRESS' : 'PRENSA NACIONAL',
+    imagen: '/images/press/abc-clipping.jpg',
+  },
+  {
+    medio: 'EL MUNDO',
+    titular: isEn
+      ? 'The "tardeo" phenomenon conquers Madrid: 48% of weekend revenue now occurs before midnight'
+      : 'El «tardeo» conquista Madrid: el 48% de la facturación del fin de semana se genera antes de medianoche',
+    cita: isEn
+      ? '«Vicente Pizcueta, spokesperson: "Daytime cultural clubbing has expanded the social demographic of historical music venues."»'
+      : '«Vicente Pizcueta, portavoz: "El tardeo ha ensanchado la base social del ocio y diversificado la programación de las salas históricas."»',
+    fecha: '16 JUL 2026',
+    enlace: 'https://www.elmundo.es/madrid.html',
+    tag: isEn ? 'TRENDS & ECONOMY' : 'TENDENCIAS & ECONOMÍA',
+    imagen: '/images/press/elmundo-clipping.jpg',
+  },
+  {
+    medio: 'HOSTELTUR',
+    titular: isEn
+      ? 'NocheMadrid promotes the capital at IMEX Frankfurt as a premier destination for MICE and business tourism'
+      : 'NocheMadrid promociona la capital en IMEX Frankfurt como destino preferente para el turismo MICE y congresos',
+    cita: isEn
+      ? '«The performing arts and nightlife federation presents its high-end catalog for corporate galas and global congresses in Germany.»'
+      : '«La patronal del ocio y los espectáculos presenta en Alemania su catálogo de recintos singulares para galas corporativas y congresos mundiales.»',
+    fecha: '20 MAY 2026',
+    enlace: 'https://www.hosteltur.com/comunidad/madrid',
+    tag: isEn ? 'MICE TOURISM' : 'TURISMO MICE',
+    imagen: '/images/press/hosteltur-clipping.jpg',
+  },
+  {
+    medio: 'TELEMADRID',
+    titular: isEn
+      ? 'NocheMadrid’s #EnLaColaSilencio campaign reduces noise complaints by 42% across central districts'
+      : 'La campaña #EnLaColaSilencio de NocheMadrid logra reducir un 42% las quejas por ruido en distritos céntricos',
+    cita: isEn
+      ? '«Environmental mediation teams at venue doors and real-time acoustic limiters consolidate neighborhood coexistence.»'
+      : '«Equipos de mediadores ambientales en puertas y limitadores acústicos telemáticos consolidan la convivencia con el descanso vecinal.»',
+    fecha: '15 ABR 2026',
+    enlace: 'https://www.telemadrid.es/programas/telenoticias-1/',
+    tag: isEn ? 'TELEVISION & SOCIETY' : 'TELEVISIÓN & SOCIEDAD',
+    imagen: '/images/press/telemadrid-clipping.jpg',
+  },
+  {
+    medio: 'CADENA SER',
+    titular: isEn
+      ? 'Interview with Alejandro Zamarro: "Madrid’s nightlife is a cultural engine and a global magnet for creative talent"'
+      : 'Entrevista a Alejandro Zamarro: "La noche de Madrid es un motor cultural y de atracción de talento creativo"',
+    cita: isEn
+      ? '«New NocheMadrid president outlines strategic priorities: digitalization, internationalization, and acoustic excellence.»'
+      : '«El nuevo presidente de NocheMadrid desgrana las prioridades estratégicas: digitalización, internacionalización y excelencia acústica.»',
+    fecha: '22 MAR 2026',
+    enlace: 'https://cadenaser.com/emisora/radio-madrid/',
+    tag: isEn ? 'RADIO & INTERVIEWS' : 'RADIO & ENTREVISTA',
+    imagen: '/images/press/cadenaser-clipping.jpg',
+  },
+  {
+    medio: 'EUROPA PRESS',
+    titular: isEn
+      ? 'Indirect economic impact of major concert tours on nightlife venues exceeds €25 million'
+      : 'El impacto indirecto de las grandes residencias musicales en las salas de ocio supera los 25 millones de euros',
+    cita: isEn
+      ? '«Stadium tours and major music festivals drive attendance across Madrid’s live music halls and cultural tablaos.»'
+      : '«Las grandes giras en estadios y festivales dinamizan la afluencia en salas de conciertos y tablaos de toda la Comunidad de Madrid.»',
+    fecha: '25 MAY 2026',
+    enlace: 'https://www.europapress.es/madrid/',
+    tag: isEn ? 'NEWS AGENCY' : 'AGENCIA DE NOTICIAS',
+    imagen: '/images/press/europapress-clipping.jpg',
+  },
+];
+---
+
+<section class="w-full bg-paper border-b border-zinc-200 py-12 md:py-16">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-zinc-200">
+      <div class="space-y-1">
+        <div class="font-mono text-xs uppercase tracking-widest text-zinc-400 font-bold">
+          {isEn ? 'MEDIA CLIPPING & PRESS COVERAGE' : 'COBERTURA EN MEDIOS & CLIPPING DE PRENSA'}
+        </div>
+        <h2 class="font-display text-2xl sm:text-3xl font-bold text-zinc-950 tracking-tight">
+          {isEn ? 'NocheMadrid in National & Global Media' : 'NocheMadrid en los Medios de Comunicación'}
+        </h2>
+      </div>
+
+      <a
+        href={isEn ? '/en/cobertura' : '/cobertura'}
+        class="font-mono text-xs uppercase tracking-wider text-zinc-950 hover:text-vermilion font-bold inline-flex items-center gap-1"
+      >
+        <span>{isEn ? 'All coverage' : 'Ver toda la cobertura'}</span>
+        <span>→</span>
+      </a>
+    </div>
+
+    <!-- Media Mentions Grid with Article Preview Images -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {mentions.map((m) => (
+        <article class="group border border-zinc-200 bg-paper hover:border-zinc-950 transition-all p-5 flex flex-col justify-between space-y-4">
+          <div class="space-y-3">
+            <!-- Article Preview Photo -->
+            <div class="aspect-[16/10] overflow-hidden bg-zinc-100 border border-zinc-200">
+              <img
+                src={m.imagen}
+                alt={m.titular}
+                class="w-full h-full object-cover filter contrast-105 group-hover:scale-105 transition-transform duration-500"
+                loading="lazy"
+              />
+            </div>
+
+            <div class="flex items-center justify-between font-mono text-[10px] uppercase tracking-wider text-zinc-500">
+              <span class="font-bold text-zinc-950 px-2 py-0.5 bg-canvas border border-zinc-200">{m.medio}</span>
+              <span>{m.fecha}</span>
+            </div>
+
+            <h3 class="font-display text-base font-bold text-zinc-950 group-hover:text-vermilion transition-colors leading-snug">
+              <a href={m.enlace} target="_blank" rel="noopener noreferrer">
+                {m.titular}
+              </a>
+            </h3>
+
+            <p class="font-sans text-xs text-zinc-600 italic leading-relaxed pt-1 border-t border-zinc-100">
+              {m.cita}
+            </p>
+          </div>
+
+          <div class="pt-3 border-t border-zinc-100 flex items-center justify-between font-mono text-xs">
+            <span class="text-[10px] text-zinc-400 uppercase">{m.tag}</span>
+            <a
+              href={m.enlace}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="font-bold text-zinc-950 group-hover:text-vermilion inline-flex items-center gap-1"
+            >
+              <span>{isEn ? 'Open media portal' : 'Abrir medio'}</span>
+              <span>↗</span>
+            </a>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>

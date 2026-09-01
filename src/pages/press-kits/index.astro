@@ -1,0 +1,181 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import WireframeHeader from '@/components/ui/WireframeHeader.astro';
+import { directus, getAssetUrl } from '@/lib/directus';
+import { readItems } from '@directus/sdk';
+import type { RecursoPrensa, Categoria } from '@/lib/directus';
+
+export const prerender = false;
+
+let recursos: RecursoPrensa[] = [];
+try {
+  const res = await directus.request(
+    readItems('recursos_prensa' as any, {
+      filter: { status: { _eq: 'published' } },
+      sort: ['-id'],
+      limit: 24,
+      fields: [
+        'id',
+        'status',
+        'titulo',
+        'tipo_recurso',
+        'resolucion_formato',
+        'tamano_mb',
+        'archivo.*',
+        'miniatura.*',
+        'derechos_creditos',
+      ],
+    })
+  );
+  recursos = (res as any) || [];
+} catch (e) {
+  console.error('Error loading /press-kits:', e);
+}
+
+const DEFAULT_KIT_THUMBS = [
+  'https://images.unsplash.com/photo-1514306191717-452ec28c7814?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1574391884720-bbc3740c59d1?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=800&auto=format&fit=crop',
+];
+---
+
+<Layout
+  title="Press Kits Oficiales y Recursos Multimedia | Madrid Live Press"
+  description="Materiales multimedia oficiales de alta resolución, B-roll en 4K, dossiers técnicos y recursos para redacciones internacionales."
+  lang="es"
+>
+  <div class="w-full bg-paper">
+    <!-- Top Wireframe Header "PRESS KITS" (Clean Baseline Cut) -->
+    <WireframeHeader
+      title="PRESS KITS"
+      subtitle="Materiales oficiales, B-roll en 4K, fotografía de alta resolución y dossiers técnicos listos para su uso editorial sin registro previo."
+      badge="24 RECURSOS"
+      updatedTime="ALTA RESOLUCIÓN · BILINGÜE"
+    />
+
+    <!-- Filter Control Bar -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 border-b border-zinc-200">
+      <div class="flex items-center justify-between gap-4 flex-wrap">
+        <div class="flex items-center gap-2 sm:gap-3 flex-wrap font-mono text-xs" id="kitTypeFilters">
+          <button type="button" class="kit-btn px-3 py-1.5 border border-zinc-950 bg-zinc-950 text-white font-bold is-active" data-type="all">
+            TODOS LOS RECURSOS
+          </button>
+          <button type="button" class="kit-btn px-3 py-1.5 border border-zinc-200 bg-paper text-zinc-700 hover:border-zinc-950" data-type="foto">
+            FOTOGRAFÍA ALTA RESOLUCIÓN
+          </button>
+          <button type="button" class="kit-btn px-3 py-1.5 border border-zinc-200 bg-paper text-zinc-700 hover:border-zinc-950" data-type="broll">
+            B-ROLL & VÍDEO 4K
+          </button>
+          <button type="button" class="kit-btn px-3 py-1.5 border border-zinc-200 bg-paper text-zinc-700 hover:border-zinc-950" data-type="dossier">
+            DOSSIERS & ESTUDIOS
+          </button>
+          <button type="button" class="kit-btn px-3 py-1.5 border border-zinc-200 bg-paper text-zinc-700 hover:border-zinc-950" data-type="logos">
+            LOGOS VECTORIALES
+          </button>
+        </div>
+
+        <div class="font-mono text-xs text-zinc-500">
+          USO EDITORIAL LIBRE DE DERECHOS (CC-BY 4.0)
+        </div>
+      </div>
+    </div>
+
+    <!-- Press Kits Grid -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div id="kitsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+        {recursos.map((kit, index) => {
+          const thumb = kit.miniatura
+            ? getAssetUrl(kit.miniatura, { width: 600, height: 400, format: 'webp' })
+            : DEFAULT_KIT_THUMBS[index % DEFAULT_KIT_THUMBS.length];
+          const fileUrl = kit.archivo ? getAssetUrl(kit.archivo) : thumb;
+          const type = kit.tipo_recurso || (index % 3 === 0 ? 'foto' : index % 3 === 1 ? 'broll' : 'dossier');
+
+          return (
+            <div
+              class="kit-card group border border-zinc-200 bg-paper hover:border-zinc-950 transition-all flex flex-col justify-between"
+              data-type={type}
+            >
+              <!-- Thumbnail -->
+              <div class="relative aspect-[16/10] overflow-hidden bg-zinc-100 border-b border-zinc-200">
+                <img
+                  src={thumb}
+                  alt={kit.titulo}
+                  class="w-full h-full object-cover filter contrast-105 group-hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                />
+                <div class="absolute top-3 left-3 bg-paper/95 backdrop-blur-sm border border-zinc-200 font-mono text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider text-zinc-950">
+                  {kit.resolucion_formato || 'Alta Resolución · RAW/TIFF'}
+                </div>
+              </div>
+
+              <!-- Content -->
+              <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
+                <div class="space-y-2">
+                  <span class="font-mono text-[10px] uppercase tracking-wider text-zinc-500 block">
+                    {kit.tamano_mb ? `${kit.tamano_mb} MB` : 'ZIP ALTA RESOLUCIÓN'}
+                  </span>
+                  <h3 class="font-display text-lg font-bold text-zinc-950 group-hover:text-vermilion transition-colors leading-snug">
+                    {kit.titulo}
+                  </h3>
+                  <p class="font-sans text-xs text-zinc-600 leading-relaxed">
+                    {kit.derechos_creditos || 'Créditos: © NocheMadrid / Madrid Live Press. Libre para uso informativo.'}
+                  </p>
+                </div>
+
+                <!-- Download CTA -->
+                <div class="pt-4 border-t border-zinc-100">
+                  <a
+                    href={fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    download
+                    class="w-full bg-paper hover:bg-zinc-950 hover:text-white border border-zinc-950 text-zinc-950 font-mono text-xs uppercase tracking-wider font-bold py-3 px-4 flex items-center justify-between transition-all active:scale-[0.98]"
+                  >
+                    <span>Descargar Press Kit</span>
+                    <span>↓</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  </div>
+
+  <!-- Client-side filter script -->
+  <script is:inline>
+    function setupKits() {
+      const btns = document.querySelectorAll('.kit-btn');
+      const cards = document.querySelectorAll('.kit-card');
+
+      btns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          btns.forEach((b) => {
+            b.classList.remove('border-zinc-950', 'bg-zinc-950', 'text-white', 'font-bold', 'is-active');
+            b.classList.add('border-zinc-200', 'bg-paper', 'text-zinc-700');
+          });
+
+          btn.classList.add('border-zinc-950', 'bg-zinc-950', 'text-white', 'font-bold', 'is-active');
+          btn.classList.remove('border-zinc-200', 'bg-paper', 'text-zinc-700');
+
+          const type = btn.getAttribute('data-type');
+          cards.forEach((c) => {
+            const cType = c.getAttribute('data-type');
+            if (type === 'all' || cType === type) {
+              c.style.display = 'flex';
+            } else {
+              c.style.display = 'none';
+            }
+          });
+        });
+      });
+    }
+
+    document.addEventListener('astro:page-load', setupKits);
+    setupKits();
+  </script>
+</Layout>

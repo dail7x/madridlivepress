@@ -1,6 +1,7 @@
 ---
 import Layout from '@/layouts/Layout.astro';
 import BlockRenderer from '@/components/blocks/BlockRenderer.astro';
+import BlockPressMentions from '@/components/blocks/BlockPressMentions.astro';
 import { getPageBySlug, getAssetUrl } from '@/lib/directus';
 import type { PageBlockItem } from '@/lib/directus';
 
@@ -50,7 +51,7 @@ const defaultBlocks: PageBlockItem[] = [
     collection: 'block_venues_map',
     item: {
       id: 'default-venues',
-      titulo: 'Red de Espacios Asociados: 96 Salas en la Comunidad de Madrid',
+      titulo: 'Red de Espacios Asociados en la Comunidad de Madrid',
       descripcion: 'Consulta las fichas técnicas, aforos, contactos de medios y ubicaciones de nuestras discotecas, salas de conciertos y teatros musicales.',
       distrito_defecto: 'all',
       tipo_local_defecto: 'all',
@@ -84,4 +85,5 @@ const blocksToRender = page?.bloques && page.bloques.length > 0 ? page.bloques :
 
 <Layout title={title} description={description} image={seoImage} lang="es">
   <BlockRenderer bloques={blocksToRender} lang="es" />
+  <BlockPressMentions lang="es" />
 </Layout>
