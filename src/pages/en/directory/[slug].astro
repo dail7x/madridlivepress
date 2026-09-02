@@ -61,6 +61,8 @@ const igUrl = sala.instagram ? `https://instagram.com/${sala.instagram.replace('
   title={`${sala.nombre} — Press Dossier & Technical Sheet | Madrid Live Press`}
   description={desc || `${sala.nombre} in Madrid.`}
   lang="en"
+  alternateUrlEs={`/directorio/${sala.slug}`}
+  alternateUrlEn={`/en/directory/${sala.slug}`}
 >
   <div class="w-full bg-paper pb-20">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-4 border-b border-zinc-200 flex items-center justify-between font-mono text-xs text-zinc-500">

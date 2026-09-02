@@ -1,9 +1,11 @@
 ---
 interface Props {
   lang?: 'es' | 'en';
+  alternateUrlEs?: string;
+  alternateUrlEn?: string;
 }
 
-const { lang = 'es' } = Astro.props;
+const { lang = 'es', alternateUrlEs, alternateUrlEn } = Astro.props;
 const currentPath = Astro.url.pathname;
 const isEn = lang === 'en' || currentPath.startsWith('/en');
 
@@ -48,8 +50,8 @@ function getAlternateLanguagePath(pathname: string, targetLang: 'es' | 'en'): st
   return pathname;
 }
 
-const targetPathEs = getAlternateLanguagePath(currentPath, 'es');
-const targetPathEn = getAlternateLanguagePath(currentPath, 'en');
+const targetPathEs = alternateUrlEs || getAlternateLanguagePath(currentPath, 'es');
+const targetPathEn = alternateUrlEn || getAlternateLanguagePath(currentPath, 'en');
 
 const navItems = isEn
   ? [

@@ -4,6 +4,7 @@ interface Props {
   scriptText: string;
   duration?: string;
   audioUrl?: string;
+  slug?: string;
   lang?: 'es' | 'en';
 }
 
@@ -12,20 +13,25 @@ const {
   scriptText,
   duration = '1:30 min',
   audioUrl,
+  slug = '',
   lang = 'es',
 } = Astro.props;
 
 const isEn = lang === 'en';
 const playerId = `audio-brief-${Math.random().toString(36).substring(2, 9)}`;
+const ttsEndpoint = `/api/elevenlabs-tts?slug=${encodeURIComponent(slug)}&lang=${lang}&text=${encodeURIComponent(scriptText)}`;
 ---
 
 <div
   id={playerId}
   class="audio-brief-player border border-zinc-200 bg-canvas p-4 sm:p-5 transition-all hover:border-zinc-950 font-mono text-xs my-6 select-none"
   data-text={scriptText}
-  data-audio={audioUrl || ''}
+  data-audio={audioUrl || ttsEndpoint}
   data-lang={isEn ? 'en-US' : 'es-ES'}
 >
+  <!-- Hidden Audio Element -->
+  <audio class="brief-audio-element" preload="none"></audio>
+
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-zinc-200">
     <!-- Header info & Badges -->
     <div class="flex items-center gap-2">
@@ -37,7 +43,7 @@ const playerId = `audio-brief-${Math.random().toString(36).substring(2, 9)}`;
         {isEn ? 'NEURAL AUDIO BRIEF (ELEVENLABS)' : 'AUDIO-BRIEF NEURONAL (ELEVENLABS)'}
       </span>
       <span class="text-zinc-300">·</span>
-      <span class="text-zinc-500 uppercase">{duration}</span>
+      <span class="text-zinc-500 uppercase audio-status-badge">{duration}</span>
     </div>
 
     <!-- Speed controller -->
@@ -60,6 +66,11 @@ const playerId = `audio-brief-${Math.random().toString(36).substring(2, 9)}`;
       <!-- Play Icon -->
       <svg class="play-icon w-5 h-5 translate-x-0.5" fill="currentColor" viewBox="0 0 24 24">
         <polygon points="5 3 19 12 5 21 5 3"></polygon>
+      </svg>
+      <!-- Loading Spinner (hidden by default) -->
+      <svg class="loading-icon w-5 h-5 animate-spin hidden" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
       </svg>
       <!-- Pause Icon (hidden by default) -->
       <svg class="pause-icon w-5 h-5 hidden" fill="currentColor" viewBox="0 0 24 24">
@@ -88,15 +99,15 @@ const playerId = `audio-brief-${Math.random().toString(36).substring(2, 9)}`;
 
       <!-- Scrubber track -->
       <div class="scrubber-track relative w-full h-1.5 bg-zinc-200 cursor-pointer overflow-hidden">
-        <div class="scrubber-fill h-full bg-zinc-950 w-0 transition-all duration-100"></div>
+        <div class="scrubber-fill h-full bg-zinc-950 w-0 transition-all duration-75"></div>
       </div>
     </div>
   </div>
 
   <p class="font-sans text-[11px] text-zinc-500 italic pt-2">
     {isEn
-      ? 'Generated automatically with ElevenLabs neural voice model for high-speed editorial consumption.'
-      : 'Locución sintética de alta fidelidad generada mediante síntesis neuronal ElevenLabs para consumo informativo rápido.'}
+      ? 'Voice narration synthesized with ElevenLabs Neural Voice Model (eleven_multilingual_v2).'
+      : 'Locución sintética de alta fidelidad generada mediante síntesis neuronal ElevenLabs (eleven_multilingual_v2).'}
   </p>
 </div>
 
@@ -105,32 +116,37 @@ const playerId = `audio-brief-${Math.random().toString(36).substring(2, 9)}`;
     const players = document.querySelectorAll('.audio-brief-player');
 
     players.forEach((player) => {
+      const audioEl = player.querySelector('.brief-audio-element');
       const playBtn = player.querySelector('.play-toggle-btn');
       const playIcon = player.querySelector('.play-icon');
       const pauseIcon = player.querySelector('.pause-icon');
+      const loadingIcon = player.querySelector('.loading-icon');
       const currentTimeEl = player.querySelector('.current-time');
+      const totalTimeEl = player.querySelector('.total-time');
       const scrubberFill = player.querySelector('.scrubber-fill');
       const scrubberTrack = player.querySelector('.scrubber-track');
       const waveBars = player.querySelectorAll('.wave-bar');
       const speedBtns = player.querySelectorAll('.speed-btn');
+      const statusBadge = player.querySelector('.audio-status-badge');
 
       const text = player.getAttribute('data-text') || '';
-      const customAudio = player.getAttribute('data-audio') || '';
+      const audioSrc = player.getAttribute('data-audio') || '';
       const speechLang = player.getAttribute('data-lang') || 'es-ES';
 
       let isPlaying = false;
       let currentRate = 1.0;
+      let usingFallbackTTS = false;
       let synthUtterance = null;
-      let timerInterval = null;
+      let synthTimer = null;
       let elapsedSeconds = 0;
-      const estimatedTotalSeconds = 90;
+      const fallbackTotalSeconds = 90;
 
       function updateWaveform(active) {
         waveBars.forEach((bar, idx) => {
           if (active) {
             bar.classList.add('bg-vermilion');
             bar.classList.remove('bg-zinc-400');
-            bar.style.animation = `pulse 0.${6 + (idx % 4)}s infinite alternate ease-in-out`;
+            bar.style.animation = `pulse 0.${5 + (idx % 4)}s infinite alternate ease-in-out`;
           } else {
             bar.classList.remove('bg-vermilion');
             bar.classList.add('bg-zinc-400');
@@ -140,77 +156,147 @@ const playerId = `audio-brief-${Math.random().toString(36).substring(2, 9)}`;
       }
 
       function formatTime(sec) {
+        if (isNaN(sec) || !isFinite(sec)) return '0:00';
         const m = Math.floor(sec / 60);
         const s = Math.floor(sec % 60);
         return `${m}:${s < 10 ? '0' : ''}${s}`;
       }
 
-      function stopAudio() {
-        if ('speechSynthesis' in window) {
-          window.speechSynthesis.cancel();
-        }
-        isPlaying = false;
-        playIcon?.classList.remove('hidden');
-        pauseIcon?.classList.add('hidden');
-        updateWaveform(false);
-        if (timerInterval) clearInterval(timerInterval);
+      function setPlayingState() {
+        isPlaying = true;
+        playIcon?.classList.add('hidden');
+        loadingIcon?.classList.add('hidden');
+        pauseIcon?.classList.remove('hidden');
+        updateWaveform(true);
       }
 
-      function startAudio() {
-        if (!('speechSynthesis' in window)) {
-          alert('Web Speech API is not supported in this browser.');
-          return;
-        }
+      function setPausedState() {
+        isPlaying = false;
+        playIcon?.classList.remove('hidden');
+        loadingIcon?.classList.add('hidden');
+        pauseIcon?.classList.add('hidden');
+        updateWaveform(false);
+      }
 
+      function setLoadingState() {
+        playIcon?.classList.add('hidden');
+        pauseIcon?.classList.add('hidden');
+        loadingIcon?.classList.remove('hidden');
+      }
+
+      // 1. Audio Element Event Listeners
+      if (audioEl) {
+        audioEl.addEventListener('play', () => {
+          setPlayingState();
+        });
+
+        audioEl.addEventListener('pause', () => {
+          setPausedState();
+        });
+
+        audioEl.addEventListener('ended', () => {
+          setPausedState();
+          if (scrubberFill) scrubberFill.style.width = '0%';
+          if (currentTimeEl) currentTimeEl.textContent = '0:00';
+        });
+
+        audioEl.addEventListener('timeupdate', () => {
+          if (!audioEl.duration) return;
+          const cur = audioEl.currentTime;
+          const dur = audioEl.duration;
+          if (currentTimeEl) currentTimeEl.textContent = formatTime(cur);
+          if (totalTimeEl && isFinite(dur)) totalTimeEl.textContent = formatTime(dur);
+          const pct = Math.min((cur / dur) * 100, 100);
+          if (scrubberFill) scrubberFill.style.width = `${pct}%`;
+        });
+
+        audioEl.addEventListener('error', (e) => {
+          console.warn('ElevenLabs audio load error, falling back to Web Speech API:', e);
+          usingFallbackTTS = true;
+          startFallbackSpeech();
+        });
+      }
+
+      // 2. Fallback Web Speech API
+      function startFallbackSpeech() {
+        if (!('speechSynthesis' in window)) return;
         window.speechSynthesis.cancel();
-
         synthUtterance = new SpeechSynthesisUtterance(text);
         synthUtterance.lang = speechLang;
         synthUtterance.rate = currentRate;
-        synthUtterance.pitch = 1.0;
 
-        // Try to pick a natural/neural voice if available in system
-        const voices = window.speechSynthesis.getVoices();
-        const preferredVoice = voices.find((v) =>
-          v.lang.startsWith(speechLang.split('-')[0]) && (v.name.includes('Neural') || v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Jorge') || v.name.includes('Monica') || v.name.includes('Samantha'))
-        );
-        if (preferredVoice) {
-          synthUtterance.voice = preferredVoice;
-        }
+        synthUtterance.onstart = () => {
+          setPlayingState();
+        };
 
         synthUtterance.onend = () => {
-          stopAudio();
+          setPausedState();
           elapsedSeconds = 0;
-          if (scrubberFill) scrubberFill.style.width = '100%';
+          if (scrubberFill) scrubberFill.style.width = '0%';
+          if (synthTimer) clearInterval(synthTimer);
         };
 
         synthUtterance.onerror = () => {
-          stopAudio();
+          setPausedState();
+          if (synthTimer) clearInterval(synthTimer);
         };
 
         window.speechSynthesis.speak(synthUtterance);
-        isPlaying = true;
-        playIcon?.classList.add('hidden');
-        pauseIcon?.classList.remove('hidden');
-        updateWaveform(true);
+        setPlayingState();
 
-        timerInterval = setInterval(() => {
+        if (synthTimer) clearInterval(synthTimer);
+        synthTimer = setInterval(() => {
           elapsedSeconds += 1 * currentRate;
           if (currentTimeEl) currentTimeEl.textContent = formatTime(elapsedSeconds);
-          const percent = Math.min((elapsedSeconds / estimatedTotalSeconds) * 100, 100);
-          if (scrubberFill) scrubberFill.style.width = `${percent}%`;
+          const pct = Math.min((elapsedSeconds / fallbackTotalSeconds) * 100, 100);
+          if (scrubberFill) scrubberFill.style.width = `${pct}%`;
         }, 1000);
       }
 
-      playBtn?.addEventListener('click', () => {
+      function stopFallbackSpeech() {
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+        }
+        setPausedState();
+        if (synthTimer) clearInterval(synthTimer);
+      }
+
+      // 3. Play / Pause Click Handler
+      playBtn?.addEventListener('click', async () => {
+        if (usingFallbackTTS) {
+          if (isPlaying) {
+            stopFallbackSpeech();
+          } else {
+            startFallbackSpeech();
+          }
+          return;
+        }
+
+        if (!audioEl) return;
+
         if (isPlaying) {
-          stopAudio();
+          audioEl.pause();
         } else {
-          startAudio();
+          // Initialize source if empty
+          if (!audioEl.src || audioEl.src === window.location.href) {
+            setLoadingState();
+            audioEl.src = audioSrc;
+            audioEl.playbackRate = currentRate;
+          }
+
+          try {
+            audioEl.playbackRate = currentRate;
+            await audioEl.play();
+            setPlayingState();
+          } catch (err) {
+            console.warn('Audio play failed, activating fallback:', err);
+            usingFallbackTTS = true;
+            startFallbackSpeech();
+          }
         }
       });
 
-      // Speed controls
+      // 4. Speed Buttons
       speedBtns.forEach((btn) => {
         btn.addEventListener('click', () => {
           speedBtns.forEach((b) => {
@@ -221,22 +307,29 @@ const playerId = `audio-brief-${Math.random().toString(36).substring(2, 9)}`;
           btn.classList.remove('text-zinc-600');
 
           currentRate = parseFloat(btn.getAttribute('data-speed') || '1');
-          if (isPlaying) {
-            stopAudio();
-            startAudio();
+          if (audioEl) {
+            audioEl.playbackRate = currentRate;
+          }
+          if (usingFallbackTTS && isPlaying) {
+            stopFallbackSpeech();
+            startFallbackSpeech();
           }
         });
       });
 
-      // Click scrubber
+      // 5. Scrubber Seeking
       scrubberTrack?.addEventListener('click', (e) => {
         const rect = scrubberTrack.getBoundingClientRect();
         const clickX = e.clientX - rect.left;
-        const width = rect.width;
-        const pct = Math.max(0, Math.min(clickX / width, 1));
-        elapsedSeconds = pct * estimatedTotalSeconds;
-        if (currentTimeEl) currentTimeEl.textContent = formatTime(elapsedSeconds);
-        if (scrubberFill) scrubberFill.style.width = `${pct * 100}%`;
+        const pct = Math.max(0, Math.min(clickX / rect.width, 1));
+
+        if (!usingFallbackTTS && audioEl && audioEl.duration) {
+          audioEl.currentTime = pct * audioEl.duration;
+        } else if (usingFallbackTTS) {
+          elapsedSeconds = pct * fallbackTotalSeconds;
+          if (currentTimeEl) currentTimeEl.textContent = formatTime(elapsedSeconds);
+          if (scrubberFill) scrubberFill.style.width = `${pct * 100}%`;
+        }
       });
     });
   }

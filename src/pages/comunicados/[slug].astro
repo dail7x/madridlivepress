@@ -18,7 +18,10 @@ try {
   const res = await directus.request(
     readItems('comunicados' as any, {
       filter: {
-        slug: { _eq: slug },
+        _or: [
+          { slug: { _eq: slug } },
+          { slug_en: { _eq: slug } },
+        ],
         status: { _eq: 'published' },
       },
       fields: [
@@ -58,6 +61,11 @@ if (!item) {
   return Astro.redirect('/404');
 }
 
+// Canonical redirect if hit with English slug in Spanish route
+if (slug !== item.slug) {
+  return Astro.redirect(`/comunicados/${item.slug}`, 301);
+}
+
 const cat = item.categoria as Categoria | undefined;
 const portavoz = item.portavoz as Portavoz | undefined;
 const pdfUrl = item.archivo_pdf ? getAssetUrl(item.archivo_pdf) : null;
@@ -83,6 +91,8 @@ const tagsList = item.tags && item.tags.length > 0
   description={item.bajada || item.titulo}
   image={heroImg}
   lang="es"
+  alternateUrlEs={`/comunicados/${item.slug}`}
+  alternateUrlEn={`/en/news/${item.slug_en || item.slug}`}
 >
   <article class="w-full bg-paper pb-16 md:pb-8">
     <!-- Top Monospaced Breadcrumb (Exact Reference 2 & Mobile 2) -->
@@ -290,6 +300,7 @@ const tagsList = item.tags && item.tags.length > 0
               scriptText={item.audio_script_es || item.bajada || item.titulo}
               duration={item.audio_duracion || '1:30 min'}
               audioUrl={item.audio_url}
+              slug={item.slug}
               lang="es"
             />
           )}

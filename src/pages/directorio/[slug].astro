@@ -67,6 +67,8 @@ const instaUrl = (item as any).instagram_url || 'https://www.instagram.com/noche
   description={item.descripcion || `Ficha oficial del espacio ${item.nombre}, asociado a NocheMadrid.`}
   image={photoUrl}
   lang="es"
+  alternateUrlEs={`/directorio/${item.slug}`}
+  alternateUrlEn={`/en/directory/${item.slug}`}
 >
   <article class="w-full bg-paper pb-16">
     <!-- Breadcrumb -->

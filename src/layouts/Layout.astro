@@ -10,6 +10,8 @@ interface Props {
   description?: string;
   image?: string;
   lang?: 'es' | 'en';
+  alternateUrlEs?: string;
+  alternateUrlEn?: string;
 }
 
 const {
@@ -17,6 +19,8 @@ const {
   description = 'Sala de prensa virtual internacional de la noche, el ocio cultural y los 96 espacios asociados de Madrid, gestionada por NocheMadrid.',
   image = '/images/hero-backstage.webp',
   lang = 'es',
+  alternateUrlEs,
+  alternateUrlEn,
 } = Astro.props;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site || 'https://madridlivepress.116.203.118.1.sslip.io');
@@ -65,8 +69,8 @@ function getAlternateLanguagePath(pathname: string, targetLang: 'es' | 'en'): st
   return pathname;
 }
 
-const targetPathEs = getAlternateLanguagePath(currentPath, 'es');
-const targetPathEn = getAlternateLanguagePath(currentPath, 'en');
+const targetPathEs = alternateUrlEs || getAlternateLanguagePath(currentPath, 'es');
+const targetPathEn = alternateUrlEn || getAlternateLanguagePath(currentPath, 'en');
 ---
 
 <!doctype html>
@@ -162,7 +166,7 @@ const targetPathEn = getAlternateLanguagePath(currentPath, 'en');
       <!-- Main Column (Offset by left rail on desktop) -->
       <div class="flex-1 md:pl-14 lg:pl-16 flex flex-col min-w-0 pb-16 md:pb-0">
         <!-- Top Minimalist Navigation Header -->
-        <Header lang={lang} />
+        <Header lang={lang} alternateUrlEs={targetPathEs} alternateUrlEn={targetPathEn} />
 
         <!-- Main Page Content -->
         <main class="flex-grow w-full">

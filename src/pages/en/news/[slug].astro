@@ -63,6 +63,12 @@ if (!comunicado) {
   return Astro.redirect('/en/news');
 }
 
+// Canonical redirect if hit with Spanish slug in English route
+const canonicalEnSlug = comunicado.slug_en || comunicado.slug;
+if (slug !== canonicalEnSlug) {
+  return Astro.redirect(`/en/news/${canonicalEnSlug}`, 301);
+}
+
 const cat = comunicado.categoria as Categoria | undefined;
 const portavoz = comunicado.portavoz as Portavoz | undefined;
 const title = comunicado.titulo_en || comunicado.titulo;
@@ -84,6 +90,8 @@ const keyPoints = comunicado.puntos_clave_en && comunicado.puntos_clave_en.lengt
   title={`${title} | Madrid Live Press`}
   description={subtitle || title}
   lang="en"
+  alternateUrlEs={`/comunicados/${comunicado.slug}`}
+  alternateUrlEn={`/en/news/${canonicalEnSlug}`}
 >
   <article class="w-full bg-paper pb-20">
     <!-- Back breadcrumb -->
@@ -142,6 +150,7 @@ const keyPoints = comunicado.puntos_clave_en && comunicado.puntos_clave_en.lengt
           scriptText={audioScript}
           duration={comunicado.audio_duracion || '1:30 min'}
           audioUrl={comunicado.audio_url}
+          slug={canonicalEnSlug}
           lang="en"
         />
       )}
