@@ -46,13 +46,53 @@ export const ALL: APIRoute = async ({ request, url }) => {
     let articleId =
       body.key ||
       (Array.isArray(body.keys) && body.keys[0]) ||
+      body.keys ||
       body.payload?.id ||
       body.id ||
+      url.searchParams.get('key') ||
       url.searchParams.get('id');
 
-    if (!articleId) {
-      return new Response(JSON.stringify({ error: 'Missing article id or key' }), {
-        status: 400,
+    // Clean placeholder strings if template wasn't interpolated
+    if (typeof articleId === 'string' && (articleId.includes('{') || articleId.trim() === '')) {
+      articleId = null;
+    }
+
+    // 1. Fetch current article from Directus
+    let item: any = null;
+    if (articleId) {
+      const directusRes = await fetch(`${DIRECTUS_URL}/items/comunicados/${articleId}?fields=*`, {
+        headers: {
+          Authorization: `Bearer ${DIRECTUS_TOKEN}`,
+        },
+      });
+      if (directusRes.ok) {
+        const resJson = await directusRes.json();
+        item = resJson.data;
+      }
+    }
+
+    // Fallback: If no articleId or not found by ID, look up by slug or title from payload
+    if (!item && (body.payload?.slug || body.payload?.titulo)) {
+      const queryParam = body.payload.slug
+        ? `filter[slug][_eq]=${encodeURIComponent(body.payload.slug)}`
+        : `filter[titulo][_eq]=${encodeURIComponent(body.payload.titulo)}`;
+      const directusRes = await fetch(`${DIRECTUS_URL}/items/comunicados?${queryParam}&limit=1&fields=*`, {
+        headers: {
+          Authorization: `Bearer ${DIRECTUS_TOKEN}`,
+        },
+      });
+      if (directusRes.ok) {
+        const resJson = await directusRes.json();
+        item = resJson.data?.[0];
+        if (item) {
+          articleId = item.id;
+        }
+      }
+    }
+
+    if (!item || !articleId) {
+      return new Response(JSON.stringify({ error: 'Article not found in Directus', receivedBody: body }), {
+        status: 404,
         headers: { 'Content-Type': 'application/json' },
       });
     }
@@ -68,22 +108,6 @@ export const ALL: APIRoute = async ({ request, url }) => {
         );
       }
     }
-
-    // 1. Fetch current article from Directus
-    const directusRes = await fetch(`${DIRECTUS_URL}/items/comunicados/${articleId}?fields=*`, {
-      headers: {
-        Authorization: `Bearer ${DIRECTUS_TOKEN}`,
-      },
-    });
-
-    if (!directusRes.ok) {
-      return new Response(
-        JSON.stringify({ error: `Article ${articleId} not found in Directus`, status: directusRes.status }),
-        { status: directusRes.status, headers: { 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const { data: item } = await directusRes.json();
     if (!item) {
       return new Response(JSON.stringify({ error: 'Article record is null' }), {
         status: 404,

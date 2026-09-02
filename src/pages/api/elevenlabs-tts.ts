@@ -123,7 +123,7 @@ export const ALL: APIRoute = async ({ request, url }) => {
       });
     }
 
-    const elevenRes = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${selectedVoiceId}`, {
+    let elevenRes = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${selectedVoiceId}`, {
       method: 'POST',
       headers: {
         'xi-api-key': apiKey,
@@ -144,11 +144,40 @@ export const ALL: APIRoute = async ({ request, url }) => {
 
     if (!elevenRes.ok) {
       const errText = await elevenRes.text();
-      console.error('ElevenLabs API error:', elevenRes.status, errText);
-      return new Response(JSON.stringify({ error: 'ElevenLabs TTS generation failed', detail: errText }), {
-        status: elevenRes.status,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      console.warn('ElevenLabs API initial error:', elevenRes.status, errText);
+
+      // If quota exceeded or too long, automatically retry with concise lead (~350 chars) to fit in remaining credits
+      if (errText.includes('quota_exceeded') && trimmedText.length > 350) {
+        console.log('Retrying ElevenLabs TTS with concise audio brief text...');
+        const conciseText = trimmedText.slice(0, 350) + '.';
+        elevenRes = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${selectedVoiceId}`, {
+          method: 'POST',
+          headers: {
+            'xi-api-key': apiKey,
+            'Content-Type': 'application/json',
+            'Accept': 'audio/mpeg',
+          },
+          body: JSON.stringify({
+            text: conciseText,
+            model_id: 'eleven_multilingual_v2',
+            voice_settings: {
+              stability: 0.5,
+              similarity_boost: 0.75,
+              style: 0.0,
+              use_speaker_boost: true,
+            },
+          }),
+        });
+      }
+
+      if (!elevenRes.ok) {
+        const finalErr = await elevenRes.text();
+        console.error('ElevenLabs API final error:', elevenRes.status, finalErr);
+        return new Response(JSON.stringify({ error: 'ElevenLabs TTS generation failed', detail: finalErr }), {
+          status: elevenRes.status,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
     }
 
     const audioArrayBuffer = await elevenRes.arrayBuffer();
