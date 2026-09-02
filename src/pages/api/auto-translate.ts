@@ -194,6 +194,49 @@ Output raw JSON only. Do not include markdown codeblocks or conversational text.
       });
     }
 
+    // 4. Update or Insert Directus native Content Translations record for en-US
+    try {
+      const transCheck = await fetch(
+        `${DIRECTUS_URL}/items/comunicados_translations?filter[comunicados_id][_eq]=${articleId}&filter[languages_code][_eq]=en-US`,
+        { headers: { Authorization: `Bearer ${DIRECTUS_TOKEN}` } }
+      );
+      const transJson = await transCheck.json();
+      const existingEn = transJson.data?.[0];
+
+      const transData = {
+        comunicados_id: articleId,
+        languages_code: 'en-US',
+        titulo: parsed.titulo_en,
+        slug: generatedSlugEn,
+        bajada: parsed.bajada_en || '',
+        cuerpo: parsed.cuerpo_en || cuerpoEs,
+        audio_script: parsed.audio_script_en || '',
+        puntos_clave: Array.isArray(parsed.puntos_clave_en) ? parsed.puntos_clave_en : [],
+      };
+
+      if (existingEn) {
+        await fetch(`${DIRECTUS_URL}/items/comunicados_translations/${existingEn.id}`, {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${DIRECTUS_TOKEN}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(transData),
+        });
+      } else {
+        await fetch(`${DIRECTUS_URL}/items/comunicados_translations`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${DIRECTUS_TOKEN}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(transData),
+        });
+      }
+    } catch (transErr) {
+      console.warn('Could not sync to comunicados_translations:', transErr);
+    }
+
     return new Response(
       JSON.stringify({
         success: true,

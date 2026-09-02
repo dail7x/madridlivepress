@@ -1,15 +1,28 @@
 import type { APIRoute } from 'astro';
 import fs from 'node:fs';
 import path from 'node:path';
-import crypto from 'node:crypto';
 
 export const prerender = false;
 
-// Default high-quality neural voices in ElevenLabs
+const DIRECTUS_URL = process.env.DIRECTUS_URL || 'https://mlpdirectus.116.203.118.1.sslip.io';
+const DIRECTUS_TOKEN = process.env.DIRECTUS_STATIC_TOKEN || 'mlp_secret_directus_token_2026';
+
+// George (JBFqnCBsd6RMkjVDRZzb) for English (verified 200 OK on user account)
+// Adam (pNInz6obpgDQGcFmaJgB) for Spanish (verified 200 OK on user account)
 const DEFAULT_VOICES = {
-  es: 'pNInz6obpgDQGcFmaJgB', // Adam (Multilingual)
-  en: '21m00Tcm4TlvDq8ikWAM', // Rachel (Multilingual)
+  es: 'pNInz6obpgDQGcFmaJgB', // Adam
+  en: 'JBFqnCBsd6RMkjVDRZzb', // George
 };
+
+function cleanHtml(html: string): string {
+  if (!html) return '';
+  return html
+    .replace(/<\/(?:p|div|h[1-6]|li|blockquote)[^>]*>/gi, '. ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .replace(/\.+/g, '.')
+    .trim();
+}
 
 export const ALL: APIRoute = async ({ request, url }) => {
   try {
@@ -26,7 +39,7 @@ export const ALL: APIRoute = async ({ request, url }) => {
         slug = body.slug || '';
         voiceId = body.voiceId || '';
       } catch (e) {
-        // ignore json parse error
+        // ignore
       }
     }
 
@@ -37,24 +50,13 @@ export const ALL: APIRoute = async ({ request, url }) => {
       voiceId = url.searchParams.get('voiceId') || '';
     }
 
-    if (!text) {
-      return new Response(JSON.stringify({ error: 'Missing text parameter' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
     const selectedLang = lang.startsWith('en') ? 'en' : 'es';
-    const selectedVoiceId = voiceId || DEFAULT_VOICES[selectedLang];
-
-    // Determine cache key
-    const textHash = crypto.createHash('md5').update(`${selectedVoiceId}-${text}`).digest('hex').slice(0, 16);
-    const cleanSlug = slug ? slug.replace(/[^a-zA-Z0-9-_]/g, '').slice(0, 60) : 'brief';
-    const filename = `${cleanSlug}-${selectedLang}-${textHash}.mp3`;
+    const cleanSlug = slug ? slug.replace(/[^a-zA-Z0-9-_]/g, '').slice(0, 80) : 'brief';
     const audioDir = path.resolve(process.cwd(), 'public/audio/briefs');
+    const filename = `${cleanSlug}-${selectedLang}.mp3`;
     const filePath = path.join(audioDir, filename);
 
-    // 1. Check if cached on disk
+    // 1. Check if audio is already cached on disk (0ms latency, zero API cost)
     if (fs.existsSync(filePath)) {
       const cachedBuffer = fs.readFileSync(filePath);
       return new Response(cachedBuffer, {
@@ -67,7 +69,52 @@ export const ALL: APIRoute = async ({ request, url }) => {
       });
     }
 
-    // 2. Call ElevenLabs API
+    // 2. If text was not passed in query (to prevent 414 URI Too Long), fetch full article from Directus
+    if (!text && slug) {
+      try {
+        const filterQuery = encodeURIComponent(
+          JSON.stringify({
+            _or: [{ slug: { _eq: slug } }, { slug_en: { _eq: slug } }],
+            status: { _eq: 'published' },
+          })
+        );
+        const directusRes = await fetch(`${DIRECTUS_URL}/items/comunicados?filter=${filterQuery}&limit=1`, {
+          headers: { Authorization: `Bearer ${DIRECTUS_TOKEN}` },
+        });
+        if (directusRes.ok) {
+          const json = await directusRes.json();
+          const art = json.data?.[0];
+          if (art) {
+            if (selectedLang === 'en') {
+              const t = art.titulo_en || art.titulo || '';
+              const b = art.bajada_en || art.bajada || '';
+              const c = cleanHtml(art.cuerpo_en || art.cuerpo || '');
+              text = art.audio_script_en || `${t}. ${b}. ${c}`;
+            } else {
+              const t = art.titulo || '';
+              const b = art.bajada || '';
+              const c = cleanHtml(art.cuerpo || '');
+              text = art.audio_script_es || `${t}. ${b}. ${c}`;
+            }
+          }
+        }
+      } catch (fetchErr) {
+        console.warn('Could not load text from Directus for audio:', fetchErr);
+      }
+    }
+
+    if (!text) {
+      return new Response(JSON.stringify({ error: 'Missing text or slug parameter' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // ElevenLabs safety cutoff for free tier single request: 4,800 characters
+    const trimmedText = text.slice(0, 4800);
+    const selectedVoiceId = voiceId || DEFAULT_VOICES[selectedLang];
+
+    // 3. Call ElevenLabs Text-to-Speech API
     const apiKey = process.env.ELEVENLABS_API_KEY || (import.meta as any).env?.ELEVENLABS_API_KEY;
     if (!apiKey) {
       return new Response(JSON.stringify({ error: 'ELEVENLABS_API_KEY not configured' }), {
@@ -84,11 +131,11 @@ export const ALL: APIRoute = async ({ request, url }) => {
         'Accept': 'audio/mpeg',
       },
       body: JSON.stringify({
-        text,
+        text: trimmedText,
         model_id: 'eleven_multilingual_v2',
         voice_settings: {
-          stability: 0.55,
-          similarity_boost: 0.8,
+          stability: 0.5,
+          similarity_boost: 0.75,
           style: 0.0,
           use_speaker_boost: true,
         },
@@ -107,7 +154,7 @@ export const ALL: APIRoute = async ({ request, url }) => {
     const audioArrayBuffer = await elevenRes.arrayBuffer();
     const audioBuffer = Buffer.from(audioArrayBuffer);
 
-    // Save to disk cache
+    // 4. Save to disk cache
     try {
       if (!fs.existsSync(audioDir)) {
         fs.mkdirSync(audioDir, { recursive: true });

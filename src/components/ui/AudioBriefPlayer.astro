@@ -19,7 +19,7 @@ const {
 
 const isEn = lang === 'en';
 const playerId = `audio-brief-${Math.random().toString(36).substring(2, 9)}`;
-const ttsEndpoint = `/api/elevenlabs-tts?slug=${encodeURIComponent(slug)}&lang=${lang}&text=${encodeURIComponent(scriptText)}`;
+const ttsEndpoint = `/api/elevenlabs-tts?slug=${encodeURIComponent(slug)}&lang=${lang}`;
 ---
 
 <div
