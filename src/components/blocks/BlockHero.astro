@@ -43,146 +43,117 @@ const DEFAULT_THUMBS = [
   '/images/news/conciertos-otono.jpg',
   '/images/news/bad-bunny-residencia.jpg',
 ];
-
-// Filmstrip photos
-const FILMSTRIP_ITEMS = [
-  { img: '/images/news/conciertos-otono.jpg', tag: 'SALA DE ENSAYO' },
-  { img: '/images/news/enlacolasilencio.jpg', tag: 'NOCHEMADRID' },
-  { img: '/images/news/dos-millones-turistas.jpg', tag: 'MADRID' },
-  { img: '/images/news/tardeo-madrid.jpg', tag: 'ESCENARIO →' },
-];
 ---
 
 <section class="w-full bg-paper border-b border-zinc-200">
-  <!-- Top Wireframe Header "MADRID LIVE PRESS" -->
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
-    <div class="w-full h-12 sm:h-16 lg:h-20 overflow-hidden flex items-end select-none pointer-events-none">
-      <span class="font-display font-black text-4xl sm:text-6xl lg:text-7xl xl:text-[5.75rem] tracking-tight leading-none text-wireframe block translate-y-1 sm:translate-y-3 whitespace-nowrap">
+  <!-- Top Wireframe Header "MADRID LIVE PRESS" (Tightened to fit first viewport) -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 sm:pt-3">
+    <div class="w-full h-8 sm:h-12 lg:h-14 overflow-hidden flex items-end select-none pointer-events-none">
+      <span class="font-display font-black text-3xl sm:text-5xl lg:text-6xl xl:text-[4.25rem] tracking-tight leading-none text-wireframe block translate-y-1 whitespace-nowrap">
         MADRID LIVE PRESS
       </span>
     </div>
 
-    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 pt-2 pb-3 border-b border-zinc-200">
-      <div class="flex items-center gap-2 font-mono text-[11px] sm:text-xs text-zinc-600 uppercase tracking-wider">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-1.5 pt-1.5 pb-2 border-b border-zinc-200">
+      <div class="flex items-center gap-2 font-mono text-[11px] text-zinc-600 uppercase tracking-wider">
         <span class="w-2 h-2 rounded-full bg-vermilion inline-block animate-pulse"></span>
         <span class="font-bold text-zinc-950">{isEn ? 'LIVE PRESSROOM' : 'SALA DE PRENSA EN DIRECTO'}</span>
         <span class="text-zinc-300">·</span>
         <span>NOCHEMADRID</span>
       </div>
 
-      <div class="font-mono text-[11px] sm:text-xs text-zinc-500 uppercase tracking-wider">
+      <div class="font-mono text-[11px] text-zinc-500 uppercase tracking-wider">
         {isEn ? 'UPDATED 12:38 CET' : 'ACTUALIZADO 12:38 CET'}
       </div>
     </div>
   </div>
 
-  <!-- First Viewport Grid: Left Manifesto Box (60%) + Right Latest News (40%) -->
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-      <!-- Left Column: Manifesto Card with Editorial Filmstrip -->
+  <!-- First Viewport Grid: Left Manifesto Box (~58%) + Right Latest News (~42%) Perfectly Height-Balanced -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 sm:pt-2.5 pb-2.5 sm:pb-3">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 items-stretch">
+      <!-- Left Column: Manifesto Card (Filmstrip removed, compact and aligned with right cards) -->
       <div class="lg:col-span-7 border border-zinc-300 bg-paper hover:border-zinc-950 transition-all flex flex-col justify-between shadow-xs">
-        <!-- Card Main Interior: Text on Left (~72%) + Analog Filmstrip on Right (~28%) -->
-        <div class="grid grid-cols-1 sm:grid-cols-12 flex-1 items-stretch">
-          <!-- Text and Actions Area -->
-          <div class="sm:col-span-8 p-5 sm:p-7 flex flex-col justify-between space-y-6">
-            <div class="space-y-4">
-              <!-- Manifiesto Label -->
-              <div class="inline-block">
-                <span class="font-mono text-[11px] font-bold text-zinc-900 uppercase tracking-widest block">
-                  {isEn ? 'MANIFESTO / 001' : 'MANIFIESTO / 001'}
-                </span>
-                <span class="block h-0.5 w-full bg-vermilion mt-1"></span>
-              </div>
-
-              <!-- Animated Permanent Headline: MADRID VIVE. AQUÍ SE CUENTA. -->
-              <h1 class="manifesto-headline font-display font-black text-3xl sm:text-4xl lg:text-[2.85rem] text-zinc-950 leading-[1.08] tracking-tight">
-                <!-- Line 1: MADRID (Vertical Mask) VIVE. (Drops 12px) -->
-                <div class="overflow-hidden flex items-baseline gap-2.5">
-                  <span class="anim-madrid inline-block">
-                    {isEn ? 'MADRID' : 'MADRID'}
-                  </span>
-                  <span class="anim-vive inline-block">
-                    {isEn ? 'LIVES.' : 'VIVE.'}
-                  </span>
-                </div>
-
-                <!-- Line 2: AQUÍ SE CUENTA. (Word by word with crimson live dot) -->
-                <div class="overflow-hidden flex items-baseline gap-2.5 pt-1">
-                  <span class="anim-word-1 inline-block">{isEn ? 'REPORTED' : 'AQUÍ'}</span>
-                  <span class="anim-word-2 inline-block">{isEn ? 'FROM' : 'SE'}</span>
-                  <span class="anim-word-3 inline-block">{isEn ? 'WITHIN' : 'CUENTA'}</span>
-                  <span class="anim-dot inline-block text-vermilion select-none text-[1.1em] leading-none">.</span>
-                </div>
-              </h1>
-
-              <!-- Subtitle / Mission Statement -->
-              <p class="font-sans text-xs sm:text-sm text-zinc-600 leading-relaxed max-w-lg">
-                {isEn
-                  ? 'Verified news, official sources and media assets to report on Madrid nightlife, concerts and performing arts.'
-                  : 'Información verificada, fuentes oficiales y recursos para contar el ocio y los espectáculos de Madrid.'}
-              </p>
+        <!-- Main Content Area -->
+        <div class="p-4 sm:p-5 lg:p-6 flex-1 flex flex-col justify-between space-y-4">
+          <div class="space-y-2.5 sm:space-y-3">
+            <!-- Manifiesto Label -->
+            <div class="inline-block">
+              <span class="font-mono text-[10px] sm:text-[11px] font-bold text-zinc-900 uppercase tracking-widest block">
+                {isEn ? 'MANIFESTO / 001' : 'MANIFIESTO / 001'}
+              </span>
+              <span class="block h-0.5 w-full bg-vermilion mt-0.5"></span>
             </div>
 
-            <!-- Typewriter Animated Line with Crimson Cursor -->
-            <div class="pt-2">
-              <div class="typewriter-container flex items-center gap-1 font-mono text-xs font-bold text-zinc-900 uppercase tracking-wider py-1 border-t border-zinc-100">
-                <span
-                  class="typewriter-text"
-                  data-words={JSON.stringify(
-                    isEn
-                      ? ['VERIFIED NEWS', 'OFFICIAL SOURCES', 'MULTIMEDIA ASSETS', 'READY TO PUBLISH']
-                      : ['NOTICIAS VERIFICADAS', 'FUENTES OFICIALES', 'RECURSOS MULTIMEDIA', 'LISTO PARA PUBLICAR']
-                  )}
-                >
-                  {isEn ? 'VERIFIED NEWS' : 'NOTICIAS VERIFICADAS'}
+            <!-- Animated Permanent Headline: MADRID VIVE. AQUÍ SE CUENTA. -->
+            <h1 class="manifesto-headline font-display font-black text-2xl sm:text-3xl lg:text-[2.35rem] text-zinc-950 leading-[1.08] tracking-tight">
+              <!-- Line 1: MADRID (Vertical Mask) VIVE. (Drops 12px) -->
+              <div class="overflow-hidden flex items-baseline gap-2">
+                <span class="anim-madrid inline-block">
+                  {isEn ? 'MADRID' : 'MADRID'}
                 </span>
-                <span class="typewriter-cursor text-vermilion font-black animate-pulse select-none">_</span>
+                <span class="anim-vive inline-block">
+                  {isEn ? 'LIVES.' : 'VIVE.'}
+                </span>
               </div>
-            </div>
 
-            <!-- Action Buttons -->
-            <div class="flex flex-wrap items-center gap-3 pt-2 font-mono text-xs">
-              <a
-                href={newsBase}
-                data-astro-prefetch="hover"
-                class="bg-zinc-950 hover:bg-vermilion text-white font-bold px-4 py-2.5 uppercase tracking-wider transition-colors inline-flex items-center gap-1.5 active:scale-95"
+              <!-- Line 2: AQUÍ SE CUENTA. (Word by word with crimson live dot) -->
+              <div class="overflow-hidden flex items-baseline gap-1.5 sm:gap-2 pt-0.5">
+                <span class="anim-word-1 inline-block">{isEn ? 'REPORTED' : 'AQUÍ'}</span>
+                <span class="anim-word-2 inline-block">{isEn ? 'FROM' : 'SE'}</span>
+                <span class="anim-word-3 inline-block">{isEn ? 'WITHIN' : 'CUENTA'}</span>
+                <span class="anim-dot inline-block text-vermilion select-none text-[1.15em] leading-none">.</span>
+              </div>
+            </h1>
+
+            <!-- Subtitle / Mission Statement -->
+            <p class="font-sans text-xs sm:text-[13px] text-zinc-600 leading-relaxed max-w-xl line-clamp-2">
+              {isEn
+                ? 'Verified news, official sources and media assets to report on Madrid nightlife, concerts and performing arts.'
+                : 'Información verificada, fuentes oficiales y recursos para contar el ocio y los espectáculos de Madrid.'}
+            </p>
+          </div>
+
+          <!-- Typewriter Animated Line with Crimson Cursor -->
+          <div class="pt-1">
+            <div class="typewriter-container flex items-center gap-1 font-mono text-xs font-bold text-zinc-900 uppercase tracking-wider py-1.5 border-t border-zinc-100 whitespace-nowrap overflow-hidden">
+              <span
+                class="typewriter-text truncate"
+                data-words={JSON.stringify(
+                  isEn
+                    ? ['VERIFIED NEWS', 'OFFICIAL SOURCES', 'MULTIMEDIA ASSETS', 'READY TO PUBLISH']
+                    : ['NOTICIAS VERIFICADAS', 'FUENTES OFICIALES', 'RECURSOS MULTIMEDIA', 'LISTO PARA PUBLICAR']
+                )}
               >
-                <span>{isEn ? 'ENTER PRESSROOM' : 'ENTRAR A LA SALA DE PRENSA'}</span>
-                <span>↗</span>
-              </a>
-              <a
-                href={`${prefix}/sobre-el-sector`}
-                data-astro-prefetch="hover"
-                class="border border-zinc-950 bg-paper hover:bg-zinc-100 text-zinc-950 font-bold px-4 py-2.5 uppercase tracking-wider transition-colors inline-flex items-center gap-1 active:scale-95"
-              >
-                <span>{isEn ? 'DISCOVER MADRID LIVE PRESS' : 'DESCUBRIR MADRID LIVE PRESS'}</span>
-                <span>↓</span>
-              </a>
+                {isEn ? 'VERIFIED NEWS' : 'NOTICIAS VERIFICADAS'}
+              </span>
+              <span class="typewriter-cursor text-vermilion font-black animate-pulse select-none flex-shrink-0">_</span>
             </div>
           </div>
 
-          <!-- Right Filmstrip: Analog Contact Sheet / Dark Frames -->
-          <div class="hidden sm:flex sm:col-span-4 border-l border-zinc-300 bg-zinc-950 p-2 flex-col justify-between gap-1.5 overflow-hidden select-none">
-            {FILMSTRIP_ITEMS.map((item) => (
-              <div class="relative flex-1 min-h-[58px] overflow-hidden bg-zinc-900 border border-zinc-800 group">
-                <img
-                  src={item.img}
-                  alt={item.tag}
-                  class="w-full h-full object-cover filter grayscale contrast-125 brightness-95 group-hover:filter-none transition-all duration-300 opacity-90 group-hover:opacity-100"
-                  loading="eager"
-                />
-                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none"></div>
-                <span class="absolute bottom-1 right-1.5 font-mono text-[9px] uppercase tracking-widest text-zinc-200 font-bold bg-black/70 px-1 py-0.5 border border-zinc-700">
-                  {item.tag}
-                </span>
-              </div>
-            ))}
+          <!-- Action Buttons -->
+          <div class="flex flex-wrap items-center gap-2.5 pt-1 font-mono text-xs">
+            <a
+              href={newsBase}
+              data-astro-prefetch="hover"
+              class="bg-zinc-950 hover:bg-vermilion text-white font-bold px-3.5 sm:px-4 py-2 uppercase tracking-wider transition-colors inline-flex items-center gap-1.5 active:scale-95 text-[11px] sm:text-xs"
+            >
+              <span>{isEn ? 'ENTER PRESSROOM' : 'ENTRAR A LA SALA DE PRENSA'}</span>
+              <span>↗</span>
+            </a>
+            <a
+              href={`${prefix}/sobre-el-sector`}
+              data-astro-prefetch="hover"
+              class="border border-zinc-950 bg-paper hover:bg-zinc-100 text-zinc-950 font-bold px-3.5 sm:px-4 py-2 uppercase tracking-wider transition-colors inline-flex items-center gap-1 active:scale-95 text-[11px] sm:text-xs"
+            >
+              <span>{isEn ? 'DISCOVER MADRID LIVE PRESS' : 'DESCUBRIR MADRID LIVE PRESS'}</span>
+              <span>↓</span>
+            </a>
           </div>
         </div>
 
         <!-- Manifesto Footer Metadata Strip -->
-        <div class="border-t border-zinc-200 bg-canvas px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between font-mono text-[10px] sm:text-[11px] text-zinc-600 tracking-wider uppercase">
-          <div class="flex items-center gap-3 sm:gap-4 flex-wrap">
+        <div class="border-t border-zinc-200 bg-canvas px-4 sm:px-5 py-2 flex flex-wrap items-center justify-between font-mono text-[10px] sm:text-[11px] text-zinc-600 tracking-wider uppercase">
+          <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
             <span>{isEn ? '96 ASSOCIATED VENUES' : '96 ASOCIADOS'}</span>
             <span class="text-zinc-300">|</span>
             <span>{isEn ? '3 LANGUAGES' : '3 IDIOMAS'}</span>
@@ -194,8 +165,8 @@ const FILMSTRIP_ITEMS = [
         </div>
       </div>
 
-      <!-- Right Column: 3 Stacked Latest News (Visible in First Viewport!) -->
-      <div class="lg:col-span-5 space-y-3 flex flex-col justify-between">
+      <!-- Right Column: 3 Stacked Latest News (Exact Height Alignment with Left Manifesto) -->
+      <div class="lg:col-span-5 flex flex-col justify-between space-y-2.5">
         <div class="flex items-center justify-between pb-1 border-b border-zinc-200 font-mono text-xs">
           <div class="font-bold text-zinc-950 uppercase tracking-wider flex items-center gap-1.5">
             <span class="w-1.5 h-1.5 rounded-full bg-vermilion inline-block"></span>
@@ -206,10 +177,10 @@ const FILMSTRIP_ITEMS = [
           </a>
         </div>
 
-        <div class="space-y-3 flex-1 flex flex-col justify-between">
+        <div class="space-y-2 flex-1 flex flex-col justify-between">
           {latestStories.map((story, idx) => {
             const cat = story.categoria as Categoria | undefined;
-            const imgUrl = (story as any).imagen_url_externa || (story.imagen_portada ? getAssetUrl(story.imagen_portada, { width: 350, height: 250, format: 'webp' }) : DEFAULT_THUMBS[idx % DEFAULT_THUMBS.length]);
+            const imgUrl = (story as any).imagen_url_externa || (story.imagen_portada ? getAssetUrl(story.imagen_portada, { width: 280, height: 200, format: 'webp' }) : DEFAULT_THUMBS[idx % DEFAULT_THUMBS.length]);
             const dateStr = new Date(story.fecha_publicacion).toLocaleDateString(isEn ? 'en-US' : 'es-ES', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase();
             const storyTitle = (isEn ? story.titulo_en : story.titulo) || story.titulo;
             const storySlug = (isEn ? (story.slug_en || story.slug) : story.slug);
@@ -219,10 +190,10 @@ const FILMSTRIP_ITEMS = [
               <a
                 href={`${newsBase}/${storySlug}`}
                 data-astro-prefetch="hover"
-                class="group block border border-zinc-200 bg-paper p-3 hover:border-zinc-950 transition-all shadow-2xs hover:shadow-xs active:scale-[0.99] flex-1"
+                class="group block border border-zinc-200 bg-paper p-2.5 hover:border-zinc-950 transition-all shadow-2xs hover:shadow-xs active:scale-[0.99] flex-1"
               >
                 <div class="grid grid-cols-12 gap-3 items-center h-full">
-                  <div class="col-span-4 aspect-[4/3] overflow-hidden bg-zinc-100 border border-zinc-200">
+                  <div class="col-span-4 aspect-[16/11] max-h-20 overflow-hidden bg-zinc-100 border border-zinc-200 flex-shrink-0">
                     <img
                       src={imgUrl}
                       alt={storyTitle}
@@ -230,15 +201,15 @@ const FILMSTRIP_ITEMS = [
                       loading="eager"
                     />
                   </div>
-                  <div class="col-span-8 flex flex-col justify-between h-full space-y-1">
-                    <div class="flex items-center justify-between font-mono text-[10px] text-zinc-500 uppercase tracking-wider">
+                  <div class="col-span-8 flex flex-col justify-between h-full space-y-0.5">
+                    <div class="flex items-center justify-between font-mono text-[9px] sm:text-[10px] text-zinc-500 uppercase tracking-wider">
                       <span class="text-zinc-950 font-bold">{catName}</span>
                       <span>{dateStr}</span>
                     </div>
-                    <h2 class="font-display font-bold text-xs sm:text-sm text-zinc-950 leading-snug line-clamp-2 group-hover:text-vermilion transition-colors">
+                    <h2 class="font-display font-bold text-xs sm:text-[13px] text-zinc-950 leading-snug line-clamp-2 group-hover:text-vermilion transition-colors">
                       {storyTitle}
                     </h2>
-                    <div class="text-right pt-1 font-mono text-xs text-zinc-400 group-hover:text-zinc-950 transition-colors">
+                    <div class="text-right font-mono text-[11px] text-zinc-400 group-hover:text-zinc-950 transition-colors">
                       →
                     </div>
                   </div>

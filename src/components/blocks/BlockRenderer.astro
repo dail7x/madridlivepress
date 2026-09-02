@@ -15,7 +15,7 @@ interface Props {
 const { bloques = [], lang = 'es' } = Astro.props;
 ---
 
-<div class="space-y-16 md:space-y-24 py-6">
+<div class="w-full flex flex-col">
   {
     bloques.map((block) => {
       const { collection, item } = block;
