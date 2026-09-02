@@ -12,7 +12,7 @@ const isEn = lang === 'en';
 const prefix = isEn ? '/en' : '';
 const newsBase = isEn ? '/en/news' : '/comunicados';
 
-// Pull latest stories directly with real images and translations
+// Pull latest 3 published stories
 let latestStories: Comunicado[] = [];
 try {
   const res = await directus.request(
@@ -39,18 +39,22 @@ try {
 }
 
 const DEFAULT_THUMBS = [
-  '/images/news/dos-millones-turistas.jpg',
-  '/images/news/tardeo-madrid.jpg',
+  '/images/news/enlacolasilencio.jpg',
+  '/images/news/conciertos-otono.jpg',
   '/images/news/bad-bunny-residencia.jpg',
 ];
 
-const heroImage = block.fondo
-  ? getAssetUrl(block.fondo, { quality: 90, format: 'webp' })
-  : '/images/news/enlacolasilencio.jpg';
+// Filmstrip photos
+const FILMSTRIP_ITEMS = [
+  { img: '/images/news/conciertos-otono.jpg', tag: 'SALA DE ENSAYO' },
+  { img: '/images/news/enlacolasilencio.jpg', tag: 'NOCHEMADRID' },
+  { img: '/images/news/dos-millones-turistas.jpg', tag: 'MADRID' },
+  { img: '/images/news/tardeo-madrid.jpg', tag: 'ESCENARIO →' },
+];
 ---
 
 <section class="w-full bg-paper border-b border-zinc-200">
-  <!-- Top Wireframe Header "MADRID LIVE PRESS" (Clean Baseline Cut) -->
+  <!-- Top Wireframe Header "MADRID LIVE PRESS" -->
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
     <div class="w-full h-12 sm:h-16 lg:h-20 overflow-hidden flex items-end select-none pointer-events-none">
       <span class="font-display font-black text-4xl sm:text-6xl lg:text-7xl xl:text-[5.75rem] tracking-tight leading-none text-wireframe block translate-y-1 sm:translate-y-3 whitespace-nowrap">
@@ -72,69 +76,140 @@ const heroImage = block.fondo
     </div>
   </div>
 
-  <!-- First Viewport Desktop Grid: Left Hero (60%) + Right 3 Latest News (40%) -->
+  <!-- First Viewport Grid: Left Manifesto Box (60%) + Right Latest News (40%) -->
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-      <!-- Left Column: Featured Editorial Story -->
-      <div class="lg:col-span-7 border border-zinc-200 bg-paper hover:border-zinc-950 transition-all p-0 flex flex-col justify-between">
-        <!-- Panoramic Compact Visual -->
-        <div class="relative aspect-[21/9] sm:aspect-[16/8] max-h-56 lg:max-h-64 w-full overflow-hidden bg-zinc-100 border-b border-zinc-200">
-          <img
-            src={heroImage}
-            alt={block.titular || 'Madrid Live Press'}
-            class="h-full w-full object-cover filter contrast-105"
-            loading="eager"
-          />
-          <div class="absolute top-3 left-3 bg-paper/95 border border-zinc-200 px-2 py-0.5 font-mono text-[10px] font-bold text-zinc-950 uppercase tracking-wider">
-            {isEn ? 'PORTAL / 001' : 'PORTADA / 001'}
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+      <!-- Left Column: Manifesto Card with Editorial Filmstrip -->
+      <div class="lg:col-span-7 border border-zinc-300 bg-paper hover:border-zinc-950 transition-all flex flex-col justify-between shadow-xs">
+        <!-- Card Main Interior: Text on Left (~72%) + Analog Filmstrip on Right (~28%) -->
+        <div class="grid grid-cols-1 sm:grid-cols-12 flex-1 items-stretch">
+          <!-- Text and Actions Area -->
+          <div class="sm:col-span-8 p-5 sm:p-7 flex flex-col justify-between space-y-6">
+            <div class="space-y-4">
+              <!-- Manifiesto Label -->
+              <div class="inline-block">
+                <span class="font-mono text-[11px] font-bold text-zinc-900 uppercase tracking-widest block">
+                  {isEn ? 'MANIFESTO / 001' : 'MANIFIESTO / 001'}
+                </span>
+                <span class="block h-0.5 w-full bg-vermilion mt-1"></span>
+              </div>
+
+              <!-- Animated Permanent Headline: MADRID VIVE. AQUÍ SE CUENTA. -->
+              <h1 class="manifesto-headline font-display font-black text-3xl sm:text-4xl lg:text-[2.85rem] text-zinc-950 leading-[1.08] tracking-tight">
+                <!-- Line 1: MADRID (Vertical Mask) VIVE. (Drops 12px) -->
+                <div class="overflow-hidden flex items-baseline gap-2.5">
+                  <span class="anim-madrid inline-block">
+                    {isEn ? 'MADRID' : 'MADRID'}
+                  </span>
+                  <span class="anim-vive inline-block">
+                    {isEn ? 'LIVES.' : 'VIVE.'}
+                  </span>
+                </div>
+
+                <!-- Line 2: AQUÍ SE CUENTA. (Word by word with crimson live dot) -->
+                <div class="overflow-hidden flex items-baseline gap-2.5 pt-1">
+                  <span class="anim-word-1 inline-block">{isEn ? 'REPORTED' : 'AQUÍ'}</span>
+                  <span class="anim-word-2 inline-block">{isEn ? 'FROM' : 'SE'}</span>
+                  <span class="anim-word-3 inline-block">{isEn ? 'WITHIN' : 'CUENTA'}</span>
+                  <span class="anim-dot inline-block text-vermilion select-none text-[1.1em] leading-none">.</span>
+                </div>
+              </h1>
+
+              <!-- Subtitle / Mission Statement -->
+              <p class="font-sans text-xs sm:text-sm text-zinc-600 leading-relaxed max-w-lg">
+                {isEn
+                  ? 'Verified news, official sources and media assets to report on Madrid nightlife, concerts and performing arts.'
+                  : 'Información verificada, fuentes oficiales y recursos para contar el ocio y los espectáculos de Madrid.'}
+              </p>
+            </div>
+
+            <!-- Typewriter Animated Line with Crimson Cursor -->
+            <div class="pt-2">
+              <div class="typewriter-container flex items-center gap-1 font-mono text-xs font-bold text-zinc-900 uppercase tracking-wider py-1 border-t border-zinc-100">
+                <span
+                  class="typewriter-text"
+                  data-words={JSON.stringify(
+                    isEn
+                      ? ['VERIFIED NEWS', 'OFFICIAL SOURCES', 'MULTIMEDIA ASSETS', 'READY TO PUBLISH']
+                      : ['NOTICIAS VERIFICADAS', 'FUENTES OFICIALES', 'RECURSOS MULTIMEDIA', 'LISTO PARA PUBLICAR']
+                  )}
+                >
+                  {isEn ? 'VERIFIED NEWS' : 'NOTICIAS VERIFICADAS'}
+                </span>
+                <span class="typewriter-cursor text-vermilion font-black animate-pulse select-none">_</span>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap items-center gap-3 pt-2 font-mono text-xs">
+              <a
+                href={newsBase}
+                data-astro-prefetch="hover"
+                class="bg-zinc-950 hover:bg-vermilion text-white font-bold px-4 py-2.5 uppercase tracking-wider transition-colors inline-flex items-center gap-1.5 active:scale-95"
+              >
+                <span>{isEn ? 'ENTER PRESSROOM' : 'ENTRAR A LA SALA DE PRENSA'}</span>
+                <span>↗</span>
+              </a>
+              <a
+                href={`${prefix}/sobre-el-sector`}
+                data-astro-prefetch="hover"
+                class="border border-zinc-950 bg-paper hover:bg-zinc-100 text-zinc-950 font-bold px-4 py-2.5 uppercase tracking-wider transition-colors inline-flex items-center gap-1 active:scale-95"
+              >
+                <span>{isEn ? 'DISCOVER MADRID LIVE PRESS' : 'DESCUBRIR MADRID LIVE PRESS'}</span>
+                <span>↓</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Right Filmstrip: Analog Contact Sheet / Dark Frames -->
+          <div class="hidden sm:flex sm:col-span-4 border-l border-zinc-300 bg-zinc-950 p-2 flex-col justify-between gap-1.5 overflow-hidden select-none">
+            {FILMSTRIP_ITEMS.map((item) => (
+              <div class="relative flex-1 min-h-[58px] overflow-hidden bg-zinc-900 border border-zinc-800 group">
+                <img
+                  src={item.img}
+                  alt={item.tag}
+                  class="w-full h-full object-cover filter grayscale contrast-125 brightness-95 group-hover:filter-none transition-all duration-300 opacity-90 group-hover:opacity-100"
+                  loading="eager"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30 pointer-events-none"></div>
+                <span class="absolute bottom-1 right-1.5 font-mono text-[9px] uppercase tracking-widest text-zinc-200 font-bold bg-black/70 px-1 py-0.5 border border-zinc-700">
+                  {item.tag}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
 
-        <div class="p-5 sm:p-6 space-y-3">
-          <h1 class="font-display text-xl sm:text-2xl lg:text-3xl font-bold text-zinc-950 leading-tight">
-            {block.titular || (isEn ? 'Madrid Nightlife & Culture Virtual Pressroom' : 'Sala de Prensa Virtual de la Noche y la Cultura de Madrid')}
-          </h1>
-
-          <p class="font-sans text-xs sm:text-sm text-zinc-600 leading-relaxed line-clamp-2">
-            {block.subtitulo || (isEn ? 'Official media channel, institutional press releases, and access to all associated cultural venues of NocheMadrid.' : 'Canal oficial de comunicación, comunicados institucionales y acceso a los espacios y salas de ocio asociados a NocheMadrid.')}
-          </p>
-
-          <div class="flex flex-wrap items-center gap-4 pt-2 border-t border-zinc-100 font-mono text-xs">
-            <a
-              href={newsBase}
-              data-astro-prefetch="hover"
-              class="bg-zinc-950 hover:bg-vermilion text-white font-bold px-4 py-2 uppercase tracking-wider transition-colors inline-flex items-center gap-1.5"
-            >
-              <span>{isEn ? 'Explore News' : 'Explorar Comunicados'}</span>
-              <span>↗</span>
-            </a>
-            <a
-              href={`${prefix}/press-kits`}
-              data-astro-prefetch="hover"
-              class="border border-zinc-950 hover:bg-zinc-100 text-zinc-950 font-bold px-4 py-2 uppercase tracking-wider transition-colors"
-            >
-              {isEn ? 'Press Kits ↓' : 'Press Kits Oficiales ↓'}
-            </a>
+        <!-- Manifesto Footer Metadata Strip -->
+        <div class="border-t border-zinc-200 bg-canvas px-4 sm:px-6 py-2.5 flex flex-wrap items-center justify-between font-mono text-[10px] sm:text-[11px] text-zinc-600 tracking-wider uppercase">
+          <div class="flex items-center gap-3 sm:gap-4 flex-wrap">
+            <span>{isEn ? '96 ASSOCIATED VENUES' : '96 ASOCIADOS'}</span>
+            <span class="text-zinc-300">|</span>
+            <span>{isEn ? '3 LANGUAGES' : '3 IDIOMAS'}</span>
+            <span class="text-zinc-300">|</span>
+            <span>{isEn ? 'OPEN ACCESS' : 'ACCESO ABIERTO'}</span>
+            <span class="text-zinc-300">|</span>
+            <span>{isEn ? 'PRESS ASSETS' : 'RECURSOS DE PRENSA'}</span>
           </div>
         </div>
       </div>
 
       <!-- Right Column: 3 Stacked Latest News (Visible in First Viewport!) -->
-      <div class="lg:col-span-5 space-y-3">
+      <div class="lg:col-span-5 space-y-3 flex flex-col justify-between">
         <div class="flex items-center justify-between pb-1 border-b border-zinc-200 font-mono text-xs">
           <div class="font-bold text-zinc-950 uppercase tracking-wider flex items-center gap-1.5">
             <span class="w-1.5 h-1.5 rounded-full bg-vermilion inline-block"></span>
             <span>{isEn ? 'LATEST PRESS RELEASES' : 'ÚLTIMOS COMUNICADOS'}</span>
           </div>
-          <a href={newsBase} data-astro-prefetch="hover" class="text-zinc-500 hover:text-vermilion text-[11px] font-semibold">
+          <a href={newsBase} data-astro-prefetch="hover" class="text-zinc-500 hover:text-vermilion text-[11px] font-semibold transition-colors">
             {isEn ? 'VIEW ALL →' : 'VER TODOS →'}
           </a>
         </div>
 
-        <div class="space-y-3">
+        <div class="space-y-3 flex-1 flex flex-col justify-between">
           {latestStories.map((story, idx) => {
             const cat = story.categoria as Categoria | undefined;
-            const imgUrl = (story as any).imagen_url_externa || (story.imagen_portada ? getAssetUrl(story.imagen_portada, { width: 350, height: 250, format: 'webp' }) : DEFAULT_THUMBS[idx]);
+            const imgUrl = (story as any).imagen_url_externa || (story.imagen_portada ? getAssetUrl(story.imagen_portada, { width: 350, height: 250, format: 'webp' }) : DEFAULT_THUMBS[idx % DEFAULT_THUMBS.length]);
             const dateStr = new Date(story.fecha_publicacion).toLocaleDateString(isEn ? 'en-US' : 'es-ES', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase();
             const storyTitle = (isEn ? story.titulo_en : story.titulo) || story.titulo;
             const storySlug = (isEn ? (story.slug_en || story.slug) : story.slug);
@@ -144,29 +219,27 @@ const heroImage = block.fondo
               <a
                 href={`${newsBase}/${storySlug}`}
                 data-astro-prefetch="hover"
-                class="group block border border-zinc-200 bg-paper p-3 hover:border-zinc-950 transition-all active:scale-[0.99]"
+                class="group block border border-zinc-200 bg-paper p-3 hover:border-zinc-950 transition-all shadow-2xs hover:shadow-xs active:scale-[0.99] flex-1"
               >
-                <div class="grid grid-cols-12 gap-3 items-center">
+                <div class="grid grid-cols-12 gap-3 items-center h-full">
                   <div class="col-span-4 aspect-[4/3] overflow-hidden bg-zinc-100 border border-zinc-200">
                     <img
                       src={imgUrl}
                       alt={storyTitle}
                       class="h-full w-full object-cover filter contrast-105 group-hover:scale-105 transition-transform duration-300"
+                      loading="eager"
                     />
                   </div>
-
                   <div class="col-span-8 flex flex-col justify-between h-full space-y-1">
-                    <div class="font-mono text-[9px] uppercase tracking-wider text-zinc-500 flex items-center justify-between">
-                      <span class="font-semibold text-zinc-900">{catName.toUpperCase()}</span>
+                    <div class="flex items-center justify-between font-mono text-[10px] text-zinc-500 uppercase tracking-wider">
+                      <span class="text-zinc-950 font-bold">{catName}</span>
                       <span>{dateStr}</span>
                     </div>
-
-                    <h3 class="font-display text-xs sm:text-sm font-bold text-zinc-950 leading-snug group-hover:text-vermilion transition-colors line-clamp-2">
+                    <h2 class="font-display font-bold text-xs sm:text-sm text-zinc-950 leading-snug line-clamp-2 group-hover:text-vermilion transition-colors">
                       {storyTitle}
-                    </h3>
-
-                    <div class="flex justify-end">
-                      <span class="text-zinc-900 text-xs font-bold group-hover:translate-x-1 transition-transform">→</span>
+                    </h2>
+                    <div class="text-right pt-1 font-mono text-xs text-zinc-400 group-hover:text-zinc-950 transition-colors">
+                      →
                     </div>
                   </div>
                 </div>
@@ -178,3 +251,137 @@ const heroImage = block.fondo
     </div>
   </div>
 </section>
+
+<style>
+  /* Exact 700-850ms One-shot Headline Animation */
+  @keyframes maskVertical {
+    0% {
+      clip-path: inset(0 0 100% 0);
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    100% {
+      clip-path: inset(0 0 0 0);
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes dropVive {
+    0% {
+      transform: translateY(-12px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes wordReveal {
+    0% {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes dotPulse {
+    0% {
+      transform: scale(0);
+      opacity: 0;
+    }
+    70% {
+      transform: scale(1.3);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .anim-madrid {
+    animation: maskVertical 320ms cubic-bezier(0.16, 1, 0.3, 1) 0ms forwards;
+  }
+
+  .anim-vive {
+    opacity: 0;
+    animation: dropVive 350ms cubic-bezier(0.16, 1, 0.3, 1) 180ms forwards;
+  }
+
+  .anim-word-1 {
+    opacity: 0;
+    animation: wordReveal 220ms cubic-bezier(0.16, 1, 0.3, 1) 360ms forwards;
+  }
+
+  .anim-word-2 {
+    opacity: 0;
+    animation: wordReveal 220ms cubic-bezier(0.16, 1, 0.3, 1) 480ms forwards;
+  }
+
+  .anim-word-3 {
+    opacity: 0;
+    animation: wordReveal 220ms cubic-bezier(0.16, 1, 0.3, 1) 600ms forwards;
+  }
+
+  .anim-dot {
+    opacity: 0;
+    animation: dotPulse 200ms cubic-bezier(0.34, 1.56, 0.64, 1) 720ms forwards;
+  }
+</style>
+
+<script>
+  function initTypewriter() {
+    const textEl = document.querySelector('.typewriter-text') as HTMLElement;
+    if (!textEl) return;
+    if (textEl.hasAttribute('data-tw-init')) return;
+    textEl.setAttribute('data-tw-init', 'true');
+
+    let words: string[] = [];
+    try {
+      words = JSON.parse(textEl.getAttribute('data-words') || '[]');
+    } catch (e) {
+      words = ['NOTICIAS VERIFICADAS', 'FUENTES OFICIALES', 'RECURSOS MULTIMEDIA', 'LISTO PARA PUBLICAR'];
+    }
+
+    let wordIdx = 0;
+    let charIdx = 0;
+    let isDeleting = false;
+    let typingSpeed = 65;
+
+    function type() {
+      const currentWord = words[wordIdx];
+
+      if (isDeleting) {
+        textEl.textContent = currentWord.substring(0, charIdx - 1);
+        charIdx--;
+        typingSpeed = 35;
+      } else {
+        textEl.textContent = currentWord.substring(0, charIdx + 1);
+        charIdx++;
+        typingSpeed = 70;
+      }
+
+      if (!isDeleting && charIdx === currentWord.length) {
+        // Pause at end of word
+        typingSpeed = 2200;
+        isDeleting = true;
+      } else if (isDeleting && charIdx === 0) {
+        isDeleting = false;
+        wordIdx = (wordIdx + 1) % words.length;
+        typingSpeed = 400;
+      }
+
+      setTimeout(type, typingSpeed);
+    }
+
+    type();
+  }
+
+  document.addEventListener('DOMContentLoaded', initTypewriter);
+  document.addEventListener('astro:page-load', initTypewriter);
+</script>
