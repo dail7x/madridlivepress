@@ -1,13 +1,13 @@
 ---
 import Layout from '@/layouts/Layout.astro';
-import WireframeHeader from '@/components/ui/WireframeHeader.astro';
 import { directus, getAssetUrl } from '@/lib/directus';
 import { readItems } from '@directus/sdk';
 import type { Comunicado, Categoria } from '@/lib/directus';
+import '@/styles/global.css';
 
 export const prerender = false;
 
-let articulos: Comunicado[] = [];
+let allItems: Comunicado[] = [];
 let categorias: Categoria[] = [];
 
 try {
@@ -35,7 +35,6 @@ try {
           'archivo_pdf.*',
           'tags',
           { categoria: ['id', 'nombre', 'nombre_en', 'slug', 'slug_en', 'color'] },
-          { portavoz: ['id', 'nombre', 'cargo'] },
         ],
       })
     ),
@@ -50,11 +49,13 @@ try {
     ),
   ]);
 
-  articulos = (articulosRes as any) || [];
+  allItems = (articulosRes as any) || [];
   categorias = (categoriasRes as any) || [];
 } catch (e) {
   console.error('Error loading /en/articles:', e);
 }
+
+const articulos = allItems;
 
 const DEFAULT_IMAGES = [
   'https://images.unsplash.com/photo-1514306191717-452ec28c7814?q=80&w=1200&auto=format&fit=crop',
@@ -66,36 +67,24 @@ const DEFAULT_IMAGES = [
 ];
 
 const featuredItem = articulos[0] || null;
-const remainingItems = articulos.slice(1);
-
-function formatDate(isoString: string): string {
-  try {
-    return new Date(isoString).toLocaleDateString('en-US', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
-    });
-  } catch {
-    return '';
-  }
-}
+const stackedItems = articulos.slice(1, 4);
+const allRemainingItems = articulos.slice(4);
 ---
 
 <Layout
-  title="Madrid Nightlife Articles & City Stories | Noche Madrid Press"
-  description="Discover Madrid's vibrant live music, festivals, afternoon 'tardeo', performing arts, and nocturnal culture."
+  title="Madrid Stories & Culture | Noche Madrid Press"
+  description="Live music, festivals, afternoon culture, and Madrid's world-leading nightlife appeal."
   lang="en"
 >
-  <div class="w-full bg-paper pb-20">
+  <div class="w-full bg-paper">
     <!-- Top Wireframe Header "ARTICLES" -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
-      <!-- Section Switcher Banner -->
       <div class="flex items-center justify-between gap-3 p-3 bg-zinc-50 border border-zinc-200 text-xs mb-3">
         <div class="flex items-center gap-2">
           <span class="inline-block w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
-          <span class="font-mono text-zinc-900 font-bold uppercase tracking-wider">Madrid Nightlife Stories · Public Blog</span>
+          <span class="font-mono text-zinc-900 font-bold uppercase tracking-wider">Madrid Stories · Public Articles</span>
           <span class="text-zinc-400 hidden sm:inline">|</span>
-          <span class="text-zinc-600 hidden sm:inline">Discover concert seasons, cultural trends, and city nightlife highlights.</span>
+          <span class="text-zinc-600 hidden sm:inline">Concerts, festival reports, trends, and nocturnal lifestyle.</span>
         </div>
         <a 
           href="/en/news" 
@@ -113,7 +102,7 @@ function formatDate(isoString: string): string {
 
       <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 pt-2 pb-3 border-b border-zinc-200">
         <p class="font-sans text-xs sm:text-sm text-zinc-700 font-medium">
-          Live music venues, international tours, afternoon culture, and Madrid's world-leading nightlife appeal.
+          Live music, festivals, afternoon culture, and Madrid's world-leading nightlife appeal.
         </p>
 
         <div class="font-mono text-[11px] sm:text-xs text-zinc-500 uppercase tracking-wider flex items-center gap-2 flex-shrink-0">
@@ -127,21 +116,23 @@ function formatDate(isoString: string): string {
     <!-- Category Filter Bar -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 border-b border-zinc-200">
       <div class="flex items-center justify-between gap-4 flex-wrap">
-        <div class="flex items-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar font-mono text-xs py-1" id="articleCatFilters">
+        <div class="flex items-center gap-4 sm:gap-6 overflow-x-auto no-scrollbar font-sans text-xs text-zinc-600 font-medium py-1" id="newsCatFilters">
           <button
             type="button"
-            class="article-filter-btn px-3 py-1 font-bold uppercase tracking-wider border border-zinc-950 bg-zinc-950 text-white transition-all shadow-sm"
+            class="cat-filter-btn flex items-center gap-1.5 whitespace-nowrap text-zinc-950 font-bold is-active"
             data-cat="all"
           >
-            ALL ({articulos.length})
+            <span>All</span>
+            <span class="dot w-1.5 h-1.5 rounded-full bg-emerald-600 inline-block"></span>
           </button>
-          {categorias.map((c) => (
+
+          {categorias.map((cat) => (
             <button
               type="button"
-              class="article-filter-btn px-3 py-1 font-bold uppercase tracking-wider border border-zinc-200 bg-white hover:border-zinc-950 text-zinc-700 hover:text-zinc-950 transition-all shadow-sm"
-              data-cat={c.slug_en || c.slug}
+              class="cat-filter-btn flex items-center gap-1.5 whitespace-nowrap text-zinc-600 hover:text-zinc-950 transition-colors"
+              data-cat={cat.slug_en || cat.slug}
             >
-              {c.nombre_en || c.nombre}
+              <span>{cat.nombre_en || cat.nombre}</span>
             </button>
           ))}
         </div>
@@ -149,106 +140,70 @@ function formatDate(isoString: string): string {
     </div>
 
     <!-- Main Content Grid -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-12">
-      <!-- Hero / Featured Story -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
       {featuredItem && (
-        <article 
-          class="article-card group border border-zinc-200 bg-white hover:border-zinc-950 transition-all duration-300 shadow-sm"
-          data-category={featuredItem.categoria?.slug_en || featuredItem.categoria?.slug || 'general'}
-        >
-          <a href={`/en/articles/${featuredItem.slug_en || featuredItem.slug}`} class="grid grid-cols-1 lg:grid-cols-12 gap-0">
-            <div class="lg:col-span-7 aspect-[16/10] lg:aspect-auto min-h-[300px] lg:min-h-[420px] overflow-hidden bg-zinc-100 border-b lg:border-b-0 lg:border-r border-zinc-200 relative">
-              <img
-                src={featuredItem.imagen_url_externa || (featuredItem.imagen_portada ? getAssetUrl(featuredItem.imagen_portada) : DEFAULT_IMAGES[0])}
-                alt={featuredItem.titulo_en || featuredItem.titulo}
-                class="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
-                loading="eager"
-              />
-              <span class="absolute top-4 left-4 bg-zinc-950 text-white text-[10px] font-mono font-bold uppercase px-2.5 py-1 tracking-wider shadow">
-                FEATURED STORY
-              </span>
-            </div>
-
-            <div class="lg:col-span-5 p-6 sm:p-8 flex flex-col justify-between">
-              <div>
-                <div class="flex items-center gap-2 mb-3">
-                  {featuredItem.categoria && (
-                    <span 
-                      class="text-[11px] font-mono font-bold uppercase px-2.5 py-0.5 border"
-                      style={`border-color: ${featuredItem.categoria.color || '#10B981'}; color: ${featuredItem.categoria.color || '#10B981'};`}
-                    >
-                      {featuredItem.categoria.nombre_en || featuredItem.categoria.nombre}
-                    </span>
-                  )}
-                  <span class="text-zinc-400 font-mono text-[11px]">·</span>
-                  <span class="text-zinc-500 font-mono text-[11px] uppercase">{formatDate(featuredItem.fecha_publicacion)}</span>
-                </div>
-
-                <h2 class="font-display font-black text-2xl sm:text-3xl lg:text-4xl text-zinc-950 leading-tight mb-4 group-hover:text-rose-600 transition-colors">
-                  {featuredItem.titulo_en || featuredItem.titulo}
-                </h2>
-
-                <p class="font-sans text-sm sm:text-base text-zinc-600 leading-relaxed line-clamp-4">
-                  {featuredItem.bajada_en || featuredItem.bajada}
-                </p>
+        <div class="news-item-card">
+          <a
+            href={`/en/articles/${featuredItem.slug_en || featuredItem.slug}`}
+            class="group block border border-zinc-200 bg-paper hover:border-zinc-950 transition-all"
+          >
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-0">
+              <div class="lg:col-span-7 aspect-[16/9] lg:aspect-auto min-h-[280px] lg:min-h-[360px] overflow-hidden bg-zinc-100 border-b lg:border-b-0 lg:border-r border-zinc-200">
+                <img
+                  src={(featuredItem as any).imagen_url_externa || (featuredItem.imagen_portada ? getAssetUrl(featuredItem.imagen_portada) : DEFAULT_IMAGES[0])}
+                  alt={featuredItem.titulo_en || featuredItem.titulo}
+                  class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
               </div>
-
-              <div class="pt-6 mt-6 border-t border-zinc-100 flex items-center justify-between font-mono text-xs font-bold text-zinc-950">
-                <span class="group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
-                  READ FULL ARTICLE →
-                </span>
-                <span class="text-zinc-400 text-[11px]">MADRID LIVE</span>
+              <div class="lg:col-span-5 p-6 sm:p-8 flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center gap-2 mb-3 font-mono text-xs text-zinc-500 uppercase">
+                    <span class="text-emerald-700 font-bold">FEATURED STORY</span>
+                    <span>·</span>
+                    <span>{(featuredItem.categoria as Categoria)?.nombre_en || (featuredItem.categoria as Categoria)?.nombre}</span>
+                  </div>
+                  <h2 class="font-display font-bold text-2xl sm:text-3xl text-zinc-950 group-hover:text-emerald-700 transition-colors leading-tight mb-4">
+                    {featuredItem.titulo_en || featuredItem.titulo}
+                  </h2>
+                  <p class="font-sans text-sm text-zinc-600 leading-relaxed line-clamp-4">
+                    {featuredItem.bajada_en || featuredItem.bajada}
+                  </p>
+                </div>
+                <div class="pt-6 border-t border-zinc-100 font-mono text-xs font-bold text-zinc-950 flex items-center justify-between">
+                  <span>READ STORY →</span>
+                  <span class="text-zinc-400">MADRID LIVE</span>
+                </div>
               </div>
             </div>
           </a>
-        </article>
+        </div>
       )}
 
-      <!-- 3-Column Articles Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8" id="articlesGrid">
-        {remainingItems.map((art, idx) => {
-          const imgUrl = art.imagen_url_externa || (art.imagen_portada ? getAssetUrl(art.imagen_portada) : DEFAULT_IMAGES[(idx + 1) % DEFAULT_IMAGES.length]);
+      <!-- Remaining Items Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-6 border-t border-zinc-200">
+        {[...stackedItems, ...allRemainingItems].map((item, idx) => {
+          const imgUrl = (item as any).imagen_url_externa || (item.imagen_portada ? getAssetUrl(item.imagen_portada) : DEFAULT_IMAGES[(idx + 1) % DEFAULT_IMAGES.length]);
           return (
-            <article
-              class="article-card group border border-zinc-200 bg-white hover:border-zinc-950 flex flex-col justify-between transition-all duration-300 shadow-sm"
-              data-category={art.categoria?.slug_en || art.categoria?.slug || 'general'}
-            >
-              <a href={`/en/articles/${art.slug_en || art.slug}`} class="block flex-1">
-                <div class="aspect-[16/10] overflow-hidden bg-zinc-100 border-b border-zinc-200 relative">
-                  <img
-                    src={imgUrl}
-                    alt={art.titulo_en || art.titulo}
-                    class="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
-                    loading="lazy"
-                  />
-                  {art.categoria && (
-                    <span 
-                      class="absolute top-3 left-3 text-[10px] font-mono font-bold uppercase px-2 py-0.5 bg-white/95 backdrop-blur-sm border shadow-sm"
-                      style={`border-color: ${art.categoria.color || '#10B981'}; color: ${art.categoria.color || '#10B981'};`}
-                    >
-                      {art.categoria.nombre_en || art.categoria.nombre}
-                    </span>
-                  )}
+            <article class="border border-zinc-200 bg-white hover:border-zinc-950 transition-all flex flex-col justify-between group">
+              <a href={`/en/articles/${item.slug_en || item.slug}`} class="block flex-1">
+                <div class="aspect-[16/10] overflow-hidden bg-zinc-100 border-b border-zinc-200">
+                  <img src={imgUrl} alt={item.titulo_en || item.titulo} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
                 </div>
-
-                <div class="p-5 sm:p-6">
-                  <div class="flex items-center gap-2 mb-2 font-mono text-[11px] text-zinc-500 uppercase">
-                    <span>{formatDate(art.fecha_publicacion)}</span>
+                <div class="p-5 space-y-2">
+                  <div class="font-mono text-[10px] text-zinc-500 uppercase">
+                    {(item.categoria as Categoria)?.nombre_en || (item.categoria as Categoria)?.nombre}
                   </div>
-
-                  <h3 class="font-display font-black text-lg sm:text-xl text-zinc-950 leading-snug mb-3 group-hover:text-rose-600 transition-colors line-clamp-3">
-                    {art.titulo_en || art.titulo}
+                  <h3 class="font-display font-bold text-base text-zinc-950 group-hover:text-emerald-700 transition-colors line-clamp-2">
+                    {item.titulo_en || item.titulo}
                   </h3>
-
-                  <p class="font-sans text-xs sm:text-sm text-zinc-600 leading-relaxed line-clamp-3 mb-4">
-                    {art.bajada_en || art.bajada}
+                  <p class="font-sans text-xs text-zinc-600 line-clamp-3">
+                    {item.bajada_en || item.bajada}
                   </p>
                 </div>
               </a>
-
-              <div class="p-5 sm:p-6 pt-0 border-t border-zinc-100 mt-auto flex items-center justify-between font-mono text-xs font-bold text-zinc-950">
-                <a href={`/en/articles/${art.slug_en || art.slug}`} class="hover:text-rose-600 transition-colors flex items-center gap-1 group-hover:translate-x-1">
-                  READ STORY →
+              <div class="p-5 pt-0 border-t border-zinc-100 font-mono text-xs font-bold text-zinc-950 mt-auto flex justify-end">
+                <a href={`/en/articles/${item.slug_en || item.slug}`} class="hover:text-emerald-700">
+                  Read →
                 </a>
               </div>
             </article>
@@ -258,30 +213,3 @@ function formatDate(isoString: string): string {
     </div>
   </div>
 </Layout>
-
-<script>
-  const filterButtons = document.querySelectorAll<HTMLButtonElement>('.article-filter-btn');
-  const cards = document.querySelectorAll<HTMLElement>('.article-card');
-
-  filterButtons.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const selected = btn.dataset.cat || 'all';
-
-      filterButtons.forEach((b) => {
-        b.classList.remove('bg-zinc-950', 'text-white', 'border-zinc-950');
-        b.classList.add('bg-white', 'text-zinc-700', 'border-zinc-200');
-      });
-      btn.classList.remove('bg-white', 'text-zinc-700', 'border-zinc-200');
-      btn.classList.add('bg-zinc-950', 'text-white', 'border-zinc-950');
-
-      cards.forEach((card) => {
-        const cat = card.dataset.category;
-        if (selected === 'all' || cat === selected) {
-          card.style.display = '';
-        } else {
-          card.style.display = 'none';
-        }
-      });
-    });
-  });
-</script>
