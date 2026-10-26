@@ -50,7 +50,7 @@ export const ALL: APIRoute = async ({ request, url }) => {
       voiceId = url.searchParams.get('voiceId') || '';
     }
 
-    const selectedLang = lang.startsWith('en') ? 'en' : 'es';
+    const selectedLang = (['en', 'it', 'fr'].find((l) => lang.startsWith(l)) || 'es') as 'es' | 'en' | 'it' | 'fr';
     const cleanSlug = slug ? slug.replace(/[^a-zA-Z0-9-_]/g, '').slice(0, 80) : 'brief';
     const audioDir = path.resolve(process.cwd(), 'public/audio/briefs');
     const filename = `${cleanSlug}-${selectedLang}.mp3`;
@@ -90,6 +90,27 @@ export const ALL: APIRoute = async ({ request, url }) => {
               const b = art.bajada_en || art.bajada || '';
               const c = cleanHtml(art.cuerpo_en || art.cuerpo || '');
               text = art.audio_script_en || `${t}. ${b}. ${c}`;
+            } else if (selectedLang === 'it' || selectedLang === 'fr') {
+              const langCodePrefix = selectedLang === 'it' ? 'it' : 'fr';
+              const transRes = await fetch(
+                `${DIRECTUS_URL}/items/comunicados_translations?filter=${encodeURIComponent(
+                  JSON.stringify({
+                    comunicados_id: { _eq: art.id },
+                    languages_code: { _starts_with: langCodePrefix },
+                  })
+                )}&limit=1`,
+                { headers: { Authorization: `Bearer ${DIRECTUS_TOKEN}` } }
+              );
+              if (transRes.ok) {
+                const transJson = await transRes.json();
+                const trans = transJson.data?.[0];
+                if (trans) {
+                  text = trans.audio_script || `${trans.titulo}. ${trans.bajada}. ${cleanHtml(trans.cuerpo || '')}`;
+                }
+              }
+              if (!text) {
+                text = art.audio_script_es || `${art.titulo}. ${art.bajada}`;
+              }
             } else {
               const t = art.titulo || '';
               const b = art.bajada || '';

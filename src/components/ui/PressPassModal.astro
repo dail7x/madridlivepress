@@ -1,0 +1,75 @@
+---
+import PressPassGate from './PressPassGate.astro';
+
+interface Props {
+  lang?: 'es' | 'en' | 'it' | 'fr';
+}
+
+const { lang = 'es' } = Astro.props;
+---
+
+<!-- Global Press Pass Modal Overlay -->
+<div
+  id="mlp-press-modal"
+  class="fixed inset-0 z-50 bg-zinc-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
+  role="dialog"
+  aria-modal="true"
+>
+  <div class="relative w-full max-w-3xl my-8">
+    <!-- Close button -->
+    <button
+      type="button"
+      id="mlp-close-modal-btn"
+      class="absolute -top-4 -right-2 sm:-right-4 z-10 w-9 h-9 bg-zinc-950 text-white hover:bg-vermilion border border-zinc-700 flex items-center justify-center font-mono text-sm font-bold transition-colors shadow-lg"
+      aria-label="Cerrar modal"
+    >
+      ✕
+    </button>
+
+    <!-- Inner Card -->
+    <PressPassGate lang={lang} />
+  </div>
+</div>
+
+<script is:inline>
+  (function () {
+    const modal = document.getElementById('mlp-press-modal');
+    const closeBtn = document.getElementById('mlp-close-modal-btn');
+
+    function openModal() {
+      modal?.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      modal?.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    closeBtn?.addEventListener('click', closeModal);
+
+    modal?.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeModal();
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !modal?.classList.contains('hidden')) {
+        closeModal();
+      }
+    });
+
+    // Global listener for elements requiring press pass
+    document.addEventListener('click', (e) => {
+      const trigger = e.target.closest('[data-require-press-pass="true"]');
+      if (trigger) {
+        e.preventDefault();
+        openModal();
+      }
+    });
+
+    window.openPressPassModal = openModal;
+    window.closePressPassModal = closeModal;
+  })();
+</script>

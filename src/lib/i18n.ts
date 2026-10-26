@@ -1,11 +1,11 @@
-export type Locale = 'es' | 'en';
+export type Locale = 'es' | 'en' | 'it' | 'fr';
 
 export const defaultLocale: Locale = 'es';
-export const locales: Locale[] = ['es', 'en'];
+export const locales: Locale[] = ['es', 'en', 'it', 'fr'];
 
 export const translations = {
   es: {
-    siteTitle: 'Madrid Live Press | Sala de Prensa de la Noche de Madrid',
+    siteTitle: 'Noche Madrid Press | Sala de Prensa de la Noche de Madrid',
     siteDescription: 'Plataforma oficial y sala de prensa internacional del ocio nocturno y la cultura de Madrid, gestionada por NocheMadrid.',
     tickerText: 'SALA DE PRENSA VIRTUAL INTERNACIONAL • NOCHEMADRID • 96 ASOCIADOS • TEATROS, SALAS DE CONCIERTOS Y CLUBS DE MADRID',
     nav: {
@@ -96,7 +96,7 @@ export const translations = {
     }
   },
   en: {
-    siteTitle: 'Madrid Live Press | Madrid Nightlife Virtual Pressroom',
+    siteTitle: 'Noche Madrid Press | Madrid Nightlife Virtual Pressroom',
     siteDescription: 'Official international pressroom and media platform for Madrid nightlife and culture, managed by NocheMadrid.',
     tickerText: 'INTERNATIONAL VIRTUAL PRESSROOM • NOCHEMADRID • 96 ASSOCIATED VENUES • THEATERS, CONCERT HALLS & CLUBS IN MADRID',
     nav: {
@@ -185,10 +185,192 @@ export const translations = {
       rights: 'All rights reserved. International Virtual Pressroom.',
       pressOffice: 'NocheMadrid Press & Communications Office',
     }
+  },
+  it: {
+    siteTitle: 'Noche Madrid Press | Sala Stampa della Notte di Madrid',
+    siteDescription: 'Piattaforma ufficiale e sala stampa internazionale della vita notturna e della cultura di Madrid, gestita da NocheMadrid.',
+    tickerText: 'SALA STAMPA VIRTUALE INTERNAZIONALE • NOCHEMADRID • 96 ASSOCIATI • TEATRI, SALE DA CONCERTO E CLUB DI MADRID',
+    nav: {
+      home: 'Home',
+      pressReleases: 'Comunicati',
+      venues: '96 Club NocheMadrid',
+      mediaKit: 'Media Kit',
+      events: 'Agenda Media',
+      accreditations: 'Accrediti',
+    },
+    hero: {
+      badge: 'Sala Stampa Ufficiale',
+      readRelease: 'Leggi Comunicato',
+      viewAll: 'Tutte le Notizie',
+      liveNotice: 'Ultime Notizie Ufficiali',
+    },
+    press: {
+      title: 'Comunicati Ufficiali & Note Stampa',
+      subtitle: 'Dati verificati, bilanci economici, turismo notturno e dichiarazioni istituzionali di NocheMadrid.',
+      filterAll: 'Tutte le categorie',
+      downloadPdf: 'Scarica PDF',
+      publishedOn: 'Pubblicato il',
+      readMore: 'Leggi articolo completo',
+      share: 'Condividi',
+      backToList: 'Torna ai Comunicati',
+      relatedReleases: 'Comunicati Correlati',
+      spokesperson: 'Portavoce Ufficiale',
+      pressContact: 'Contatto Stampa',
+      mediaAssets: 'Materiale Multimediale Allegato',
+    },
+    venues: {
+      title: 'Elenco Club & Spazi Associati',
+      subtitle: '96 discoteche, sale concerti, teatri musicali e tablaos di flamenco che definiscono la notte madrilena.',
+      filterDistrict: 'Tutti i quartieri',
+      filterType: 'Tutte le tipologie',
+      capacity: 'Capienza',
+      address: 'Indirizzo',
+      pressContact: 'Ufficio Stampa / Relazioni Media',
+      dossier: 'Scarica Dossier Tecnico',
+      website: 'Sito Web',
+      backToList: 'Torna all\'Elenco',
+      technicalSpecs: 'Scheda Tecnica dello Spazio',
+    },
+    mediaKit: {
+      title: 'Media Kit & Risorse Audiovisive',
+      subtitle: 'Materiale grafico ufficiale ad alta risoluzione, identità visive, b-roll 4K e report statistici.',
+      downloadZip: 'Scarica Risorsa',
+      fileFormat: 'Formato',
+      fileSize: 'Dimensione',
+      specifications: 'Specifiche di utilizzo',
+      allCategories: 'Tutte le categorie',
+    },
+    events: {
+      title: 'Agenda Eventi & Conferenze Stampa',
+      subtitle: 'Presentazioni ufficiali, festival e conferenze con accesso prioritario per giornalisti accreditati.',
+      date: 'Data e Ora',
+      venue: 'Luogo / Spazio',
+      requestPass: 'Richiedi Accredito',
+      accreditationDeadline: 'Termine per l\'Accredito',
+      spotsAvailable: 'Pass stampa disponibili',
+    },
+    accreditations: {
+      title: 'Accredito Stampa Internazionale',
+      subtitle: 'Modulo esclusivo per giornalisti, agenzie e media internazionali che seguono la notte e la cultura di Madrid.',
+      mediaName: 'Nome della Testata / Agenzia',
+      journalistName: 'Nome del Giornalista',
+      journalistEmail: 'Email Aziendale',
+      journalistPhone: 'Telefono / WhatsApp',
+      country: 'Paese della Testata',
+      mediaType: 'Tipologia Media (TV, Radio, Stampa, Digitale, Agenzia)',
+      eventSelect: 'Evento per cui si richiede la copertura',
+      notes: 'Dettagli della copertura prevista / Link a pubblicazioni precedenti',
+      submitButton: 'Invia Richiesta di Accredito',
+      successMessage: 'Richiesta inviata con successo. L\'ufficio stampa di NocheMadrid esaminerà le credenziali entro 24 ore.',
+    },
+    newsletter: {
+      title: 'Database Media (CRM Stampa)',
+      subtitle: 'Ricevi comunicati sotto embargo, convocazioni urgenti e statistiche economiche del settore in tempo reale.',
+      placeholder: 'La tua email aziendale...',
+      button: 'Iscriviti agli Avvisi Stampa',
+      privacy: 'Inviamo solo informazioni giornalistiche verificate. Conformità GDPR rigorosa.',
+      success: 'Ti sei iscritto con successo alla lista di distribuzione stampa.',
+    },
+    footer: {
+      association: 'Associazione Imprenditoriale del Tempo Libero e Spettacolo della Comunità di Madrid (NocheMadrid).',
+      rights: 'Tutti i diritti riservati. Sala Stampa Virtuale Internazionale.',
+      pressOffice: 'Ufficio Stampa e Comunicazione NocheMadrid',
+    }
+  },
+  fr: {
+    siteTitle: 'Noche Madrid Press | Salle de Presse de la Nuit Madrilène',
+    siteDescription: 'Plateforme officielle et salle de presse internationale de la vie nocturne et de la culture de Madrid, gérée par NocheMadrid.',
+    tickerText: 'SALLE DE PRESSE VIRTUELLE INTERNATIONALE • NOCHEMADRID • 96 ASSOCIÉS • THÉÂTRES, SALLES DE CONCERT ET CLUBS DE MADRID',
+    nav: {
+      home: 'Accueil',
+      pressReleases: 'Communiqués',
+      venues: '96 Établissements',
+      mediaKit: 'Kit Média',
+      events: 'Agenda Médias',
+      accreditations: 'Accréditations',
+    },
+    hero: {
+      badge: 'Salle de Presse Officielle',
+      readRelease: 'Lire le Communiqué',
+      viewAll: 'Voir Tous les Articles',
+      liveNotice: 'Dernière Minute Officielle',
+    },
+    press: {
+      title: 'Communiqués Officiels & Dossiers de Presse',
+      subtitle: 'Informations vérifiées, bilans économiques, tourisme nocturne et déclarations institutionnelles de NocheMadrid.',
+      filterAll: 'Toutes les catégories',
+      downloadPdf: 'Télécharger le PDF',
+      publishedOn: 'Publié le',
+      readMore: 'Lire l\'article complet',
+      share: 'Partager',
+      backToList: 'Retour aux Communiqués',
+      relatedReleases: 'Communiqués Connexes',
+      spokesperson: 'Porte-Parole Officiel',
+      pressContact: 'Contact Presse',
+      mediaAssets: 'Supports Médias Rattachés',
+    },
+    venues: {
+      title: 'Répertoire des Lieux & Établissements Associés',
+      subtitle: '96 discothèques, salles de concert, théâtres musicaux et tablaos de flamenco façonnant la nuit madrilène.',
+      filterDistrict: 'Tous les arrondissements',
+      filterType: 'Tous les types',
+      capacity: 'Capacité',
+      address: 'Adresse',
+      pressContact: 'Presse / Relations Médias',
+      dossier: 'Télécharger le Dossier Technique',
+      website: 'Site Internet',
+      backToList: 'Retour au Répertoire',
+      technicalSpecs: 'Fiche Technique du Lieu',
+    },
+    mediaKit: {
+      title: 'Kits Média & Ressources Audiovisuelles',
+      subtitle: 'Supports graphiques haute résolution, chartes graphiques, b-roll 4K et rapports statistiques officiels.',
+      downloadZip: 'Télécharger la Ressource',
+      fileFormat: 'Format',
+      fileSize: 'Taille',
+      specifications: 'Conditions d\'utilisation',
+      allCategories: 'Toutes les catégories',
+    },
+    events: {
+      title: 'Agenda des Conférences & Rendez-vous Presse',
+      subtitle: 'Présentations officielles, festivals et conférences avec accès prioritaire pour journalistes accrédités.',
+      date: 'Date et Heure',
+      venue: 'Lieu / Établissement',
+      requestPass: 'Demander une Accréditation',
+      accreditationDeadline: 'Date Limite d\'Accréditation',
+      spotsAvailable: 'Pass presse disponibles',
+    },
+    accreditations: {
+      title: 'Accréditation Presse Internationale',
+      subtitle: 'Formulaire réservé aux journalistes, agences et médias couvrant la vie nocturne et culturelle de Madrid.',
+      mediaName: 'Nom du Média / Agence',
+      journalistName: 'Nom du Journaliste',
+      journalistEmail: 'Adresse Email Professionnelle',
+      journalistPhone: 'Téléphone / WhatsApp',
+      country: 'Pays du Média',
+      mediaType: 'Type de Média (TV, Radio, Presse Écrite, Numérique, Agence)',
+      eventSelect: 'Événement pour lequel vous demandez une couverture',
+      notes: 'Détails de la couverture prévue / Liens vers des publications antérieures',
+      submitButton: 'Envoyer la Demande d\'Accréditation',
+      successMessage: 'Votre demande a été envoyée avec succès. Le service de presse de NocheMadrid examinera vos justificatifs sous 24 heures.',
+    },
+    newsletter: {
+      title: 'Fichier Médias (CRM Presse)',
+      subtitle: 'Recevez en temps réel les communiqués sous embargo, convocations urgentes et chiffres économiques du secteur.',
+      placeholder: 'Votre email professionnel...',
+      button: 'S\'abonner aux Alertes Presse',
+      privacy: 'Nous ne diffusons que des informations journalistiques vérifiées. Respect strict du RGPD.',
+      success: 'Vous êtes inscrit avec succès à la liste de diffusion presse.',
+    },
+    footer: {
+      association: 'Association des Professionnels de la Nuit et du Spectacle de la Communauté de Madrid (NocheMadrid).',
+      rights: 'Tous droits réservés. Salle de Presse Virtuelle Internationale.',
+      pressOffice: 'Service de Presse et Communication NocheMadrid',
+    }
   }
 };
 
 export function useTranslations(lang?: string) {
-  const currentLang: Locale = (lang === 'en' ? 'en' : 'es');
+  const currentLang: Locale = (lang === 'en' || lang === 'it' || lang === 'fr') ? lang : 'es';
   return translations[currentLang];
 }

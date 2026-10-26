@@ -5,7 +5,7 @@ interface Props {
   duration?: string;
   audioUrl?: string;
   slug?: string;
-  lang?: 'es' | 'en';
+  lang?: 'es' | 'en' | 'it' | 'fr';
 }
 
 const {
@@ -27,6 +27,8 @@ const estTotalSecs = Math.max(30, Math.round((words / 135) * 60));
 const estMins = Math.floor(estTotalSecs / 60);
 const estSecs = estTotalSecs % 60;
 const initialFormattedDuration = `${estMins}:${estSecs < 10 ? '0' : ''}${estSecs} MIN`;
+const langMap: Record<string, string> = { en: 'en-US', es: 'es-ES', it: 'it-IT', fr: 'fr-FR' };
+const bcp47Lang = langMap[lang] || 'es-ES';
 ---
 
 <div
@@ -34,7 +36,7 @@ const initialFormattedDuration = `${estMins}:${estSecs < 10 ? '0' : ''}${estSecs
   class="audio-brief-player border border-zinc-200 bg-canvas p-4 sm:p-5 transition-all hover:border-zinc-950 font-mono text-xs my-6 select-none"
   data-text={scriptText}
   data-audio={audioUrl || ttsEndpoint}
-  data-lang={isEn ? 'en-US' : 'es-ES'}
+  data-lang={bcp47Lang}
 >
   <!-- Hidden Audio Element -->
   <audio class="brief-audio-element" preload="none"></audio>

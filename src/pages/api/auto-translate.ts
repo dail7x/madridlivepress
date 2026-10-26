@@ -129,7 +129,7 @@ export const ALL: APIRoute = async ({ request, url }) => {
     }
 
     // 2. Call Cloudflare Workers AI (Llama 3.1 8B Instruct)
-    const systemPrompt = `You are a world-class bilingual journalist and editor for Madrid Live Press / Reuters.
+    const systemPrompt = `You are a world-class bilingual journalist and editor for Noche Madrid Press / Reuters.
 Translate the provided Spanish press release fields to English with journalistic precision and elegance.
 You MUST output ONLY a valid JSON object with EXACTLY these keys:
 {

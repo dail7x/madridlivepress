@@ -1,11 +1,15 @@
 ---
 import Layout from '@/layouts/Layout.astro';
 import WireframeHeader from '@/components/ui/WireframeHeader.astro';
+import PressPassModal from '@/components/ui/PressPassModal.astro';
 import { directus, getAssetUrl } from '@/lib/directus';
 import { readItems } from '@directus/sdk';
 import type { RecursoPrensa } from '@/lib/directus';
 
 export const prerender = false;
+
+const pressUser = Astro.locals.pressUser;
+const isAuthed = !!pressUser;
 
 let recursos: RecursoPrensa[] = [];
 try {
@@ -44,7 +48,7 @@ const DEFAULT_KIT_THUMBS = [
 ---
 
 <Layout
-  title="Press Kits & Official Editorial Media Assets | Madrid Live Press"
+  title="Press Kits & Official Editorial Media Assets | Noche Madrid Press"
   description="Download official high-resolution photography, 4K b-roll footage, statistical dossiers and vector brand assets for newsrooms."
   lang="en"
 >
@@ -52,9 +56,38 @@ const DEFAULT_KIT_THUMBS = [
     <WireframeHeader
       title="PRESS KITS"
       subtitle="Official media assets, 4K b-roll footage, high-resolution photography, and technical dossiers ready for editorial use."
-      badge="PRESS ASSETS"
+      badge={isAuthed ? '● ACCREDITED PRESS' : 'PRESS ASSETS'}
       updatedTime="HIGH RESOLUTION · BILINGUAL"
     />
+
+    <!-- Status Bar for Press Access -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+      {isAuthed ? (
+        <div class="border border-emerald-300 bg-emerald-50/70 p-3 flex items-center justify-between font-mono text-xs text-emerald-900">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+            <span><strong>Active Session:</strong> {pressUser?.nombre} ({pressUser?.medio || 'Newsroom'}) · Unlimited high-res downloads unlocked.</span>
+          </div>
+          <a href="/api/press-auth/logout?redirect=/en/press-kits" class="text-emerald-700 hover:underline uppercase text-[10px]">
+            Sign out
+          </a>
+        </div>
+      ) : (
+        <div class="border border-zinc-200 bg-canvas p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-mono text-xs">
+          <div class="flex items-center gap-2 text-zinc-800">
+            <span class="w-2.5 h-2.5 rounded-full bg-vermilion animate-pulse"></span>
+            <span>Free professional access: Accredit your outlet to unlock 4K B-Roll footage and RAW press kits without delay.</span>
+          </div>
+          <button
+            type="button"
+            data-require-press-pass="true"
+            class="bg-zinc-950 hover:bg-vermilion text-white font-bold px-3 py-1.5 uppercase tracking-wider text-[11px] whitespace-nowrap transition-colors"
+          >
+            Get Free Press Pass →
+          </button>
+        </div>
+      )}
+    </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -83,13 +116,33 @@ const DEFAULT_KIT_THUMBS = [
                   </p>
                 )}
               </div>
-              <a href={fileUrl} target="_blank" download class="w-full bg-zinc-950 hover:bg-vermilion text-white font-mono text-xs uppercase font-bold py-2.5 px-4 text-center transition-colors">
-                Download Kit ↓
-              </a>
+
+              {isAuthed ? (
+                <a
+                  href={fileUrl}
+                  target="_blank"
+                  download
+                  class="w-full bg-zinc-950 hover:bg-vermilion text-white font-mono text-xs uppercase font-bold py-2.5 px-4 text-center transition-colors"
+                >
+                  Download Kit ↓
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  data-require-press-pass="true"
+                  class="w-full bg-zinc-950 hover:bg-vermilion text-white font-mono text-xs uppercase font-bold py-2.5 px-4 text-center transition-colors flex items-center justify-center gap-2"
+                >
+                  <span>Download (Press Pass)</span>
+                  <span class="text-xs">🔒</span>
+                </button>
+              )}
             </div>
           );
         })}
       </div>
     </div>
   </div>
+
+  <!-- Global Modal for Downloads -->
+  <PressPassModal lang="en" />
 </Layout>

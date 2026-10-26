@@ -39,6 +39,18 @@ export interface Portavoz {
   email_prensa?: string;
 }
 
+export interface ComunicadoTranslation {
+  id?: number;
+  comunicados_id?: string | number;
+  languages_code: string; // 'es-ES' | 'en-US' | 'it-IT' | 'fr-FR'
+  titulo: string;
+  slug: string;
+  bajada?: string;
+  cuerpo?: string;
+  audio_script?: string;
+  puntos_clave?: string[];
+}
+
 export interface Comunicado {
   id: string;
   status: 'published' | 'draft' | 'archived';
@@ -66,6 +78,7 @@ export interface Comunicado {
   puntos_clave_en?: string[];
   destacado?: boolean;
   tags?: string[];
+  translations?: ComunicadoTranslation[];
 }
 
 export interface Sala {
@@ -274,3 +287,163 @@ export async function getPageBySlug(slug: string): Promise<Pagina | null> {
     return null;
   }
 }
+
+export interface LocalizedComunicadoResult {
+  comunicado: Comunicado;
+  title: string;
+  subtitle: string;
+  body: string;
+  audioScript: string;
+  keyPoints: string[];
+  slug: string;
+  isFallback: boolean;
+  fallbackLang?: 'es' | 'en';
+}
+
+export async function getComunicadoForLocale(
+  slug: string,
+  targetLang: 'es' | 'en' | 'it' | 'fr'
+): Promise<LocalizedComunicadoResult | null> {
+  try {
+    const langCodeMap: Record<string, string> = {
+      es: 'es-ES',
+      en: 'en-US',
+      it: 'it-IT',
+      fr: 'fr-FR'
+    };
+    const targetCode = langCodeMap[targetLang] || 'es-ES';
+
+    // Fetch release matching slug either in root (slug, slug_en) or in any translation
+    const items = await directus.request(
+      readItems('comunicados' as any, {
+        filter: {
+          _or: [
+            { slug: { _eq: slug } },
+            { slug_en: { _eq: slug } },
+            { translations: { slug: { _eq: slug } } }
+          ],
+          status: { _eq: 'published' }
+        },
+        fields: [
+          'id',
+          'status',
+          'fecha_publicacion',
+          'slug',
+          'slug_en',
+          'titulo',
+          'titulo_en',
+          'bajada',
+          'bajada_en',
+          'cuerpo',
+          'cuerpo_en',
+          'destacado',
+          'imagen_url_externa',
+          'imagen_portada.*',
+          'archivo_pdf.*',
+          'audio_habilitado',
+          'audio_url',
+          'audio_duracion',
+          'audio_script_es',
+          'audio_script_en',
+          'puntos_clave',
+          'puntos_clave_en',
+          'tags',
+          { categoria: ['id', 'nombre', 'nombre_en', 'slug', 'slug_en'] },
+          { portavoz: ['id', 'nombre', 'cargo', 'bio', 'avatar.*', 'email_prensa'] },
+          {
+            translations: [
+              'id',
+              'languages_code',
+              'titulo',
+              'slug',
+              'bajada',
+              'cuerpo',
+              'audio_script',
+              'puntos_clave'
+            ]
+          }
+        ],
+        limit: 1
+      })
+    );
+
+    const com = (items && (items as any)[0]) as Comunicado | undefined;
+    if (!com) return null;
+
+    // Check if translation exists in translations collection
+    const trans = com.translations?.find((t) => t.languages_code === targetCode);
+
+    if (trans && trans.titulo && trans.cuerpo) {
+      return {
+        comunicado: com,
+        title: trans.titulo,
+        subtitle: trans.bajada || '',
+        body: trans.cuerpo || '',
+        audioScript: trans.audio_script || trans.bajada || trans.titulo,
+        keyPoints: trans.puntos_clave && trans.puntos_clave.length > 0 ? trans.puntos_clave : [],
+        slug: trans.slug || com.slug,
+        isFallback: false
+      };
+    }
+
+    // Check flat fallback for English
+    if (targetLang === 'en' && (com.titulo_en || com.cuerpo_en)) {
+      return {
+        comunicado: com,
+        title: com.titulo_en || com.titulo,
+        subtitle: com.bajada_en || com.bajada || '',
+        body: com.cuerpo_en || com.cuerpo || '',
+        audioScript: com.audio_script_en || com.bajada_en || com.titulo_en || com.titulo,
+        keyPoints: com.puntos_clave_en && com.puntos_clave_en.length > 0 ? com.puntos_clave_en : com.puntos_clave || [],
+        slug: com.slug_en || com.slug,
+        isFallback: false
+      };
+    }
+
+    // If targetLang is Spanish
+    if (targetLang === 'es') {
+      return {
+        comunicado: com,
+        title: com.titulo,
+        subtitle: com.bajada || '',
+        body: com.cuerpo || '',
+        audioScript: com.audio_script_es || com.bajada || com.titulo,
+        keyPoints: com.puntos_clave && com.puntos_clave.length > 0 ? com.puntos_clave : [],
+        slug: com.slug,
+        isFallback: false
+      };
+    }
+
+    // Fallback logic for IT or FR when translation is missing:
+    // Prefer English if available, otherwise Spanish
+    if (com.titulo_en && com.cuerpo_en) {
+      return {
+        comunicado: com,
+        title: com.titulo_en,
+        subtitle: com.bajada_en || '',
+        body: com.cuerpo_en || '',
+        audioScript: com.audio_script_en || com.bajada_en || com.titulo_en,
+        keyPoints: com.puntos_clave_en || com.puntos_clave || [],
+        slug: com.slug_en || com.slug,
+        isFallback: true,
+        fallbackLang: 'en'
+      };
+    }
+
+    return {
+      comunicado: com,
+      title: com.titulo,
+      subtitle: com.bajada || '',
+      body: com.cuerpo || '',
+      audioScript: com.audio_script_es || com.bajada || com.titulo,
+      keyPoints: com.puntos_clave || [],
+      slug: com.slug,
+      isFallback: true,
+      fallbackLang: 'es'
+    };
+  } catch (error) {
+    console.error(`Error loading localized comunicado for ${slug} (${targetLang}):`, error);
+    return null;
+  }
+}
+

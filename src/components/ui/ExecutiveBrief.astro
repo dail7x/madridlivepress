@@ -1,15 +1,23 @@
 ---
 interface Props {
   points: string[];
-  lang?: 'es' | 'en';
+  lang?: 'es' | 'en' | 'it' | 'fr';
 }
 
 const { points = [], lang = 'es' } = Astro.props;
-const isEn = lang === 'en';
 
 if (!points || points.length === 0) {
   return null;
 }
+
+const labels: Record<string, { badge: string; subtitle: string }> = {
+  es: { badge: 'BRIEF · TL;DR DE 30 SEGUNDOS', subtitle: 'PUNTOS CLAVE Y CIFRAS' },
+  en: { badge: 'BRIEF · 30-SECOND TL;DR', subtitle: 'KEY TAKEAWAYS & DATA' },
+  it: { badge: 'BRIEF · TL;DR DI 30 SECONDI', subtitle: 'PUNTI CHIAVE E CIFRE' },
+  fr: { badge: 'BRIEF · TL;DR DE 30 SECONDES', subtitle: 'POINTS CLÉS ET CHIFFRES' },
+};
+
+const currentLabels = labels[lang] || labels.es;
 ---
 
 <section class="executive-lead-box border border-zinc-200 bg-canvas p-6 sm:p-7 my-6 font-sans relative border-l-4 border-l-vermilion">
@@ -17,12 +25,12 @@ if (!points || points.length === 0) {
     <div class="flex items-center gap-2 font-mono text-xs uppercase tracking-wider">
       <span class="w-2 h-2 rounded-full bg-vermilion inline-block"></span>
       <span class="font-bold text-zinc-950">
-        {isEn ? 'BRIEF · 30-SECOND TL;DR' : 'BRIEF · TL;DR DE 30 SEGUNDOS'}
+        {currentLabels.badge}
       </span>
     </div>
 
     <div class="font-mono text-[10px] text-zinc-400 uppercase tracking-widest hidden sm:block">
-      {isEn ? 'KEY TAKEAWAYS & DATA' : 'PUNTOS CLAVE Y CIFRAS'}
+      {currentLabels.subtitle}
     </div>
   </div>
 

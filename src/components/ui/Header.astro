@@ -8,6 +8,7 @@ interface Props {
 const { lang = 'es', alternateUrlEs, alternateUrlEn } = Astro.props;
 const currentPath = Astro.url.pathname;
 const isEn = lang === 'en' || currentPath.startsWith('/en');
+const pressUser = Astro.locals.pressUser;
 
 function getAlternateLanguagePath(pathname: string, targetLang: 'es' | 'en'): string {
   const cleanPath = pathname.replace(/\/$/, '') || '/';
@@ -132,14 +133,25 @@ const navItems = isEn
 
         <span class="text-zinc-300 mx-1 select-none">|</span>
 
-        <!-- Accreditation CTA Button -->
-        <a
-          href={isEn ? '/en/accreditation' : '/acreditaciones'}
-          data-astro-prefetch="hover"
-          class="font-mono text-xs uppercase tracking-wider text-zinc-900 hover:text-vermilion px-2.5 py-1 transition-colors font-bold whitespace-nowrap"
-        >
-          {isEn ? 'ACCREDITATION' : 'ACREDITACIÓN'}
-        </a>
+        <!-- Accreditation CTA Button / Status Badge -->
+        {pressUser ? (
+          <a
+            href={isEn ? '/en/press-kits' : '/press-kits'}
+            class="flex items-center gap-1.5 font-mono text-[10px] text-emerald-800 bg-emerald-50 border border-emerald-300 px-2 py-0.5 hover:bg-emerald-100 transition-colors"
+            title={`Acreditado: ${pressUser.email} (${pressUser.medio || 'Prensa'})`}
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+            <span class="font-bold tracking-wider uppercase">{isEn ? 'ACCREDITED' : 'ACREDITADO'}</span>
+          </a>
+        ) : (
+          <a
+            href={isEn ? '/en/accreditation' : '/acreditaciones'}
+            data-astro-prefetch="hover"
+            class="font-mono text-xs uppercase tracking-wider text-zinc-900 hover:text-vermilion px-2.5 py-1 transition-colors font-bold whitespace-nowrap"
+          >
+            {isEn ? 'ACCREDITATION' : 'ACREDITACIÓN'}
+          </a>
+        )}
 
         <!-- Drawer Toggle Button -->
         <button
@@ -160,7 +172,7 @@ const navItems = isEn
       <div class="flex items-center justify-between w-full md:hidden">
         <a href={isEn ? '/en' : '/'} class="font-display font-bold text-xs tracking-wider text-zinc-950 uppercase flex items-center gap-1.5">
           <span class="w-1.5 h-1.5 rounded-full bg-vermilion inline-block"></span>
-          <span>MADRID LIVE PRESS</span>
+          <span>NOCHE MADRID PRESS</span>
         </a>
 
         <div class="flex items-center gap-2">

@@ -1,0 +1,44 @@
+---
+interface Props {
+  targetLang: 'it' | 'fr';
+  fallbackLang?: 'es' | 'en';
+}
+
+const { targetLang, fallbackLang = 'es' } = Astro.props;
+
+const messages = {
+  it: {
+    title: 'Traduzione Ufficiale in Corso',
+    description: fallbackLang === 'en'
+      ? 'La versione ufficiale in lingua italiana di questo comunicato stampa è in fase di elaborazione editoriale. Di seguito viene presentata la versione verificata in lingua inglese.'
+      : 'La versione ufficiale in lingua italiana di questo comunicato stampa è in fase di elaborazione editoriale. Di seguito viene presentata la versione originale in spagnolo.',
+    badge: 'SALA STAMPA · NOTA EDITORIALE',
+  },
+  fr: {
+    title: 'Traduction Officielle en Cours',
+    description: fallbackLang === 'en'
+      ? 'La version officielle en langue française de ce communiqué de presse est en cours de traitement éditorial. La version vérifiée en anglais est affichée ci-dessous.'
+      : 'La version officielle en langue française de ce communiqué de presse est en cours de traitement éditorial. La version originale en espagnol est affichée ci-dessous.',
+    badge: 'SALLE DE PRESSE · NOTE ÉDITORIALE',
+  },
+};
+
+const current = messages[targetLang];
+---
+
+<aside
+  class="border-l-4 border-amber-500 bg-amber-50/70 p-4 sm:p-5 rounded-r-md my-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-zinc-800 font-sans"
+  role="alert"
+>
+  <div class="space-y-1">
+    <div class="flex items-center gap-2 font-mono text-[10px] tracking-wider font-bold text-amber-800 uppercase">
+      <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse inline-block"></span>
+      <span>{current.badge}</span>
+    </div>
+    <h4 class="font-display font-bold text-sm text-zinc-950">{current.title}</h4>
+    <p class="text-xs text-zinc-600 leading-relaxed max-w-2xl">{current.description}</p>
+  </div>
+  <div class="font-mono text-[11px] uppercase tracking-wider text-amber-900 bg-amber-100/80 px-2.5 py-1 rounded border border-amber-300 font-semibold whitespace-nowrap self-end sm:self-auto">
+    ORIGINAL · {fallbackLang.toUpperCase()}
+  </div>
+</aside>

@@ -1,0 +1,10 @@
+name = "mlp-translation-worker"
+main = "worker.js"
+compatibility_date = "2024-09-01"
+
+[ai]
+binding = "AI"
+
+[vars]
+AI_MODEL = "@cf/meta/llama-3.3-70b-instruct"
+# TRANSLATION_SECRET = "tu_token_secreto_aqui"

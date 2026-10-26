@@ -1,0 +1,260 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import AudioBriefPlayer from '@/components/ui/AudioBriefPlayer.astro';
+import ExecutiveBrief from '@/components/ui/ExecutiveBrief.astro';
+import PressPassGate from '@/components/ui/PressPassGate.astro';
+import PressPassModal from '@/components/ui/PressPassModal.astro';
+import TranslationFallbackBanner from '@/components/ui/TranslationFallbackBanner.astro';
+import type { Categoria, Portavoz } from '@/lib/directus';
+import { getComunicadoForLocale, getAssetUrl } from '@/lib/directus';
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+
+if (!slug) {
+  return Astro.redirect('/');
+}
+
+const localized = await getComunicadoForLocale(slug, 'fr');
+
+if (!localized) {
+  return Astro.redirect('/');
+}
+
+const { comunicado, title, subtitle, body, audioScript, keyPoints, isFallback, fallbackLang } = localized;
+
+const cat = comunicado.categoria as Categoria | undefined;
+const portavoz = comunicado.portavoz as Portavoz | undefined;
+
+const formattedDate = new Date(comunicado.fecha_publicacion).toLocaleDateString('fr-FR', {
+  day: '2-digit',
+  month: 'long',
+  year: 'numeric',
+});
+
+const imgUrl = comunicado.imagen_url_externa || (comunicado.imagen_portada ? getAssetUrl(comunicado.imagen_portada, { width: 1200, height: 700, format: 'webp' }) : '/images/news/dos-millones-turistas.jpg');
+
+// Session & Access control logic (Smart Metered + Lead Teaser)
+const pressUser = Astro.locals.pressUser;
+const isBot = Astro.locals.isBot;
+const isAuthed = !!pressUser;
+
+const countCookie = Astro.cookies.get('mlp_articles_count')?.value;
+const articlesCount = countCookie ? parseInt(countCookie, 10) : 0;
+
+let isUnlocked = isAuthed || isBot;
+let isFirstFreeArticle = false;
+
+if (!isUnlocked) {
+  if (articlesCount === 0) {
+    isUnlocked = true;
+    isFirstFreeArticle = true;
+    Astro.cookies.set('mlp_articles_count', '1', {
+      path: '/',
+      maxAge: 30 * 24 * 60 * 60,
+      sameSite: 'lax',
+    });
+  }
+}
+
+// Helper to extract lead paragraph
+function splitFirstParagraph(html: string): { lead: string; rest: string } {
+  const match = html.match(/(<p[\s\S]*?<\/p>)/i);
+  if (match && match.index !== undefined) {
+    const lead = match[1];
+    const rest = html.slice(match.index + lead.length).trim();
+    return { lead, rest };
+  }
+  return { lead: html, rest: '' };
+}
+
+const { lead, rest } = splitFirstParagraph(body);
+---
+
+<Layout
+  title={`${title} | Noche Madrid Press`}
+  description={subtitle || title}
+  image={imgUrl}
+  lang="fr"
+  alternateUrlEs={`/comunicados/${comunicado.slug}`}
+  alternateUrlEn={`/en/news/${comunicado.slug_en || comunicado.slug}`}
+>
+  <!-- Structured Schema.org with Google Paywall/Regwall standard -->
+  <script
+    is:inline
+    type="application/ld+json"
+    set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'NewsArticle',
+      headline: title,
+      description: subtitle || title,
+      datePublished: comunicado.fecha_publicacion,
+      image: [imgUrl],
+      isAccessibleForFree: isUnlocked ? 'true' : 'false',
+      hasPart: {
+        '@type': 'WebPageElement',
+        isAccessibleForFree: 'false',
+        cssSelector: '.press-pass-restricted-content',
+      },
+    })}
+  />
+
+  <article class="w-full bg-paper pb-20">
+    <!-- Back breadcrumb -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-4 border-b border-zinc-200 flex items-center justify-between font-mono text-xs text-zinc-500">
+      <a href="/" class="hover:text-vermilion flex items-center gap-1.5 font-bold uppercase tracking-wider transition-colors">
+        <span>←</span>
+        <span>Retour aux Actualités</span>
+      </a>
+      <div class="flex items-center gap-3">
+        {isAuthed && (
+          <span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 border border-emerald-200 font-bold uppercase tracking-wider">
+            ● PRESSE ACCRÉDITÉE
+          </span>
+        )}
+        <span class="uppercase">COMMUNIQUÉ DE PRESSE · {cat?.nombre?.toUpperCase() || 'OFFICIEL'}</span>
+      </div>
+    </div>
+
+    <!-- Article Header -->
+    <header class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-6 space-y-4">
+      <div class="flex items-center gap-3 font-mono text-xs uppercase tracking-wider text-zinc-500">
+        <span class="w-2 h-2 rounded-full bg-vermilion inline-block"></span>
+        <span class="font-bold text-zinc-950">{cat?.nombre?.toUpperCase() || 'COMMUNIQUÉ OFFICIEL'}</span>
+        <span>·</span>
+        <span>{formattedDate}</span>
+        <span>·</span>
+        <span>MADRID</span>
+      </div>
+
+      <h1 class="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-zinc-950 leading-[1.15] tracking-tight">
+        {title}
+      </h1>
+
+      {subtitle && (
+        <p class="font-sans text-lg sm:text-xl text-zinc-600 leading-relaxed font-normal pt-2 border-t border-zinc-100">
+          {subtitle}
+        </p>
+      )}
+
+      <!-- Editorial Fallback Notice if translation is in progress -->
+      {isFallback && (
+        <TranslationFallbackBanner targetLang="fr" fallbackLang={fallbackLang} />
+      )}
+    </header>
+
+    <!-- Main Hero Image -->
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div class="aspect-[16/9] w-full overflow-hidden bg-zinc-100 border border-zinc-200">
+        <img
+          src={imgUrl}
+          alt={title}
+          class="w-full h-full object-cover filter contrast-105"
+          loading="eager"
+        />
+      </div>
+      <div class="flex items-center justify-between pt-2 font-mono text-[10px] text-zinc-400 uppercase tracking-wider">
+        <span>PHOTO: NOCHEMADRID / ARCHIVES OFFICIELLES NOCHE MADRID PRESS</span>
+        <span>HAUTE RÉSOLUTION DISPONIBLE</span>
+      </div>
+    </div>
+
+    <!-- Main Content Body -->
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-8">
+      <!-- Neural Audio Brief -->
+      {comunicado.audio_habilitado !== false && (
+        <AudioBriefPlayer
+          title={title}
+          scriptText={audioScript}
+          duration={comunicado.audio_duracion || '1:30 min'}
+          audioUrl={comunicado.audio_url}
+          slug={slug}
+          lang="fr"
+        />
+      )}
+
+      <!-- Executive Brief (TL;DR) -->
+      {keyPoints.length > 0 && (
+        <ExecutiveBrief points={keyPoints} lang="fr" />
+      )}
+
+      <!-- Article Rich Text Area -->
+      {isUnlocked ? (
+        <!-- Full Unlocked Body -->
+        <div
+          class="prose prose-zinc max-w-none font-serif text-base sm:text-lg text-zinc-800 leading-relaxed space-y-4 [&>p]:leading-relaxed [&>blockquote]:border-l-2 [&>blockquote]:border-vermilion [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:text-zinc-900"
+          set:html={body}
+        />
+      ) : (
+        <!-- Gated Teaser: Lead + Blurred Rest + PressPassGate Card -->
+        <div class="space-y-4">
+          <div
+            class="prose prose-zinc max-w-none font-serif text-base sm:text-lg text-zinc-800 leading-relaxed [&>p]:leading-relaxed"
+            set:html={lead}
+          />
+
+          <div
+            class="press-pass-restricted-content select-none overflow-hidden max-h-24 opacity-30 filter blur-[3px] pointer-events-none"
+            aria-hidden="true"
+            set:html={rest}
+          />
+
+          <PressPassGate lang="fr" redirectUrl={Astro.url.pathname} />
+        </div>
+      )}
+
+      <!-- Spokesperson Card if available -->
+      {portavoz && (
+        <div class="border border-zinc-200 bg-canvas p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div class="w-16 h-16 rounded-full overflow-hidden bg-zinc-200 border border-zinc-300 flex-shrink-0">
+            {portavoz.avatar ? (
+              <img src={getAssetUrl(portavoz.avatar)} alt={portavoz.nombre} class="w-full h-full object-cover" />
+            ) : (
+              <div class="w-full h-full flex items-center justify-center font-display font-bold text-zinc-600">
+                {portavoz.nombre[0]}
+              </div>
+            )}
+          </div>
+          <div class="space-y-1">
+            <div class="font-mono text-[10px] uppercase tracking-wider text-zinc-400 font-semibold">Porte-Parole Officiel</div>
+            <h4 class="font-display text-base font-bold text-zinc-950">{portavoz.nombre}</h4>
+            <p class="font-sans text-xs text-zinc-600">{portavoz.cargo}</p>
+            {portavoz.email_prensa && (
+              <a href={`mailto:${portavoz.email_prensa}`} class="font-mono text-xs text-vermilion hover:underline inline-block pt-1">
+                {portavoz.email_prensa}
+              </a>
+            )}
+          </div>
+        </div>
+      )}
+
+      <!-- Media Kit / Download CTA -->
+      <div class="border border-zinc-950 bg-paper p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 font-mono text-xs">
+        <div class="space-y-1">
+          <div class="font-bold text-zinc-950 uppercase tracking-wider">KIT DE PRESSE OFFICIEL ET RESSOURCES HAUTE RÉSOLUTION</div>
+          <div class="text-zinc-500 text-[11px]">Téléchargez le B-Roll pour la télévision (4K ProRes) et le pack graphique complet.</div>
+        </div>
+        {isAuthed ? (
+          <a
+            href="/press-kits"
+            class="bg-zinc-950 hover:bg-vermilion text-white font-bold px-4 py-2 uppercase tracking-wider transition-colors whitespace-nowrap text-center"
+          >
+            Accéder au Kit Média ↓
+          </a>
+        ) : (
+          <button
+            type="button"
+            data-require-press-pass="true"
+            class="bg-zinc-950 hover:bg-vermilion text-white font-bold px-4 py-2 uppercase tracking-wider transition-colors whitespace-nowrap text-center"
+          >
+            Accéder au Kit Média ↓
+          </button>
+        )}
+      </div>
+    </div>
+  </article>
+
+  <!-- Global Modal for Downloads & Intercepts -->
+  <PressPassModal lang="fr" />
+</Layout>

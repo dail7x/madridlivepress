@@ -1,11 +1,15 @@
 ---
 import Layout from '@/layouts/Layout.astro';
 import WireframeHeader from '@/components/ui/WireframeHeader.astro';
+import PressPassModal from '@/components/ui/PressPassModal.astro';
 import { directus, getAssetUrl } from '@/lib/directus';
 import { readItems } from '@directus/sdk';
-import type { RecursoPrensa, Categoria } from '@/lib/directus';
+import type { RecursoPrensa } from '@/lib/directus';
 
 export const prerender = false;
+
+const pressUser = Astro.locals.pressUser;
+const isAuthed = !!pressUser;
 
 let recursos: RecursoPrensa[] = [];
 try {
@@ -43,18 +47,47 @@ const DEFAULT_KIT_THUMBS = [
 ---
 
 <Layout
-  title="Press Kits Oficiales y Recursos Multimedia | Madrid Live Press"
+  title="Press Kits Oficiales y Recursos Multimedia | Noche Madrid Press"
   description="Materiales multimedia oficiales de alta resolución, B-roll en 4K, dossiers técnicos y recursos para redacciones internacionales."
   lang="es"
 >
   <div class="w-full bg-paper">
-    <!-- Top Wireframe Header "PRESS KITS" (Clean Baseline Cut) -->
+    <!-- Top Wireframe Header "PRESS KITS" -->
     <WireframeHeader
       title="PRESS KITS"
-      subtitle="Materiales oficiales, B-roll en 4K, fotografía de alta resolución y dossiers técnicos listos para su uso editorial sin registro previo."
-      badge="24 RECURSOS"
+      subtitle="Materiales oficiales, B-roll en 4K, fotografía de alta resolución y dossiers técnicos para uso editorial."
+      badge={isAuthed ? '● PRENSA ACREDITADA' : '24 RECURSOS DISPONIBLES'}
       updatedTime="ALTA RESOLUCIÓN · BILINGÜE"
     />
+
+    <!-- Status Bar for Press Access -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+      {isAuthed ? (
+        <div class="border border-emerald-300 bg-emerald-50/70 p-3 flex items-center justify-between font-mono text-xs text-emerald-900">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+            <span><strong>Sesión Activa:</strong> {pressUser?.nombre} ({pressUser?.medio || 'Redacción'}) · Descargas ilimitadas habilitadas.</span>
+          </div>
+          <a href="/api/press-auth/logout?redirect=/press-kits" class="text-emerald-700 hover:underline uppercase text-[10px]">
+            Cerrar sesión
+          </a>
+        </div>
+      ) : (
+        <div class="border border-zinc-200 bg-canvas p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-mono text-xs">
+          <div class="flex items-center gap-2 text-zinc-800">
+            <span class="w-2 h-2 rounded-full bg-vermilion animate-pulse"></span>
+            <span>Acceso profesional sin coste: Acredita tu medio para desbloquear descargas en 4K y RAW sin esperas.</span>
+          </div>
+          <button
+            type="button"
+            data-require-press-pass="true"
+            class="bg-zinc-950 hover:bg-vermilion text-white font-bold px-3 py-1.5 uppercase tracking-wider text-[11px] whitespace-nowrap transition-colors"
+          >
+            Obtener Pase de Prensa →
+          </button>
+        </div>
+      )}
+    </div>
 
     <!-- Filter Control Bar -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 border-b border-zinc-200">
@@ -121,22 +154,33 @@ const DEFAULT_KIT_THUMBS = [
                     {kit.titulo}
                   </h3>
                   <p class="font-sans text-xs text-zinc-600 leading-relaxed">
-                    {kit.derechos_creditos || 'Créditos: © NocheMadrid / Madrid Live Press. Libre para uso informativo.'}
+                    {kit.derechos_creditos || 'Créditos: © NocheMadrid / Noche Madrid Press. Libre para uso informativo.'}
                   </p>
                 </div>
 
                 <!-- Download CTA -->
                 <div class="pt-4 border-t border-zinc-100">
-                  <a
-                    href={fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    download
-                    class="w-full bg-paper hover:bg-zinc-950 hover:text-white border border-zinc-950 text-zinc-950 font-mono text-xs uppercase tracking-wider font-bold py-3 px-4 flex items-center justify-between transition-all active:scale-[0.98]"
-                  >
-                    <span>Descargar Press Kit</span>
-                    <span>↓</span>
-                  </a>
+                  {isAuthed ? (
+                    <a
+                      href={fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      download
+                      class="w-full bg-paper hover:bg-zinc-950 hover:text-white border border-zinc-950 text-zinc-950 font-mono text-xs uppercase tracking-wider font-bold py-3 px-4 flex items-center justify-between transition-all active:scale-[0.98]"
+                    >
+                      <span>Descargar Press Kit</span>
+                      <span>↓</span>
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      data-require-press-pass="true"
+                      class="w-full bg-paper hover:bg-zinc-950 hover:text-white border border-zinc-950 text-zinc-950 font-mono text-xs uppercase tracking-wider font-bold py-3 px-4 flex items-center justify-between transition-all active:scale-[0.98]"
+                    >
+                      <span>Descargar (Requiere Pase)</span>
+                      <span class="text-vermilion font-bold">🔒</span>
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -145,6 +189,9 @@ const DEFAULT_KIT_THUMBS = [
       </div>
     </div>
   </div>
+
+  <!-- Global Modal for Downloads -->
+  <PressPassModal lang="es" />
 
   <!-- Client-side filter script -->
   <script is:inline>

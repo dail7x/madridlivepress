@@ -9,13 +9,13 @@ interface Props {
   title?: string;
   description?: string;
   image?: string;
-  lang?: 'es' | 'en';
+  lang?: 'es' | 'en' | 'it' | 'fr';
   alternateUrlEs?: string;
   alternateUrlEn?: string;
 }
 
 const {
-  title = 'Madrid Live Press | Sala de Prensa de la Noche y la Cultura de Madrid',
+  title = 'Noche Madrid Press | Sala de Prensa de la Noche y la Cultura de Madrid',
   description = 'Sala de prensa virtual internacional de la noche, el ocio cultural y los 96 espacios asociados de Madrid, gestionada por NocheMadrid.',
   image = '/images/hero-backstage.webp',
   lang = 'es',
@@ -125,7 +125,7 @@ const targetPathEn = alternateUrlEn || getAlternateLanguagePath(currentPath, 'en
             data-astro-prefetch="hover"
             class="writing-vertical font-mono text-[11px] font-bold tracking-[0.25em] text-zinc-900 hover:text-vermilion transition-colors uppercase whitespace-nowrap flex items-center gap-2"
           >
-            <span>MADRID LIVE PRESS</span>
+            <span>NOCHE MADRID PRESS</span>
             <span class="inline-block w-1.5 h-1.5 rounded-full bg-vermilion"></span>
           </a>
         </div>
