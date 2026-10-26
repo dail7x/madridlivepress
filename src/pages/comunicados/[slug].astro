@@ -2,7 +2,6 @@
 import Layout from '@/layouts/Layout.astro';
 import AudioBriefPlayer from '@/components/ui/AudioBriefPlayer.astro';
 import ExecutiveBrief from '@/components/ui/ExecutiveBrief.astro';
-import PressPassGate from '@/components/ui/PressPassGate.astro';
 import PressPassModal from '@/components/ui/PressPassModal.astro';
 import type { Comunicado, Categoria, Portavoz } from '@/lib/directus';
 import { directus, readItems, getAssetUrl } from '@/lib/directus';
@@ -85,42 +84,8 @@ const imgUrl = comunicado.imagen_url_externa || (comunicado.imagen_portada ? get
 const audioScript = comunicado.audio_script_es || subtitle || title;
 const keyPoints = comunicado.puntos_clave && comunicado.puntos_clave.length > 0 ? comunicado.puntos_clave : [];
 
-// Session & Access control logic (Smart Metered + Lead Teaser)
 const pressUser = Astro.locals.pressUser;
-const isBot = Astro.locals.isBot;
 const isAuthed = !!pressUser;
-
-const countCookie = Astro.cookies.get('mlp_articles_count')?.value;
-const articlesCount = countCookie ? parseInt(countCookie, 10) : 0;
-
-let isUnlocked = isAuthed || isBot;
-let isFirstFreeArticle = false;
-
-if (!isUnlocked) {
-  if (articlesCount === 0) {
-    // 1st article is completely free
-    isUnlocked = true;
-    isFirstFreeArticle = true;
-    Astro.cookies.set('mlp_articles_count', '1', {
-      path: '/',
-      maxAge: 30 * 24 * 60 * 60, // 30 days
-      sameSite: 'lax',
-    });
-  }
-}
-
-// Helper to extract lead paragraph for the regwall teaser
-function splitFirstParagraph(html: string): { lead: string; rest: string } {
-  const match = html.match(/(<p[\s\S]*?<\/p>)/i);
-  if (match && match.index !== undefined) {
-    const lead = match[1];
-    const rest = html.slice(match.index + lead.length).trim();
-    return { lead, rest };
-  }
-  return { lead: html, rest: '' };
-}
-
-const { lead, rest } = splitFirstParagraph(body);
 ---
 
 <Layout
@@ -131,7 +96,7 @@ const { lead, rest } = splitFirstParagraph(body);
   alternateUrlEs={`/comunicados/${canonicalEsSlug}`}
   alternateUrlEn={`/en/news/${comunicado.slug_en || canonicalEsSlug}`}
 >
-  <!-- Structured Schema.org with Google Paywall/Regwall standard -->
+  <!-- Schema.org NewsArticle (100% Libre Acceso) -->
   <script
     is:inline
     type="application/ld+json"
@@ -142,12 +107,12 @@ const { lead, rest } = splitFirstParagraph(body);
       description: subtitle || title,
       datePublished: comunicado.fecha_publicacion,
       image: [imgUrl],
-      isAccessibleForFree: isUnlocked ? 'true' : 'false',
-      hasPart: {
-        '@type': 'WebPageElement',
-        isAccessibleForFree: 'false',
-        cssSelector: '.press-pass-restricted-content',
-      },
+      isAccessibleForFree: 'true',
+      publisher: {
+        '@type': 'Organization',
+        name: 'Noche Madrid Press',
+        url: 'https://nochemadridpress.org'
+      }
     })}
   />
 
@@ -156,7 +121,7 @@ const { lead, rest } = splitFirstParagraph(body);
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-4 border-b border-zinc-200 flex items-center justify-between font-mono text-xs text-zinc-500">
       <a href="/comunicados" class="hover:text-vermilion flex items-center gap-1.5 font-bold uppercase tracking-wider transition-colors">
         <span>←</span>
-        <span>Volver a Noticias</span>
+        <span>Volver a Notas de Prensa</span>
       </a>
       <div class="flex items-center gap-3">
         {isAuthed && (
@@ -220,54 +185,16 @@ const { lead, rest } = splitFirstParagraph(body);
         />
       )}
 
-      <!-- First Free Article Notice (Gentle & professional) -->
-      {isFirstFreeArticle && (
-        <div class="border border-zinc-200 bg-canvas p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-mono text-xs">
-          <div class="flex items-center gap-2 text-zinc-800">
-            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span><strong>Cortesía Editorial:</strong> Estás leyendo tu primer comunicado libre.</span>
-          </div>
-          <button
-            type="button"
-            data-require-press-pass="true"
-            class="text-vermilion hover:underline font-bold uppercase tracking-wider text-left sm:text-right"
-          >
-            Acreditar medio para descargas 4K →
-          </button>
-        </div>
-      )}
-
       <!-- Executive Brief (30-Sec TL;DR) -->
       {keyPoints.length > 0 && (
         <ExecutiveBrief points={keyPoints} lang="es" />
       )}
 
-      <!-- Article Rich Text Area -->
-      {isUnlocked ? (
-        <!-- Full Unlocked Body -->
-        <div
-          class="prose prose-zinc max-w-none font-serif text-base sm:text-lg text-zinc-800 leading-relaxed space-y-4 [&>p]:leading-relaxed [&>blockquote]:border-l-2 [&>blockquote]:border-vermilion [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:text-zinc-900"
-          set:html={body}
-        />
-      ) : (
-        <!-- Gated Teaser: Lead + Blurred Rest + PressPassGate Card -->
-        <div class="space-y-4">
-          <div
-            class="prose prose-zinc max-w-none font-serif text-base sm:text-lg text-zinc-800 leading-relaxed [&>p]:leading-relaxed"
-            set:html={lead}
-          />
-
-          <!-- Rest of the article with blur for search crawlers / accessibility -->
-          <div
-            class="press-pass-restricted-content select-none overflow-hidden max-h-24 opacity-30 filter blur-[3px] pointer-events-none"
-            aria-hidden="true"
-            set:html={rest}
-          />
-
-          <!-- Integrated Editorial Press Pass Gate -->
-          <PressPassGate lang="es" redirectUrl={Astro.url.pathname} />
-        </div>
-      )}
+      <!-- Article Body (100% Libre Acceso) -->
+      <div
+        class="prose prose-zinc max-w-none font-serif text-base sm:text-lg text-zinc-800 leading-relaxed space-y-4 [&>p]:leading-relaxed [&>blockquote]:border-l-2 [&>blockquote]:border-vermilion [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:text-zinc-900"
+        set:html={body}
+      />
 
       <!-- Spokesperson Card if available -->
       {portavoz && (

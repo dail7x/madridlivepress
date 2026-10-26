@@ -1,5 +1,6 @@
 ---
 import Layout from '@/layouts/Layout.astro';
+import PressPassModal from '@/components/ui/PressPassModal.astro';
 import type { Sala } from '@/lib/directus';
 import { directus, readItems, getAssetUrl } from '@/lib/directus';
 
@@ -55,6 +56,9 @@ if (!sala) {
 const typeName = sala.tipo_espacio_en || sala.tipo_espacio;
 const desc = sala.descripcion_en || sala.descripcion;
 const igUrl = sala.instagram ? `https://instagram.com/${sala.instagram.replace('@', '')}` : null;
+
+const pressUser = Astro.locals.pressUser;
+const isAuthed = !!pressUser;
 ---
 
 <Layout
@@ -168,22 +172,59 @@ const igUrl = sala.instagram ? `https://instagram.com/${sala.instagram.replace('
         </div>
 
         {sala.contacto_prensa_nombre && (
-          <div class="border border-zinc-200 bg-paper p-5 space-y-2">
-            <div class="font-bold text-zinc-950 uppercase tracking-wider pb-2 border-b border-zinc-100">
-              PRESS CONTACT
+          <div class="border border-zinc-200 bg-paper p-5 space-y-3">
+            <div class="flex items-center justify-between pb-2 border-b border-zinc-100">
+              <span class="font-bold text-zinc-950 uppercase tracking-wider">PRESS CONTACT</span>
+              {isAuthed ? (
+                <span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 border border-emerald-300 font-bold text-[10px]">
+                  ● UNLOCKED
+                </span>
+              ) : (
+                <span class="text-zinc-500 text-[10px] uppercase">
+                  PRESS PASS
+                </span>
+              )}
             </div>
-            <div class="font-bold text-zinc-950">{sala.contacto_prensa_nombre}</div>
-            {sala.contacto_prensa_email && (
-              <a href={`mailto:${sala.contacto_prensa_email}`} class="text-vermilion hover:underline block">
-                {sala.contacto_prensa_email}
-              </a>
-            )}
-            {sala.contacto_prensa_telefono && (
-              <div class="text-zinc-500">{sala.contacto_prensa_telefono}</div>
+
+            {isAuthed ? (
+              <div class="space-y-1.5 text-zinc-800">
+                <div class="font-bold text-zinc-950">{sala.contacto_prensa_nombre}</div>
+                {sala.contacto_prensa_email && (
+                  <div>
+                    <span class="text-zinc-400">Email:</span>{' '}
+                    <a href={`mailto:${sala.contacto_prensa_email}`} class="text-vermilion hover:underline font-bold">
+                      {sala.contacto_prensa_email}
+                    </a>
+                  </div>
+                )}
+                {sala.contacto_prensa_telefono && (
+                  <div>
+                    <span class="text-zinc-400">Phone:</span>{' '}
+                    <span class="font-semibold text-zinc-950">{sala.contacto_prensa_telefono}</span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div class="space-y-3">
+                <div class="flex items-center justify-between text-zinc-600">
+                  <span class="font-medium">{sala.contacto_prensa_nombre}</span>
+                  <span class="text-zinc-400 filter blur-[3px] select-none font-bold">press@venue.com</span>
+                </div>
+                <button
+                  type="button"
+                  data-require-press-pass="true"
+                  class="w-full bg-zinc-950 hover:bg-vermilion text-white font-bold py-2.5 px-3 uppercase tracking-wider text-[11px] transition-colors"
+                >
+                  Unlock Direct Press Contact →
+                </button>
+              </div>
             )}
           </div>
         )}
       </div>
     </div>
   </div>
+
+  <!-- Global Modal for Downloads & Accreditation -->
+  <PressPassModal lang="en" />
 </Layout>

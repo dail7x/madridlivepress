@@ -2,7 +2,6 @@
 import Layout from '@/layouts/Layout.astro';
 import AudioBriefPlayer from '@/components/ui/AudioBriefPlayer.astro';
 import ExecutiveBrief from '@/components/ui/ExecutiveBrief.astro';
-import PressPassGate from '@/components/ui/PressPassGate.astro';
 import PressPassModal from '@/components/ui/PressPassModal.astro';
 import TranslationFallbackBanner from '@/components/ui/TranslationFallbackBanner.astro';
 import type { Categoria, Portavoz } from '@/lib/directus';
@@ -35,41 +34,8 @@ const formattedDate = new Date(comunicado.fecha_publicacion).toLocaleDateString(
 
 const imgUrl = comunicado.imagen_url_externa || (comunicado.imagen_portada ? getAssetUrl(comunicado.imagen_portada, { width: 1200, height: 700, format: 'webp' }) : '/images/news/dos-millones-turistas.jpg');
 
-// Session & Access control logic (Smart Metered + Lead Teaser)
 const pressUser = Astro.locals.pressUser;
-const isBot = Astro.locals.isBot;
 const isAuthed = !!pressUser;
-
-const countCookie = Astro.cookies.get('mlp_articles_count')?.value;
-const articlesCount = countCookie ? parseInt(countCookie, 10) : 0;
-
-let isUnlocked = isAuthed || isBot;
-let isFirstFreeArticle = false;
-
-if (!isUnlocked) {
-  if (articlesCount === 0) {
-    isUnlocked = true;
-    isFirstFreeArticle = true;
-    Astro.cookies.set('mlp_articles_count', '1', {
-      path: '/',
-      maxAge: 30 * 24 * 60 * 60,
-      sameSite: 'lax',
-    });
-  }
-}
-
-// Helper to extract lead paragraph
-function splitFirstParagraph(html: string): { lead: string; rest: string } {
-  const match = html.match(/(<p[\s\S]*?<\/p>)/i);
-  if (match && match.index !== undefined) {
-    const lead = match[1];
-    const rest = html.slice(match.index + lead.length).trim();
-    return { lead, rest };
-  }
-  return { lead: html, rest: '' };
-}
-
-const { lead, rest } = splitFirstParagraph(body);
 ---
 
 <Layout
@@ -80,7 +46,7 @@ const { lead, rest } = splitFirstParagraph(body);
   alternateUrlEs={`/comunicados/${comunicado.slug}`}
   alternateUrlEn={`/en/news/${comunicado.slug_en || comunicado.slug}`}
 >
-  <!-- Structured Schema.org with Google Paywall/Regwall standard -->
+  <!-- Schema.org NewsArticle (100% Free Access) -->
   <script
     is:inline
     type="application/ld+json"
@@ -91,12 +57,12 @@ const { lead, rest } = splitFirstParagraph(body);
       description: subtitle || title,
       datePublished: comunicado.fecha_publicacion,
       image: [imgUrl],
-      isAccessibleForFree: isUnlocked ? 'true' : 'false',
-      hasPart: {
-        '@type': 'WebPageElement',
-        isAccessibleForFree: 'false',
-        cssSelector: '.press-pass-restricted-content',
-      },
+      isAccessibleForFree: 'true',
+      publisher: {
+        '@type': 'Organization',
+        name: 'Noche Madrid Press',
+        url: 'https://nochemadridpress.org'
+      }
     })}
   />
 
@@ -179,30 +145,11 @@ const { lead, rest } = splitFirstParagraph(body);
         <ExecutiveBrief points={keyPoints} lang="it" />
       )}
 
-      <!-- Article Rich Text Area -->
-      {isUnlocked ? (
-        <!-- Full Unlocked Body -->
-        <div
-          class="prose prose-zinc max-w-none font-serif text-base sm:text-lg text-zinc-800 leading-relaxed space-y-4 [&>p]:leading-relaxed [&>blockquote]:border-l-2 [&>blockquote]:border-vermilion [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:text-zinc-900"
-          set:html={body}
-        />
-      ) : (
-        <!-- Gated Teaser: Lead + Blurred Rest + PressPassGate Card -->
-        <div class="space-y-4">
-          <div
-            class="prose prose-zinc max-w-none font-serif text-base sm:text-lg text-zinc-800 leading-relaxed [&>p]:leading-relaxed"
-            set:html={lead}
-          />
-
-          <div
-            class="press-pass-restricted-content select-none overflow-hidden max-h-24 opacity-30 filter blur-[3px] pointer-events-none"
-            aria-hidden="true"
-            set:html={rest}
-          />
-
-          <PressPassGate lang="it" redirectUrl={Astro.url.pathname} />
-        </div>
-      )}
+      <!-- Article Body (100% Free Access) -->
+      <div
+        class="prose prose-zinc max-w-none font-serif text-base sm:text-lg text-zinc-800 leading-relaxed space-y-4 [&>p]:leading-relaxed [&>blockquote]:border-l-2 [&>blockquote]:border-vermilion [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:text-zinc-900"
+        set:html={body}
+      />
 
       <!-- Spokesperson Card if available -->
       {portavoz && (

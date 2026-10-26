@@ -2,18 +2,25 @@
 interface Props {
   lang?: 'es' | 'en' | 'it' | 'fr';
   redirectUrl?: string;
+  title?: string;
+  subtitle?: string;
 }
 
-const { lang = 'es', redirectUrl = '' } = Astro.props;
+const { 
+  lang = 'es', 
+  redirectUrl = '',
+  title: customTitle,
+  subtitle: customSubtitle
+} = Astro.props;
 
 const isEs = lang === 'es';
 const texts = {
   badgeMeta: isEs ? 'GABINETE DE PRENSA OFICIAL · NOCHEMADRID' : 'OFFICIAL PRESS DESK · NOCHEMADRID',
   badgeFree: isEs ? '100% GRATUITO PARA REDACCIONES' : '100% FREE FOR NEWSROOMS',
-  title: isEs ? 'Pase de Prensa: Desbloquea el Comunicado Completo' : 'Press Pass: Unlock the Full Release',
-  subtitle: isEs
-    ? 'Noche Madrid Press es la fuente oficial del ocio nocturno y la música en vivo. La acreditación profesional es sin coste y te da acceso inmediato a recursos en alta resolución y notas bajo embargo.'
-    : 'Noche Madrid Press is the official wire for live music and nightlife culture. Professional accreditation is free and grants immediate access to high-res media kits and embargoed news.',
+  title: customTitle || (isEs ? 'Pase de Prensa: Desbloquea el Contenido Completo' : 'Press Pass: Unlock the Full Content'),
+  subtitle: customSubtitle || (isEs
+    ? 'Noche Madrid Press es la fuente oficial del ocio nocturno y la música en vivo. La acreditación profesional es sin coste y te da acceso inmediato a reportajes en profundidad, recursos en alta resolución y notas bajo embargo.'
+    : 'Noche Madrid Press is the official wire for live music and nightlife culture. Professional accreditation is free and grants immediate access to high-res media kits, in-depth reports and embargoed news.'),
   benefit1Title: isEs ? 'B-Roll 4K y RAW sin marcas' : '4K B-Roll & RAW Media Kits',
   benefit1Desc: isEs ? 'Vídeo para TV y fotografía de alta resolución libres de derechos editoriales.' : 'Broadcast-ready footage and photography free for editorial use.',
   benefit2Title: isEs ? 'Exclusivas y Embargos 24h' : '24h Pre-Release Embargoes',

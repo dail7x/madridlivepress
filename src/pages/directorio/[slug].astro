@@ -1,5 +1,6 @@
 ---
 import Layout from '@/layouts/Layout.astro';
+import PressPassModal from '@/components/ui/PressPassModal.astro';
 import { directus, getAssetUrl } from '@/lib/directus';
 import { readItems } from '@directus/sdk';
 import type { Sala } from '@/lib/directus';
@@ -60,6 +61,9 @@ const typeLabelMap: Record<string, string> = {
 const typeLabel = typeLabelMap[item.tipo_espacio] || 'ESPACIO ASOCIADO OFICIAL';
 const monogram = item.nombre.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase();
 const instaUrl = (item as any).instagram_url || 'https://www.instagram.com/nochemadrid/';
+
+const pressUser = Astro.locals.pressUser;
+const isAuthed = !!pressUser;
 ---
 
 <Layout
@@ -122,6 +126,56 @@ const instaUrl = (item as any).instagram_url || 'https://www.instagram.com/noche
             </div>
           </div>
 
+          <!-- Contacto Directo de Prensa (Acceso con Pase de Prensa) -->
+          <div class="border border-zinc-200 bg-canvas p-5 space-y-3 font-mono text-xs">
+            <div class="flex items-center justify-between pb-2 border-b border-zinc-200">
+              <span class="font-bold text-zinc-950 uppercase tracking-wider">CONTACTO DE PRENSA DIRECTO</span>
+              {isAuthed ? (
+                <span class="text-emerald-700 bg-emerald-50 px-2 py-0.5 border border-emerald-300 font-bold text-[10px]">
+                  ● ACCESO DESBLOQUEADO
+                </span>
+              ) : (
+                <span class="text-zinc-500 text-[10px] uppercase">
+                  REQUIERE PASE DE PRENSA
+                </span>
+              )}
+            </div>
+
+            {isAuthed ? (
+              <div class="space-y-1.5 text-zinc-800">
+                <div class="font-bold text-sm text-zinc-950">{item.contacto_prensa_nombre || 'Gabinete de Prensa'}</div>
+                {item.contacto_prensa_email && (
+                  <div>
+                    <span class="text-zinc-400">Email:</span>{' '}
+                    <a href={`mailto:${item.contacto_prensa_email}`} class="text-vermilion font-bold hover:underline">
+                      {item.contacto_prensa_email}
+                    </a>
+                  </div>
+                )}
+                {item.contacto_prensa_telefono && (
+                  <div>
+                    <span class="text-zinc-400">Tel:</span>{' '}
+                    <span class="font-bold text-zinc-950">{item.contacto_prensa_telefono}</span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div class="space-y-3">
+                <div class="flex items-center justify-between text-zinc-600">
+                  <span>{item.contacto_prensa_nombre || 'Responsable de Medios'}</span>
+                  <span class="text-zinc-400 filter blur-[3px] select-none font-bold">prensa@espacio.es</span>
+                </div>
+                <button
+                  type="button"
+                  data-require-press-pass="true"
+                  class="w-full bg-zinc-950 hover:bg-vermilion text-white font-bold py-2.5 px-4 uppercase tracking-wider text-[11px] transition-colors"
+                >
+                  Desbloquear Contacto Directo con Pase de Prensa →
+                </button>
+              </div>
+            )}
+          </div>
+
           <!-- Social Links & Action Buttons -->
           <div class="space-y-3 pt-2">
             <div class="flex items-center gap-4 font-mono text-xs">
@@ -182,4 +236,7 @@ const instaUrl = (item as any).instagram_url || 'https://www.instagram.com/noche
       </div>
     </div>
   </article>
+
+  <!-- Global Modal for Press Pass Intercepts -->
+  <PressPassModal lang="es" />
 </Layout>

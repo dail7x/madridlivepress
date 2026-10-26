@@ -2,6 +2,8 @@
 import Layout from '@/layouts/Layout.astro';
 import AudioBriefPlayer from '@/components/ui/AudioBriefPlayer.astro';
 import ExecutiveBrief from '@/components/ui/ExecutiveBrief.astro';
+import PressPassGate from '@/components/ui/PressPassGate.astro';
+import PressPassModal from '@/components/ui/PressPassModal.astro';
 import type { Comunicado, Categoria, Portavoz } from '@/lib/directus';
 import { directus, readItems, getAssetUrl } from '@/lib/directus';
 
@@ -109,6 +111,25 @@ const formattedDate = new Date(comunicado.fecha_publicacion).toLocaleDateString(
 const imgUrl = comunicado.imagen_url_externa || (comunicado.imagen_portada ? getAssetUrl(comunicado.imagen_portada, { width: 1200, height: 700, format: 'webp' }) : '/images/news/dos-millones-turistas.jpg');
 const audioScript = comunicado.audio_script_es || subtitle || title;
 const keyPoints = comunicado.puntos_clave && comunicado.puntos_clave.length > 0 ? comunicado.puntos_clave : [];
+
+// Press Pass access control for in-depth editorial reports
+const pressUser = Astro.locals.pressUser;
+const isBot = Astro.locals.isBot;
+const isAuthed = !!pressUser;
+const isUnlocked = isAuthed || isBot;
+
+// Helper to extract lead paragraph for the regwall teaser
+function splitFirstParagraph(html: string): { lead: string; rest: string } {
+  const match = html.match(/(<p[\s\S]*?<\/p>)/i);
+  if (match && match.index !== undefined) {
+    const lead = match[1];
+    const rest = html.slice(match.index + lead.length).trim();
+    return { lead, rest };
+  }
+  return { lead: html, rest: '' };
+}
+
+const { lead, rest } = splitFirstParagraph(body);
 ---
 
 <Layout
@@ -119,7 +140,7 @@ const keyPoints = comunicado.puntos_clave && comunicado.puntos_clave.length > 0 
   alternateUrlEs={`/articulos/${canonicalEsSlug}`}
   alternateUrlEn={`/en/articles/${comunicado.slug_en || canonicalEsSlug}`}
 >
-  <!-- Schema.org Article JSON-LD -->
+  <!-- Schema.org Article JSON-LD with Gated Content standard -->
   <script
     is:inline
     type="application/ld+json"
@@ -130,7 +151,12 @@ const keyPoints = comunicado.puntos_clave && comunicado.puntos_clave.length > 0 
       description: subtitle || title,
       datePublished: comunicado.fecha_publicacion,
       image: [imgUrl],
-      isAccessibleForFree: 'true',
+      isAccessibleForFree: isUnlocked ? 'true' : 'false',
+      hasPart: {
+        '@type': 'WebPageElement',
+        isAccessibleForFree: 'false',
+        cssSelector: '.press-pass-restricted-content'
+      },
       publisher: {
         '@type': 'Organization',
         name: 'Noche Madrid',
@@ -146,8 +172,16 @@ const keyPoints = comunicado.puntos_clave && comunicado.puntos_clave.length > 0 
         <span>←</span>
         <span>Volver a Artículos de Madrid</span>
       </a>
-      <div class="flex items-center gap-2">
-        <span class="inline-block w-2 h-2 rounded-full bg-emerald-600"></span>
+      <div class="flex items-center gap-3">
+        {isAuthed ? (
+          <span class="text-emerald-700 bg-emerald-50 px-2.5 py-0.5 border border-emerald-300 font-bold uppercase tracking-wider text-[11px]">
+            ● PASE DE PRENSA ACTIVO
+          </span>
+        ) : (
+          <span class="text-zinc-600 bg-zinc-100 px-2 py-0.5 border border-zinc-200 uppercase tracking-wider text-[11px]">
+            REPORTAJE ESPECIAL
+          </span>
+        )}
         <span class="uppercase font-bold text-zinc-800">
           {cat?.nombre?.toUpperCase() || 'REPORTAJE DE OCIO'}
         </span>
@@ -225,11 +259,35 @@ const keyPoints = comunicado.puntos_clave && comunicado.puntos_clave.length > 0 
       )}
     </div>
 
-    <!-- Article Content: 100% público y libre para lectura -->
+    <!-- Article Content: Gated with Press Pass -->
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="prose prose-zinc max-w-none font-serif text-base sm:text-lg leading-relaxed text-zinc-800 space-y-6">
-        <div set:html={body} />
-      </div>
+      {isUnlocked ? (
+        <div class="prose prose-zinc max-w-none font-serif text-base sm:text-lg leading-relaxed text-zinc-800 space-y-6">
+          <div set:html={body} />
+        </div>
+      ) : (
+        <div class="space-y-6">
+          <div
+            class="prose prose-zinc max-w-none font-serif text-base sm:text-lg leading-relaxed text-zinc-800"
+            set:html={lead}
+          />
+
+          <!-- Rest of article blurred for search crawlers / accessibility -->
+          <div
+            class="press-pass-restricted-content select-none overflow-hidden max-h-36 opacity-30 filter blur-[3px] pointer-events-none"
+            aria-hidden="true"
+            set:html={rest}
+          />
+
+          <!-- Integrated Press Pass Gate -->
+          <PressPassGate
+            lang="es"
+            redirectUrl={Astro.url.pathname}
+            title="Pase de Prensa: Desbloquea este Reportaje Especial"
+            subtitle="Acceso para profesionales y medios de comunicación. Solicita tu acreditación gratuita o inicia sesión para leer el reportaje completo, descargar datos estadísticos e informes sectoriales."
+          />
+        </div>
+      )}
 
       <!-- Tags -->
       {comunicado.tags && Array.isArray(comunicado.tags) && comunicado.tags.length > 0 && (
@@ -289,4 +347,7 @@ const keyPoints = comunicado.puntos_clave && comunicado.puntos_clave.length > 0 
       </section>
     )}
   </article>
+
+  <!-- Global Modal for Downloads & Accreditation -->
+  <PressPassModal lang="es" />
 </Layout>
