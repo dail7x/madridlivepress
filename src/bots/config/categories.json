@@ -1,0 +1,77 @@
+{
+  "categories": {
+    "ocio_nocturno": {
+      "nombre": "Ocio Nocturno y Entretenimiento",
+      "keywords": [
+        "ocio nocturno", "noche", "discoteca", "discotecas", "clubbing", "dj", "fiesta", 
+        "festivales", "festival", "tardeo", "electrónica", "conciertos", "salas de fiesta",
+        "club", "coctelería nocturna", "eventos nocturnos", "salas de concierto", "nocturna",
+        "nightlife", "madrid de noche", "música electrónica", "baile"
+      ],
+      "default_tags": ["ocio-nocturno", "noche-madrid", "entretenimiento", "musica-en-vivo"]
+    },
+    "gastronomia": {
+      "nombre": "Gastronomía y Restauración",
+      "keywords": [
+        "gastronomía", "restaurante", "restaurantes", "chef", "coctelería", "coctel", "cocktail",
+        "tapas", "maridaje", "bodega", "vino", "vinos", "sumiller", "estrella michelin", "soles repsol",
+        "carta", "menú", "brunch", "gastrobar", "taberna", "cocina", "repostería", "bistró"
+      ],
+      "default_tags": ["gastronomia", "restauracion", "cocteleria", "madrid-gastro"]
+    },
+    "turismo": {
+      "nombre": "Turismo y Destino Madrid",
+      "keywords": [
+        "turismo", "turista", "turistas", "hotel", "hoteles", "viajes", "viajar", "escapadas",
+        "alojamiento", "guía de viajes", "fitur", "madrid destino", "mice", "turismo urbano",
+        "visitar madrid", "monumentos", "rutas turísticas", "patrimonio"
+      ],
+      "default_tags": ["turismo", "destino-madrid", "hoteles", "viajes"]
+    },
+    "cultura_espectaculos": {
+      "nombre": "Cultura y Espectáculos",
+      "keywords": [
+        "cultura", "teatro", "espectáculo", "espectáculos", "musical", "musicales", "arte",
+        "museo", "museos", "exposición", "exposiciones", "cine", "danza", "flamenco", "concierto",
+        "agenda cultural", "actuación", "obra teatral", "literatura", "galería"
+      ],
+      "default_tags": ["cultura", "espectaculos", "teatro", "agenda-madrid", "arte"]
+    },
+    "estilo_de_vida": {
+      "nombre": "Tendencias y Estilo de Vida (Lifestyle)",
+      "keywords": [
+        "estilo de vida", "lifestyle", "tendencias", "moda", "planes", "planes madrid", "shopping",
+        "belleza", "wellness", "ocio urbano", "experiencias", "rooftop", "terrazas", "lujo",
+        "diseño", "escapadas chic", "lifestyle madrid"
+      ],
+      "default_tags": ["lifestyle", "tendencias", "planes-madrid", "estilo-de-vida"]
+    },
+    "sectorial_hosteleria": {
+      "nombre": "Revistas Sectoriales y Hostelería B2B",
+      "keywords": [
+        "hostelería", "patronal", "sectorial", "b2b", "empresarial", "asociación", "cehe",
+        "restauración moderna", "horeca", "proveedores", "negocio", "retail", "inversión hotelera",
+        "gestión de ocio", "fepet", "directivos", "industria turística"
+      ],
+      "default_tags": ["sectorial", "hosteleria-b2b", "patronal", "horeca"]
+    },
+    "generalista_madrid": {
+      "nombre": "Prensa Generalista y Agencias (Madrid)",
+      "keywords": [
+        "madrid", "comunidad de madrid", "ayuntamiento de madrid", "sociedad", "local", "agencia",
+        "europa press", "efe", "telemadrid", "noticias madrid", "actualidad", "prensa local",
+        "servimedia", "redacción central", "información local"
+      ],
+      "default_tags": ["generalista", "prensa-madrid", "agencias", "actualidad"]
+    }
+  },
+  "roles_keywords": {
+    "Director / Directora": ["director", "directora", "director general", "directora general"],
+    "Redactor Jefe / Editor Jefe": ["redactor jefe", "redactora jefa", "editor jefe", "editora jefa", "jefe de sección", "jefa de sección", "coordinador editorial", "coordinadora editorial"],
+    "Editor / Editora": ["editor", "editora", "editor de contenidos", "editora de contenidos"],
+    "Redactor / Periodista": ["redactor", "redactora", "periodista", "redacción", "autor", "autora", "cronista"],
+    "Crítico / Especialista": ["crítico", "crítica", "columnista", "sommelier", "crítico gastronómico", "crítico musical"],
+    "Colaborador / Freelance": ["colaborador", "colaboradora", "freelance", "firma invitada", "blogger"],
+    "Buzón de Redacción": ["redaccion", "prensa", "comunicacion", "contacto", "info", "redaccionmadrid"]
+  }
+}

@@ -88,6 +88,7 @@ def setup_schema():
     add_or_update_field("email", "string", "input", is_nullable=False)
     add_or_update_field("telefono", "string", "input")
 
+    # Categoría Principal con opciones predefinidas
     cat_options = {
         "choices": [
             {"text": "Ocio Nocturno y Entretenimiento", "value": "ocio_nocturno"},
@@ -100,12 +101,37 @@ def setup_schema():
         ]
     }
     add_or_update_field("categoria_principal", "string", "select-dropdown", cat_options, default_value="ocio_nocturno")
+    
+    # País / Mercado objetivo
+    mercado_options = {
+        "choices": [
+            {"text": "España (Nacional / Madrid)", "value": "es"},
+            {"text": "Francia (Francófono)", "value": "fr"},
+            {"text": "Italia (Italiano)", "value": "it"},
+            {"text": "Reino Unido / Internacional (Inglés)", "value": "uk"},
+            {"text": "Alemania / DACH (Alemán)", "value": "de"},
+            {"text": "Internacional / Global", "value": "int"}
+        ]
+    }
+    add_or_update_field("pais_mercado", "string", "select-dropdown", mercado_options, default_value="es")
+
+    # Tipo de medio / Creador
+    tipo_medio_options = {
+        "choices": [
+            {"text": "Blog Especializado Independiente", "value": "blog"},
+            {"text": "Creador de Contenido / Vlogger / Foodie", "value": "creador_vlogger"},
+            {"text": "Guía de Ocio / Portal de Viajes", "value": "portal_turismo"},
+            {"text": "Prensa Digital / Revista", "value": "prensa_digital"}
+        ]
+    }
+    add_or_update_field("tipo_medio", "string", "select-dropdown", tipo_medio_options, default_value="blog")
+
     add_or_update_field("etiquetas", "json", "tags")
 
     tipo_options = {
         "choices": [
-            {"text": "Periodista / Persona directa", "value": "personal"},
-            {"text": "Buzón general de redacción / Prensa", "value": "redaccion_general"}
+            {"text": "Periodista / Creador / Persona directa", "value": "personal"},
+            {"text": "Buzón general / Contacto del Blog", "value": "redaccion_general"}
         ]
     }
     add_or_update_field("tipo_contacto", "string", "select-dropdown", tipo_options, default_value="personal")

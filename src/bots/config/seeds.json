@@ -1,0 +1,184 @@
+{
+  "media_seeds": [
+    {
+      "medio": "Madrid Cool Blog",
+      "url": "https://www.madridcoolblog.com",
+      "categoria": "estilo_de_vida",
+      "pais_mercado": "es",
+      "tipo_medio": "blog",
+      "etiquetas": ["blog-indie", "cocteleria-oculta", "lifestyle-madrid", "terrazas"],
+      "paths_contacto": ["/contacto", "/about", "/quienes-somos"]
+    },
+    {
+      "medio": "Madrid Diferente",
+      "url": "https://madriddiferente.com",
+      "categoria": "ocio_nocturno",
+      "pais_mercado": "es",
+      "tipo_medio": "blog",
+      "etiquetas": ["ocio-alternativo", "bares-secretos", "planes-originales", "noche"],
+      "paths_contacto": ["/contacto", "/aviso-legal", "/sobre-nosotros"]
+    },
+    {
+      "medio": "Con El Morro Fino",
+      "url": "https://conelmorrofino.com",
+      "categoria": "gastronomia",
+      "pais_mercado": "es",
+      "tipo_medio": "creador_vlogger",
+      "etiquetas": ["foodie-madrid", "cocteleria", "restaurantes-top", "creador-contenido"],
+      "paths_contacto": ["/contacto", "/sobre-nosotros"]
+    },
+    {
+      "medio": "Madrid Low Cost",
+      "url": "https://madridlowcost.es",
+      "categoria": "ocio_nocturno",
+      "pais_mercado": "es",
+      "tipo_medio": "creador_vlogger",
+      "etiquetas": ["ocio-joven", "fiestas-madrid", "planes-finde", "comunidad-noche"],
+      "paths_contacto": ["/contacto", "/quienes-somos"]
+    },
+    {
+      "medio": "Naked Madrid",
+      "url": "https://nakedmadrid.com",
+      "categoria": "estilo_de_vida",
+      "pais_mercado": "uk",
+      "tipo_medio": "blog",
+      "etiquetas": ["expat-madrid", "international-crowd", "nightlife-guide", "english-blog"],
+      "paths_contacto": ["/contact", "/about-naked-madrid", "/write-for-us"]
+    },
+    {
+      "medio": "Citylife Madrid",
+      "url": "https://www.citylifemadrid.com",
+      "categoria": "ocio_nocturno",
+      "pais_mercado": "uk",
+      "tipo_medio": "creador_vlogger",
+      "etiquetas": ["international-nightlife", "events-madrid", "clubbing-parties", "vlog-madrid"],
+      "paths_contacto": ["/contact-us", "/about-us", "/work-with-us"]
+    },
+    {
+      "medio": "Madrid No Frills",
+      "url": "https://madridnofrills.com",
+      "categoria": "cultura_espectaculos",
+      "pais_mercado": "uk",
+      "tipo_medio": "blog",
+      "etiquetas": ["authentic-madrid", "barrio-bars", "cultural-spaces", "english-writer"],
+      "paths_contacto": ["/contact", "/about", "/press"]
+    },
+    {
+      "medio": "Devour Madrid (Bites & Nightlife)",
+      "url": "https://devourfoodtours.com/blog/",
+      "categoria": "gastronomia",
+      "pais_mercado": "uk",
+      "tipo_medio": "portal_turismo",
+      "etiquetas": ["tapas-bars", "cocktails-madrid", "night-tours", "tourist-guides"],
+      "paths_contacto": ["/contact/", "/about-us/"]
+    },
+    {
+      "medio": "Le Petit Journal Madrid",
+      "url": "https://lepetitjournal.com/madrid",
+      "categoria": "cultura_espectaculos",
+      "pais_mercado": "fr",
+      "tipo_medio": "prensa_digital",
+      "etiquetas": ["communaute-francaise", "sortir-madrid", "culture-espagne", "agenda-madrid"],
+      "paths_contacto": ["/madrid/contact", "/mentions-legales"]
+    },
+    {
+      "medio": "Madrid Pour Les Français",
+      "url": "https://www.madridpourlesfrancais.com",
+      "categoria": "estilo_de_vida",
+      "pais_mercado": "fr",
+      "tipo_medio": "blog",
+      "etiquetas": ["guide-francais", "vie-nocturne", "bars-a-tapas", "sorties-madrid"],
+      "paths_contacto": ["/contact", "/a-propos"]
+    },
+    {
+      "medio": "Courrier d'Espagne",
+      "url": "https://courrierdespagne.com",
+      "categoria": "sectorial_hosteleria",
+      "pais_mercado": "fr",
+      "tipo_medio": "prensa_digital",
+      "etiquetas": ["b2b-france-espagne", "tourisme-affaires", "hotellerie-espagne"],
+      "paths_contacto": ["/contact", "/qui-sommes-nous"]
+    },
+    {
+      "medio": "Vivere a Madrid",
+      "url": "https://viveremadrid.info",
+      "categoria": "ocio_nocturno",
+      "pais_mercado": "it",
+      "tipo_medio": "blog",
+      "etiquetas": ["vita-notturna", "locali-madrid", "aperitivo-spagnolo", "comunita-italiana"],
+      "paths_contacto": ["/contatti", "/chi-siamo"]
+    },
+    {
+      "medio": "Destinazione Madrid",
+      "url": "https://www.destinazionemadrid.it",
+      "categoria": "turismo",
+      "pais_mercado": "it",
+      "tipo_medio": "portal_turismo",
+      "etiquetas": ["guida-madrid", "vacanza-madrid", "nightlife-italiani", "ristoranti"],
+      "paths_contacto": ["/contatti", "/informazioni"]
+    },
+    {
+      "medio": "Madrid Mal Anders",
+      "url": "https://www.madrid-mal-anders.de",
+      "categoria": "ocio_nocturno",
+      "pais_mercado": "de",
+      "tipo_medio": "blog",
+      "etiquetas": ["nachtleben-madrid", "bars-und-clubs", "insider-tipps", "deutsch-in-madrid"],
+      "paths_contacto": ["/kontakt", "/ueber-mich", "/impressum"]
+    },
+    {
+      "medio": "Spanien Reisemagazin",
+      "url": "https://spanien-reisemagazin.de",
+      "categoria": "turismo",
+      "pais_mercado": "de",
+      "tipo_medio": "portal_turismo",
+      "etiquetas": ["staedtereise-madrid", "lifestyle-spanien", "nachtleben", "kultur"],
+      "paths_contacto": ["/kontakt", "/impressum"]
+    },
+    {
+      "medio": "Un Buen Día en Madrid",
+      "url": "https://unbuendiaenmadrid.com",
+      "categoria": "estilo_de_vida",
+      "pais_mercado": "es",
+      "tipo_medio": "blog",
+      "etiquetas": ["planes-madrid", "lifestyle", "gastronomia", "planes-finde"],
+      "paths_contacto": ["/contacto", "/quienes-somos", "/aviso-legal"]
+    },
+    {
+      "medio": "Clubbingspain",
+      "url": "https://www.clubbingspain.com",
+      "categoria": "ocio_nocturno",
+      "pais_mercado": "es",
+      "tipo_medio": "blog",
+      "etiquetas": ["clubbing", "musica-electronica", "djs", "festivales"],
+      "paths_contacto": ["/contacto", "/staff", "/info"]
+    },
+    {
+      "medio": "DJ Mag España",
+      "url": "https://djmag.es",
+      "categoria": "ocio_nocturno",
+      "pais_mercado": "es",
+      "tipo_medio": "prensa_digital",
+      "etiquetas": ["musica-electronica", "djs", "festivales", "noche-madrid"],
+      "paths_contacto": ["/contacto", "/quienes-somos"]
+    },
+    {
+      "medio": "GastroMadrid",
+      "url": "https://gastromadrid.net",
+      "categoria": "gastronomia",
+      "pais_mercado": "es",
+      "tipo_medio": "blog",
+      "etiquetas": ["gastronomia", "restaurantes-madrid", "critica-gastro"],
+      "paths_contacto": ["/contacto", "/quienes-somos"]
+    },
+    {
+      "medio": "MadridEsTeatro",
+      "url": "https://madridesteatro.com",
+      "categoria": "cultura_espectaculos",
+      "pais_mercado": "es",
+      "tipo_medio": "blog",
+      "etiquetas": ["teatro-madrid", "musicales", "cartelera-teatral"],
+      "paths_contacto": ["/contacto", "/quienes-somos"]
+    }
+  ]
+}

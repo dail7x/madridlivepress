@@ -80,7 +80,7 @@ const formattedDate = new Date(comunicado.fecha_publicacion).toLocaleDateString(
   month: 'long',
   year: 'numeric',
 });
-const imgUrl = comunicado.imagen_url_externa || (comunicado.imagen_portada ? getAssetUrl(comunicado.imagen_portada, { width: 1200, height: 700, format: 'webp' }) : '/images/news/dos-millones-turistas.jpg');
+const imgUrl = comunicado.imagen_url_externa || (comunicado.imagen_portada ? getAssetUrl(comunicado.imagen_portada, { width: 1200, height: 630, format: 'webp' }) : '/images/og/og-comunicados.jpg');
 const audioScript = comunicado.audio_script_en || subtitle || title;
 const keyPoints = comunicado.puntos_clave_en && comunicado.puntos_clave_en.length > 0
   ? comunicado.puntos_clave_en
@@ -95,6 +95,11 @@ const isAuthed = !!pressUser;
   description={subtitle || title}
   image={imgUrl}
   lang="en"
+  type="article"
+  publishedTime={comunicado.fecha_publicacion}
+  author={portavoz?.nombre || 'NocheMadrid Press Office'}
+  section={cat?.nombre_en || cat?.nombre || 'Press Releases'}
+  tags={comunicado.tags || []}
   alternateUrlEs={`/comunicados/${comunicado.slug}`}
   alternateUrlEn={`/en/news/${canonicalEnSlug}`}
 >
