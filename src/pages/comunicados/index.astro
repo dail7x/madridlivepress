@@ -7,14 +7,17 @@ import type { Comunicado, Categoria } from '@/lib/directus';
 
 export const prerender = false;
 
-let comunicados: Comunicado[] = [];
+let allItems: Comunicado[] = [];
 let categorias: Categoria[] = [];
 
 try {
   const [comunicadosRes, categoriasRes] = await Promise.all([
     directus.request(
       readItems('comunicados' as any, {
-        filter: { status: { _eq: 'published' } },
+        filter: { 
+          status: { _eq: 'published' },
+          categoria: { _eq: 1 } // Only official Press Releases
+        },
         sort: ['-fecha_publicacion', '-id'],
         limit: 50,
         fields: [
@@ -41,11 +44,13 @@ try {
     ),
   ]);
 
-  comunicados = (comunicadosRes as any) || [];
+  allItems = (comunicadosRes as any) || [];
   categorias = (categoriasRes as any) || [];
 } catch (e) {
   console.error('Error loading /comunicados:', e);
 }
+
+const comunicados = allItems;
 
 // Fallback high-res editorial images
 const DEFAULT_IMAGES = [
@@ -67,28 +72,44 @@ const allRemainingItems = comunicados.slice(4);
 ---
 
 <Layout
-  title="Noticias y Comunicados Oficiales | Noche Madrid Press"
-  description="El pulso cultural de Madrid, verificado y listo para publicar. Sala de prensa oficial de NocheMadrid."
+  title="Notas de Prensa Oficiales | Noche Madrid Press"
+  description="Comunicados oficiales, balances y acuerdos de la federación Noche Madrid para medios de comunicación y periodistas."
   lang="es"
 >
   <div class="w-full bg-paper">
-    <!-- Top Wireframe Header "NOTICIAS" (Ultra Compact for First Viewport in Desktop) -->
+    <!-- Top Wireframe Header "NOTAS DE PRENSA" -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
+      <!-- Section Switcher Banner -->
+      <div class="flex items-center justify-between gap-3 p-3 bg-zinc-50 border border-zinc-200 text-xs mb-3">
+        <div class="flex items-center gap-2">
+          <span class="inline-block w-2 h-2 rounded-full bg-rose-600 animate-pulse"></span>
+          <span class="font-mono text-zinc-900 font-bold uppercase tracking-wider">Sala de Prensa Oficial</span>
+          <span class="text-zinc-400 hidden sm:inline">|</span>
+          <span class="text-zinc-600 hidden sm:inline">Notas, balances y convocatorias oficiales de Noche Madrid.</span>
+        </div>
+        <a 
+          href="/articulos" 
+          class="font-mono text-xs font-bold text-zinc-900 hover:text-rose-600 underline flex items-center gap-1 transition-colors"
+        >
+          Ver Artículos de Blog sobre Madrid →
+        </a>
+      </div>
+
       <div class="w-full h-12 sm:h-16 lg:h-20 overflow-hidden flex items-end select-none pointer-events-none">
-        <span class="font-display font-black text-5xl sm:text-7xl lg:text-[7rem] tracking-tight leading-none text-wireframe block translate-y-2 sm:translate-y-4">
-          NOTICIAS
+        <span class="font-display font-black text-4xl sm:text-6xl lg:text-[6.5rem] tracking-tight leading-none text-wireframe block translate-y-2 sm:translate-y-4">
+          NOTAS DE PRENSA
         </span>
       </div>
 
       <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 pt-2 pb-3 border-b border-zinc-200">
         <p class="font-sans text-xs sm:text-sm text-zinc-700 font-medium">
-          El pulso cultural de Madrid, verificado y listo para publicar.
+          Comunicados oficiales, balances y acuerdos de Noche Madrid listos para publicar.
         </p>
 
         <div class="font-mono text-[11px] sm:text-xs text-zinc-500 uppercase tracking-wider flex items-center gap-2 flex-shrink-0">
-          <span id="newsTotalCount" class="font-bold text-zinc-950">{comunicados.length} RESULTADOS</span>
+          <span id="newsTotalCount" class="font-bold text-zinc-950">{comunicados.length} COMUNICADOS</span>
           <span class="text-zinc-300">·</span>
-          <span>ACTUALIZADO 12:38</span>
+          <span>CANAL OFICIAL</span>
         </div>
       </div>
     </div>

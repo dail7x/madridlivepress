@@ -2,6 +2,7 @@
 import Layout from '@/layouts/Layout.astro';
 import BlockRenderer from '@/components/blocks/BlockRenderer.astro';
 import BlockPressMentions from '@/components/blocks/BlockPressMentions.astro';
+import BlockFeaturedArticles from '@/components/blocks/BlockFeaturedArticles.astro';
 import type { PageBlockItem } from '@/lib/directus';
 
 export const prerender = false;
@@ -79,5 +80,6 @@ const defaultBlocksEn: PageBlockItem[] = [
   lang="en"
 >
   <BlockRenderer bloques={defaultBlocksEn} lang="en" />
+  <BlockFeaturedArticles lang="en" />
   <BlockPressMentions lang="en" />
 </Layout>

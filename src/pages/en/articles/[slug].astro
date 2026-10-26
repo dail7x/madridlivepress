@@ -1,0 +1,287 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import AudioBriefPlayer from '@/components/ui/AudioBriefPlayer.astro';
+import ExecutiveBrief from '@/components/ui/ExecutiveBrief.astro';
+import type { Comunicado, Categoria } from '@/lib/directus';
+import { directus, readItems, getAssetUrl } from '@/lib/directus';
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+
+if (!slug) {
+  return Astro.redirect('/en/articles');
+}
+
+let comunicado: Comunicado | null = null;
+let relatedArticles: Comunicado[] = [];
+
+try {
+  const [res, relatedRes] = await Promise.all([
+    directus.request(
+      readItems('comunicados' as any, {
+        filter: {
+          _or: [
+            { slug: { _eq: slug } },
+            { slug_en: { _eq: slug } },
+          ],
+          status: { _eq: 'published' },
+        },
+        fields: [
+          'id',
+          'status',
+          'fecha_publicacion',
+          'slug',
+          'slug_en',
+          'titulo',
+          'titulo_en',
+          'bajada',
+          'bajada_en',
+          'cuerpo',
+          'cuerpo_en',
+          'destacado',
+          'imagen_url_externa',
+          'imagen_portada.*',
+          'archivo_pdf.*',
+          'audio_habilitado',
+          'audio_url',
+          'audio_duracion',
+          'audio_script_es',
+          'audio_script_en',
+          'puntos_clave',
+          'puntos_clave_en',
+          'tags',
+          { categoria: ['id', 'nombre', 'nombre_en', 'slug', 'slug_en', 'color'] },
+        ],
+        limit: 1,
+      })
+    ),
+    directus.request(
+      readItems('comunicados' as any, {
+        filter: {
+          status: { _eq: 'published' },
+          categoria: { _neq: 1 },
+          slug: { _neq: slug }
+        },
+        fields: [
+          'id',
+          'slug',
+          'slug_en',
+          'titulo',
+          'titulo_en',
+          'bajada',
+          'bajada_en',
+          'fecha_publicacion',
+          'imagen_url_externa',
+          'imagen_portada.*',
+          { categoria: ['id', 'nombre', 'nombre_en', 'slug', 'slug_en', 'color'] }
+        ],
+        limit: 3,
+        sort: ['-fecha_publicacion']
+      })
+    )
+  ]);
+
+  comunicado = (res && (res as any)[0]) || null;
+  relatedArticles = (relatedRes as any) || [];
+} catch (e) {
+  console.error('Error loading English article:', e);
+}
+
+if (!comunicado) {
+  return Astro.redirect('/en/articles');
+}
+
+const cat = comunicado.categoria as Categoria | undefined;
+const title = comunicado.titulo_en || comunicado.titulo;
+const subtitle = comunicado.bajada_en || comunicado.bajada;
+const body = comunicado.cuerpo_en || comunicado.cuerpo || '';
+const formattedDate = new Date(comunicado.fecha_publicacion).toLocaleDateString('en-US', {
+  day: '2-digit',
+  month: 'long',
+  year: 'numeric',
+});
+const imgUrl = comunicado.imagen_url_externa || (comunicado.imagen_portada ? getAssetUrl(comunicado.imagen_portada, { width: 1200, height: 700, format: 'webp' }) : '/images/news/dos-millones-turistas.jpg');
+const keyPoints = (comunicado.puntos_clave_en && comunicado.puntos_clave_en.length > 0)
+  ? comunicado.puntos_clave_en
+  : (comunicado.puntos_clave || []);
+---
+
+<Layout
+  title={`${title} | Madrid Stories | Noche Madrid Press`}
+  description={subtitle || title}
+  image={imgUrl}
+  lang="en"
+  alternateUrlEs={`/articulos/${comunicado.slug}`}
+  alternateUrlEn={`/en/articles/${comunicado.slug_en || comunicado.slug}`}
+>
+  <script
+    is:inline
+    type="application/ld+json"
+    set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: title,
+      description: subtitle || title,
+      datePublished: comunicado.fecha_publicacion,
+      image: [imgUrl],
+      isAccessibleForFree: 'true',
+      publisher: {
+        '@type': 'Organization',
+        name: 'Noche Madrid',
+        url: 'https://nochemadrid.org'
+      }
+    })}
+  />
+
+  <article class="w-full bg-paper pb-20">
+    <!-- Back breadcrumb -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-4 border-b border-zinc-200 flex items-center justify-between font-mono text-xs text-zinc-500">
+      <a href="/en/articles" class="hover:text-emerald-700 flex items-center gap-1.5 font-bold uppercase tracking-wider transition-colors">
+        <span>←</span>
+        <span>Back to Madrid Articles</span>
+      </a>
+      <div class="flex items-center gap-2">
+        <span class="inline-block w-2 h-2 rounded-full bg-emerald-600"></span>
+        <span class="uppercase font-bold text-zinc-800">
+          {cat?.nombre_en?.toUpperCase() || cat?.nombre?.toUpperCase() || 'MADRID STORY'}
+        </span>
+      </div>
+    </div>
+
+    <!-- Article Header -->
+    <header class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-6 space-y-4">
+      <div class="flex items-center gap-3 font-mono text-xs uppercase tracking-wider text-zinc-500 flex-wrap">
+        {cat && (
+          <span 
+            class="font-bold px-2.5 py-0.5 border text-[11px]"
+            style={`border-color: ${cat.color || '#10B981'}; color: ${cat.color || '#10B981'};`}
+          >
+            {(cat.nombre_en || cat.nombre).toUpperCase()}
+          </span>
+        )}
+        <span>·</span>
+        <span>{formattedDate}</span>
+        <span>·</span>
+        <span>MADRID CULTURAL</span>
+      </div>
+
+      <h1 class="font-display font-black text-3xl sm:text-4xl lg:text-5xl text-zinc-950 leading-[1.1] tracking-tight">
+        {title}
+      </h1>
+
+      {subtitle && (
+        <p class="font-sans text-lg sm:text-xl text-zinc-600 leading-relaxed font-normal pt-2">
+          {subtitle}
+        </p>
+      )}
+
+      <!-- Meta Bar -->
+      <div class="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-zinc-200 font-mono text-xs text-zinc-500">
+        <div class="flex items-center gap-3">
+          <span class="font-bold text-zinc-950">NOCHE MADRID EDITORIAL</span>
+          <span>·</span>
+          <span>PUBLIC READING (3 MIN)</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button 
+            type="button" 
+            onclick="navigator.clipboard.writeText(window.location.href); alert('Link copied to clipboard');"
+            class="px-2.5 py-1 border border-zinc-300 hover:border-zinc-950 bg-white font-bold uppercase tracking-wider transition-colors"
+          >
+            COPY LINK
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Featured Image -->
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+      <div class="aspect-[16/9] w-full overflow-hidden bg-zinc-100 border border-zinc-200 shadow-sm relative">
+        <img
+          src={imgUrl}
+          alt={title}
+          class="w-full h-full object-cover"
+          loading="eager"
+        />
+      </div>
+    </div>
+
+    <!-- Executive Brief / Audio Summary -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 mb-10">
+      <AudioBriefPlayer
+        slug={comunicado.slug_en || comunicado.slug}
+        lang="en"
+        title="Listen to story audio brief"
+      />
+
+      {keyPoints.length > 0 && (
+        <ExecutiveBrief points={keyPoints} lang="en" />
+      )}
+    </div>
+
+    <!-- Article Content -->
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="prose prose-zinc max-w-none font-serif text-base sm:text-lg leading-relaxed text-zinc-800 space-y-6">
+        <div set:html={body} />
+      </div>
+
+      <!-- Tags -->
+      {comunicado.tags && Array.isArray(comunicado.tags) && comunicado.tags.length > 0 && (
+        <div class="pt-10 mt-10 border-t border-zinc-200">
+          <div class="font-mono text-xs text-zinc-400 uppercase tracking-wider mb-3">TOPICS & TAGS:</div>
+          <div class="flex flex-wrap gap-2">
+            {comunicado.tags.map((tag: string) => (
+              <span class="font-mono text-xs px-2.5 py-1 bg-zinc-100 text-zinc-700 border border-zinc-200">
+                #{tag}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+
+    <!-- Related Articles Section -->
+    {relatedArticles.length > 0 && (
+      <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 mt-16 border-t border-zinc-200">
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <span class="font-mono text-xs font-bold text-emerald-600 uppercase tracking-wider block">MORE ON MADRID</span>
+            <h2 class="font-display font-black text-2xl sm:text-3xl text-zinc-950">More stories on nightlife and culture</h2>
+          </div>
+          <a href="/en/articles" class="font-mono text-xs font-bold text-zinc-950 hover:text-emerald-700 underline">
+            View all stories →
+          </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {relatedArticles.map((rel) => {
+            const relImg = rel.imagen_url_externa || (rel.imagen_portada ? getAssetUrl(rel.imagen_portada) : '/images/news/dos-millones-turistas.jpg');
+            return (
+              <article class="group border border-zinc-200 bg-white hover:border-zinc-950 transition-all">
+                <a href={`/en/articles/${rel.slug_en || rel.slug}`} class="block">
+                  <div class="aspect-[16/10] overflow-hidden bg-zinc-100 border-b border-zinc-200">
+                    <img 
+                      src={relImg} 
+                      alt={rel.titulo_en || rel.titulo}
+                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                      loading="lazy"
+                    />
+                  </div>
+                  <div class="p-4 space-y-2">
+                    <h3 class="font-display font-bold text-sm text-zinc-950 group-hover:text-emerald-700 transition-colors line-clamp-2">
+                      {rel.titulo_en || rel.titulo}
+                    </h3>
+                    <p class="font-sans text-xs text-zinc-600 line-clamp-2">
+                      {rel.bajada_en || rel.bajada}
+                    </p>
+                  </div>
+                </a>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+    )}
+  </article>
+</Layout>

@@ -18,6 +18,9 @@ function getAlternateLanguagePath(pathname: string, targetLang: 'es' | 'en'): st
     if (cleanPath === '/en/news' || cleanPath === '/en/comunicados') return '/comunicados';
     if (cleanPath.startsWith('/en/news/')) return cleanPath.replace('/en/news/', '/comunicados/');
     if (cleanPath.startsWith('/en/comunicados/')) return cleanPath.replace('/en/comunicados/', '/comunicados/');
+    if (cleanPath === '/en/articles' || cleanPath === '/en/articulos') return '/articulos';
+    if (cleanPath.startsWith('/en/articles/')) return cleanPath.replace('/en/articles/', '/articulos/');
+    if (cleanPath.startsWith('/en/articulos/')) return cleanPath.replace('/en/articulos/', '/articulos/');
     if (cleanPath === '/en/directory' || cleanPath === '/en/directorio') return '/directorio';
     if (cleanPath.startsWith('/en/directory/')) return cleanPath.replace('/en/directory/', '/directorio/');
     if (cleanPath.startsWith('/en/directorio/')) return cleanPath.replace('/en/directorio/', '/directorio/');
@@ -36,6 +39,8 @@ function getAlternateLanguagePath(pathname: string, targetLang: 'es' | 'en'): st
     if (cleanPath === '/' || cleanPath === '') return '/en';
     if (cleanPath === '/comunicados') return '/en/news';
     if (cleanPath.startsWith('/comunicados/')) return cleanPath.replace('/comunicados/', '/en/news/');
+    if (cleanPath === '/articulos') return '/en/articles';
+    if (cleanPath.startsWith('/articulos/')) return cleanPath.replace('/articulos/', '/en/articles/');
     if (cleanPath === '/directorio') return '/en/directory';
     if (cleanPath.startsWith('/directorio/')) return cleanPath.replace('/directorio/', '/en/directory/');
     if (cleanPath === '/press-kits') return '/en/press-kits';
@@ -56,19 +61,19 @@ const targetPathEn = alternateUrlEn || getAlternateLanguagePath(currentPath, 'en
 
 const navItems = isEn
   ? [
-      { label: 'NEWS', href: '/en/news' },
+      { label: 'PRESS RELEASES', href: '/en/news' },
+      { label: 'ARTICLES', href: '/en/articles' },
       { label: 'COVERAGE', href: '/en/coverage' },
       { label: 'PRESS KITS', href: '/en/press-kits' },
       { label: 'DIRECTORY', href: '/en/directory' },
-      { label: 'ARCHIVE', href: '/en/archive' },
       { label: 'ABOUT THE SECTOR', href: '/en/about' },
     ]
   : [
-      { label: 'NOTICIAS', href: '/comunicados' },
+      { label: 'NOTAS DE PRENSA', href: '/comunicados' },
+      { label: 'ARTÍCULOS', href: '/articulos' },
       { label: 'COBERTURA', href: '/cobertura' },
       { label: 'PRESS KITS', href: '/press-kits' },
       { label: 'DIRECTORIO', href: '/directorio' },
-      { label: 'ARCHIVO', href: '/archivo' },
       { label: 'SOBRE EL SECTOR', href: '/sobre-el-sector' },
     ];
 ---

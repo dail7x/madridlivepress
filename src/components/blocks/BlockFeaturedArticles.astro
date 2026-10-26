@@ -1,0 +1,125 @@
+---
+import { directus, readItems, getAssetUrl } from '@/lib/directus';
+import type { Comunicado, Categoria } from '@/lib/directus';
+
+interface Props {
+  lang?: 'es' | 'en';
+}
+
+const { lang = 'es' } = Astro.props;
+const isEn = lang === 'en';
+const baseArticlesUrl = isEn ? '/en/articles' : '/articulos';
+
+let articles: Comunicado[] = [];
+try {
+  const res = await directus.request(
+    readItems('comunicados' as any, {
+      filter: {
+        status: { _eq: 'published' },
+        categoria: { _neq: 1 } // Blog / City Articles
+      },
+      sort: ['-fecha_publicacion', '-id'],
+      limit: 3,
+      fields: [
+        'id',
+        'slug',
+        'slug_en',
+        'titulo',
+        'titulo_en',
+        'bajada',
+        'bajada_en',
+        'fecha_publicacion',
+        'imagen_url_externa',
+        'imagen_portada.*',
+        { categoria: ['id', 'nombre', 'nombre_en', 'slug', 'slug_en', 'color'] }
+      ]
+    })
+  );
+  articles = (res as any) || [];
+} catch (e) {
+  console.error('Error fetching featured articles for home:', e);
+}
+
+const DEFAULT_IMAGES = [
+  'https://images.unsplash.com/photo-1514306191717-452ec28c7814?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?q=80&w=800&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=800&auto=format&fit=crop'
+];
+---
+
+{articles.length > 0 && (
+  <section class="w-full bg-zinc-50 border-b border-zinc-200 py-12 md:py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-zinc-200">
+        <div>
+          <div class="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-emerald-700 font-bold mb-1">
+            <span class="w-2 h-2 rounded-full bg-emerald-600 inline-block animate-pulse"></span>
+            <span>{isEn ? 'MADRID NIGHTLIFE & CULTURE BLOG' : 'EL PULSO DE LA NOCHE DE MADRID'}</span>
+          </div>
+          <h2 class="font-display text-2xl sm:text-3xl lg:text-4xl font-black text-zinc-950 tracking-tight">
+            {isEn ? 'Stories, Live Music & Festivals' : 'Reportajes, Música en Directo y Festivales'}
+          </h2>
+        </div>
+
+        <a
+          href={baseArticlesUrl}
+          class="inline-flex items-center gap-1.5 font-mono text-xs font-bold uppercase tracking-wider text-zinc-900 hover:text-emerald-700 underline transition-colors group"
+        >
+          <span>{isEn ? 'Explore all Madrid stories' : 'Ver todos los artículos de Madrid'}</span>
+          <span class="transform group-hover:translate-x-1 transition-transform">→</span>
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 pt-8">
+        {articles.map((art, idx) => {
+          const title = (isEn ? art.titulo_en : art.titulo) || art.titulo;
+          const slug = (isEn ? art.slug_en : art.slug) || art.slug;
+          const bajada = (isEn ? art.bajada_en : art.bajada) || art.bajada;
+          const cat = art.categoria as Categoria | undefined;
+          const catName = isEn ? (cat?.nombre_en || cat?.nombre) : cat?.nombre;
+          const imgUrl = art.imagen_url_externa || (art.imagen_portada ? getAssetUrl(art.imagen_portada) : DEFAULT_IMAGES[idx % DEFAULT_IMAGES.length]);
+
+          return (
+            <article class="article-card group border border-zinc-200 bg-white hover:border-zinc-950 transition-all flex flex-col justify-between shadow-sm">
+              <a href={`${baseArticlesUrl}/${slug}`} class="block flex-1">
+                <div class="aspect-[16/10] overflow-hidden bg-zinc-100 border-b border-zinc-200 relative">
+                  <img
+                    src={imgUrl}
+                    alt={title}
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                  {cat && (
+                    <span
+                      class="absolute top-3 left-3 text-[10px] font-mono font-bold uppercase px-2 py-0.5 bg-white/95 backdrop-blur-sm border shadow-sm"
+                      style={`border-color: ${cat.color || '#10B981'}; color: ${cat.color || '#10B981'};`}
+                    >
+                      {catName}
+                    </span>
+                  )}
+                </div>
+
+                <div class="p-5">
+                  <h3 class="font-display font-black text-lg text-zinc-950 leading-snug mb-2 group-hover:text-rose-600 transition-colors line-clamp-2">
+                    {title}
+                  </h3>
+
+                  <p class="font-sans text-xs text-zinc-600 line-clamp-2 leading-relaxed">
+                    {bajada}
+                  </p>
+                </div>
+              </a>
+
+              <div class="p-5 pt-0 border-t border-zinc-100 mt-auto flex items-center justify-between font-mono text-xs font-bold text-zinc-950">
+                <a href={`${baseArticlesUrl}/${slug}`} class="hover:text-rose-600 transition-colors inline-flex items-center gap-1 group-hover:translate-x-1">
+                  <span>{isEn ? 'READ STORY' : 'LEER REPORTAJE'}</span>
+                  <span>→</span>
+                </a>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+)}

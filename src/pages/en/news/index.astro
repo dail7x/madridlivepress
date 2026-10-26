@@ -25,7 +25,10 @@ let comunicados: Comunicado[] = [];
 try {
   const comRes = await directus.request(
     readItems('comunicados' as any, {
-      filter: { status: { _eq: 'published' } },
+      filter: { 
+        status: { _eq: 'published' },
+        categoria: { _eq: 1 } // Only official Press Releases
+      },
       sort: ['-fecha_publicacion', '-id'],
       limit: 100,
       fields: [
@@ -58,16 +61,34 @@ const DEFAULT_NEWS_IMAGE = '/images/news/dos-millones-turistas.jpg';
 ---
 
 <Layout
-  title="News & Press Releases | Noche Madrid Press"
-  description="Official press releases, macroeconomic reports, and verified cultural statements on Madrid nightlife."
+  title="Press Releases | Noche Madrid Press"
+  description="Official press releases, macroeconomic reports, and verified cultural statements by Noche Madrid."
   lang="en"
 >
   <div class="w-full bg-paper pb-16">
-    <!-- Wireframe Header NEWS -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
+      <!-- Section Switcher Banner -->
+      <div class="flex items-center justify-between gap-3 p-3 bg-zinc-50 border border-zinc-200 text-xs mb-3">
+        <div class="flex items-center gap-2">
+          <span class="inline-block w-2 h-2 rounded-full bg-rose-600 animate-pulse"></span>
+          <span class="font-mono text-zinc-900 font-bold uppercase tracking-wider">Official Pressroom</span>
+          <span class="text-zinc-400 hidden sm:inline">|</span>
+          <span class="text-zinc-600 hidden sm:inline">Official communications, data and agreements from Noche Madrid.</span>
+        </div>
+        <a 
+          href="/en/articles" 
+          class="font-mono text-xs font-bold text-zinc-900 hover:text-rose-600 underline flex items-center gap-1 transition-colors"
+        >
+          Explore Madrid Articles & Blog →
+        </a>
+      </div>
+    </div>
+
+    <!-- Wireframe Header PRESS RELEASES -->
     <WireframeHeader
-      title="NEWS"
-      subtitle="Madrid's cultural pulse, verified and ready to publish."
-      badge="PRESS RELEASES"
+      title="PRESS RELEASES"
+      subtitle="Official statements, macroeconomic reports and institutional agreements."
+      badge="OFFICIAL RELEASES"
       updatedTime="LIVE 12:38 CET"
     />
 

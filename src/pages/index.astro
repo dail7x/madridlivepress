@@ -2,6 +2,7 @@
 import Layout from '@/layouts/Layout.astro';
 import BlockRenderer from '@/components/blocks/BlockRenderer.astro';
 import BlockPressMentions from '@/components/blocks/BlockPressMentions.astro';
+import BlockFeaturedArticles from '@/components/blocks/BlockFeaturedArticles.astro';
 import { getPageBySlug, getAssetUrl } from '@/lib/directus';
 import type { PageBlockItem } from '@/lib/directus';
 
@@ -85,5 +86,6 @@ const blocksToRender = page?.bloques && page.bloques.length > 0 ? page.bloques :
 
 <Layout title={title} description={description} image={seoImage} lang="es">
   <BlockRenderer bloques={blocksToRender} lang="es" />
+  <BlockFeaturedArticles lang="es" />
   <BlockPressMentions lang="es" />
 </Layout>
