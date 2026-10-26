@@ -5,7 +5,7 @@ import tailwind from '@astrojs/tailwind';
 
 // https://astro.build/config
 export default defineConfig({
-  site: process.env.SITE_URL || 'https://madridlivepress.116.203.118.1.sslip.io',
+  site: process.env.SITE_URL || 'https://nochemadridpress.com',
   output: 'server',
   adapter: node({
     mode: 'standalone',

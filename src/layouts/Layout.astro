@@ -36,7 +36,10 @@ const {
 } = Astro.props;
 
 // Determine absolute base URL for social crawlers (WhatsApp, Twitter, LinkedIn, Facebook require absolute URLs)
-const siteBase = (Astro.site ? Astro.site.toString() : (Astro.url.origin || 'https://madridlivepress.116.203.118.1.sslip.io')).replace(/\/$/, '');
+const siteBase = (Astro.url.origin && !Astro.url.origin.includes('localhost')
+  ? Astro.url.origin
+  : (Astro.site ? Astro.site.toString() : 'https://nochemadridpress.com')
+).replace(/\/$/, '');
 const currentPath = Astro.url.pathname;
 const canonicalURL = new URL(currentPath, siteBase);
 const isEn = lang === 'en' || currentPath.startsWith('/en');
