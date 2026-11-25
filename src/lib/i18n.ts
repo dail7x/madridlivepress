@@ -7,11 +7,11 @@ export const translations = {
   es: {
     siteTitle: 'Noche Madrid Press | Sala de Prensa de la Noche de Madrid',
     siteDescription: 'Plataforma oficial y sala de prensa internacional del ocio nocturno y la cultura de Madrid, gestionada por NocheMadrid.',
-    tickerText: 'SALA DE PRENSA VIRTUAL INTERNACIONAL • NOCHEMADRID • 96 ASOCIADOS • TEATROS, SALAS DE CONCIERTOS Y CLUBS DE MADRID',
+    tickerText: 'SALA DE PRENSA VIRTUAL INTERNACIONAL • NOCHEMADRID • ESPACIOS ASOCIADOS • TEATROS, SALAS DE CONCIERTOS Y CLUBS DE MADRID',
     nav: {
       home: 'Inicio',
       pressReleases: 'Comunicados',
-      venues: '96 Salas NocheMadrid',
+      venues: 'Espacios asociados',
       mediaKit: 'Media Kit',
       events: 'Agenda de Medios',
       accreditations: 'Acreditaciones',
@@ -38,7 +38,7 @@ export const translations = {
     },
     venues: {
       title: 'Directorio de Salas & Espacios Asociados',
-      subtitle: '96 discotecas, salas de conciertos, teatros musicales y tablaos flamencos que definen el ocio de la capital.',
+      subtitle: 'Discotecas, salas de conciertos, teatros musicales y tablaos flamencos que definen el ocio de la capital.',
       filterDistrict: 'Todos los distritos',
       filterType: 'Todos los tipos',
       capacity: 'Aforo',
@@ -98,11 +98,11 @@ export const translations = {
   en: {
     siteTitle: 'Noche Madrid Press | Madrid Nightlife Virtual Pressroom',
     siteDescription: 'Official international pressroom and media platform for Madrid nightlife and culture, managed by NocheMadrid.',
-    tickerText: 'INTERNATIONAL VIRTUAL PRESSROOM • NOCHEMADRID • 96 ASSOCIATED VENUES • THEATERS, CONCERT HALLS & CLUBS IN MADRID',
+    tickerText: 'INTERNATIONAL VIRTUAL PRESSROOM • NOCHEMADRID • ASSOCIATED VENUES • THEATERS, CONCERT HALLS & CLUBS IN MADRID',
     nav: {
       home: 'Home',
       pressReleases: 'Press Releases',
-      venues: '96 Venues',
+      venues: 'Associated venues',
       mediaKit: 'Media Kit',
       events: 'Media Agenda',
       accreditations: 'Accreditations',
@@ -129,7 +129,7 @@ export const translations = {
     },
     venues: {
       title: 'Directory of Associated Venues & Clubs',
-      subtitle: '96 nightclubs, concert halls, musical theaters, and flamenco tablaos shaping Madrid night culture.',
+      subtitle: 'Nightclubs, concert halls, musical theaters, and flamenco tablaos shaping Madrid night culture.',
       filterDistrict: 'All Districts',
       filterType: 'All Types',
       capacity: 'Capacity',
@@ -189,11 +189,11 @@ export const translations = {
   it: {
     siteTitle: 'Noche Madrid Press | Sala Stampa della Notte di Madrid',
     siteDescription: 'Piattaforma ufficiale e sala stampa internazionale della vita notturna e della cultura di Madrid, gestita da NocheMadrid.',
-    tickerText: 'SALA STAMPA VIRTUALE INTERNAZIONALE • NOCHEMADRID • 96 ASSOCIATI • TEATRI, SALE DA CONCERTO E CLUB DI MADRID',
+    tickerText: 'SALA STAMPA VIRTUALE INTERNAZIONALE • NOCHEMADRID • SPAZI ASSOCIATI • TEATRI, SALE DA CONCERTO E CLUB DI MADRID',
     nav: {
       home: 'Home',
       pressReleases: 'Comunicati',
-      venues: '96 Club NocheMadrid',
+      venues: 'Spazi associati',
       mediaKit: 'Media Kit',
       events: 'Agenda Media',
       accreditations: 'Accrediti',
@@ -220,7 +220,7 @@ export const translations = {
     },
     venues: {
       title: 'Elenco Club & Spazi Associati',
-      subtitle: '96 discoteche, sale concerti, teatri musicali e tablaos di flamenco che definiscono la notte madrilena.',
+      subtitle: 'Discoteche, sale concerti, teatri musicali e tablaos di flamenco che definiscono la notte madrilena.',
       filterDistrict: 'Tutti i quartieri',
       filterType: 'Tutte le tipologie',
       capacity: 'Capienza',
@@ -280,11 +280,11 @@ export const translations = {
   fr: {
     siteTitle: 'Noche Madrid Press | Salle de Presse de la Nuit Madrilène',
     siteDescription: 'Plateforme officielle et salle de presse internationale de la vie nocturne et de la culture de Madrid, gérée par NocheMadrid.',
-    tickerText: 'SALLE DE PRESSE VIRTUELLE INTERNATIONALE • NOCHEMADRID • 96 ASSOCIÉS • THÉÂTRES, SALLES DE CONCERT ET CLUBS DE MADRID',
+    tickerText: 'SALLE DE PRESSE VIRTUELLE INTERNATIONALE • NOCHEMADRID • ÉTABLISSEMENTS ASSOCIÉS • THÉÂTRES, SALLES DE CONCERT ET CLUBS DE MADRID',
     nav: {
       home: 'Accueil',
       pressReleases: 'Communiqués',
-      venues: '96 Établissements',
+      venues: 'Établissements associés',
       mediaKit: 'Kit Média',
       events: 'Agenda Médias',
       accreditations: 'Accréditations',
@@ -311,7 +311,7 @@ export const translations = {
     },
     venues: {
       title: 'Répertoire des Lieux & Établissements Associés',
-      subtitle: '96 discothèques, salles de concert, théâtres musicaux et tablaos de flamenco façonnant la nuit madrilène.',
+      subtitle: 'Discothèques, salles de concert, théâtres musicaux et tablaos de flamenco façonnant la nuit madrilène.',
       filterDistrict: 'Tous les arrondissements',
       filterType: 'Tous les types',
       capacity: 'Capacité',
