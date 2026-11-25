@@ -1,8 +1,10 @@
 ---
 import Layout from '@/layouts/Layout.astro';
 import WireframeHeader from '@/components/ui/WireframeHeader.astro';
+import PressReleaseDownloads from '@/components/press/PressReleaseDownloads.astro';
 import type { Comunicado, Categoria } from '@/lib/directus';
 import { directus, readItems, getAssetUrl } from '@/lib/directus';
+import { filterVisibleCategories, scrubHiddenCategory } from '@/lib/categories';
 
 export const prerender = false;
 
@@ -15,7 +17,7 @@ try {
       sort: ['nombre'],
     })
   );
-  categorias = (catRes as any) || [];
+  categorias = filterVisibleCategories((catRes as Categoria[]) || []);
 } catch (e) {
   console.error('Error fetching categories:', e);
 }
@@ -49,7 +51,16 @@ try {
       ],
     })
   );
-  comunicados = (comRes as any) || [];
+  comunicados = ((comRes as any) || []).map(scrubHiddenCategory);
+  const used = new Set(
+    comunicados
+      .map((item) => {
+        const cat = item.categoria as Categoria | undefined;
+        return cat?.slug_en || cat?.slug;
+      })
+      .filter(Boolean)
+  );
+  categorias = categorias.filter((cat) => used.has(cat.slug_en || cat.slug));
 } catch (e) {
   console.error('Error fetching news:', e);
 }
@@ -87,12 +98,14 @@ const DEFAULT_NEWS_IMAGE = '/images/news/dos-millones-turistas.jpg';
     <!-- Wireframe Header PRESS RELEASES -->
     <WireframeHeader
       title="PRESS RELEASES"
-      subtitle="Official statements, macroeconomic reports and institutional agreements."
+      subtitle="Official press notes from Noche Madrid. Each note lists its PDF when the file is published."
       badge="OFFICIAL RELEASES"
       updatedTime="LIVE 12:38 CET"
     />
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4">
+      <PressReleaseDownloads items={comunicados} lang="en" />
+
       <!-- Category Filter Pills -->
       <div class="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200 pb-3 font-mono text-xs">
         <div class="flex flex-wrap items-center gap-2" id="categoryFilters">

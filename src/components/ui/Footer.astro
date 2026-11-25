@@ -1,6 +1,8 @@
 ---
 import type { Locale } from '@/lib/i18n';
 import { useTranslations } from '@/lib/i18n';
+import { SHOW_MEMBER_DIRECTORY } from '@/lib/features';
+import { association, pressOffice } from '@/lib/contacts';
 
 interface Props {
   lang?: 'es' | 'en';
@@ -28,8 +30,8 @@ const base = isEn ? '/en' : '';
 
         <p class="font-sans text-xs text-zinc-600 leading-relaxed max-w-md">
           {isEn
-            ? 'International virtual press room for Madrid nightlife and performing arts, managed by NocheMadrid. Serving national and international media newsrooms with certified sources and high-definition assets.'
-            : 'Sala de prensa virtual internacional de la noche y las artes escénicas de Madrid, gestionada por NocheMadrid. Al servicio de redacciones nacionales e internacionales con fuentes oficiales y recursos en alta resolución.'}
+            ? 'Virtual press room for Madrid nightlife and shows, run by Noche Madrid, the association of nightlife business owners in the Community of Madrid.'
+            : 'Sala de prensa del ocio nocturno y los espectáculos de Madrid, gestionada por Noche Madrid, asociación de empresarios del ocio nocturno de la Comunidad de Madrid.'}
         </p>
 
         <div class="pt-2 font-mono text-[11px] text-zinc-500 uppercase tracking-wider">
@@ -43,9 +45,13 @@ const base = isEn ? '/en' : '';
           {isEn ? 'PRESS DIRECTORY' : 'DIRECTORIO DE PRENSA'}
         </h4>
         <ul class="space-y-2 font-sans text-xs text-zinc-700">
-          <li><a href={`${base}/comunicados`} class="hover:text-vermilion transition-colors">{isEn ? 'News & Press Releases' : 'Noticias y Comunicados'}</a></li>
-          <li><a href={`${base}/cobertura`} class="hover:text-vermilion transition-colors">{isEn ? 'Media Coverage & Clipping' : 'Cobertura en Medios'}</a></li>
-          <li><a href={`${base}/directorio`} class="hover:text-vermilion transition-colors">{isEn ? 'Official Directory (96 Venues)' : 'Directorio Oficial (96 Asociados)'}</a></li>
+          <li><a href={isEn ? '/en/news' : '/comunicados'} class="hover:text-vermilion transition-colors">{isEn ? 'News & Press Releases' : 'Noticias y Comunicados'}</a></li>
+          <li><a href={isEn ? '/en/articles' : '/articulos'} class="hover:text-vermilion transition-colors">{isEn ? 'Articles' : 'Artículos'}</a></li>
+          <li><a href={isEn ? '/en/studies' : '/estudios'} class="hover:text-vermilion transition-colors">{isEn ? 'Studies and campaigns' : 'Estudios y campañas'}</a></li>
+          <li><a href={isEn ? '/en/coverage' : '/cobertura'} class="hover:text-vermilion transition-colors">{isEn ? 'Media Coverage & Clipping' : 'Cobertura en Medios'}</a></li>
+          {SHOW_MEMBER_DIRECTORY && (
+            <li><a href={isEn ? '/en/directory' : '/directorio'} class="hover:text-vermilion transition-colors">{isEn ? 'Official Directory' : 'Directorio de asociados'}</a></li>
+          )}
           <li><a href={`${base}/archivo`} class="hover:text-vermilion transition-colors">{isEn ? 'Historical Archive' : 'Archivo Histórico'}</a></li>
           <li><a href={`${base}/press-kits`} class="hover:text-vermilion transition-colors">{isEn ? 'Media Kits (High-Res)' : 'Media Kits (Alta Resolución)'}</a></li>
           <li><a href={`${base}/eventos`} class="hover:text-vermilion transition-colors">{isEn ? 'Media Agenda' : 'Agenda de Medios'}</a></li>
@@ -59,9 +65,12 @@ const base = isEn ? '/en' : '';
           {isEn ? 'PRESS OFFICE' : 'GABINETE DE COMUNICACIÓN'}
         </h4>
         <div class="font-mono text-xs text-zinc-600 space-y-1.5">
-          <div>prensa@nochemadrid.org</div>
-          <div>+34 91 542 23 04</div>
-          <div>C/ Valverde 13, 3º D · 28004 Madrid</div>
+          <div class="font-bold text-zinc-950">{pressOffice.name}</div>
+          <a href={`tel:${pressOffice.phoneTel}`} class="block hover:text-vermilion">Tel. {pressOffice.phoneDisplay}</a>
+          <div class="pt-2 text-zinc-400 uppercase tracking-wider">{isEn ? 'Headquarters' : 'Sede'}</div>
+          <a href={`mailto:${association.email}`} class="block hover:text-vermilion">{association.email}</a>
+          <a href={`tel:${association.phoneTel}`} class="block hover:text-vermilion">{association.phoneDisplay}</a>
+          <div>{association.address} · {association.city}</div>
         </div>
 
         <div class="border border-zinc-200 p-3.5 bg-canvas font-mono text-[11px] text-zinc-600 space-y-1">
@@ -69,7 +78,8 @@ const base = isEn ? '/en' : '';
             <span class="w-2 h-2 rounded-full bg-vermilion inline-block"></span>
             <span>NOCHE MADRID</span>
           </div>
-          <div>Federación de Asociaciones de Ocio y Espectáculos de Madrid</div>
+          <div>{isEn ? 'Association of nightlife business owners in the Community of Madrid' : association.description}</div>
+          <div>{isEn ? 'Sector: nightlife and shows' : `Sector: ${association.sector.toLowerCase()}`}</div>
         </div>
       </div>
     </div>

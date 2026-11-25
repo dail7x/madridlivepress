@@ -1,6 +1,7 @@
 ---
 import { directus, readItems, getAssetUrl } from '@/lib/directus';
 import type { Comunicado, Categoria } from '@/lib/directus';
+import { scrubHiddenCategory } from '@/lib/categories';
 
 interface Props {
   lang?: 'es' | 'en';
@@ -16,7 +17,6 @@ try {
     readItems('comunicados' as any, {
       filter: {
         status: { _eq: 'published' },
-        categoria: { _neq: 1 } // Blog / City Articles
       },
       sort: ['-fecha_publicacion', '-id'],
       limit: 3,
@@ -35,7 +35,7 @@ try {
       ]
     })
   );
-  articles = (res as any) || [];
+  articles = ((res as any) || []).map(scrubHiddenCategory);
 } catch (e) {
   console.error('Error fetching featured articles for home:', e);
 }

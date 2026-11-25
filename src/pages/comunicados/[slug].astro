@@ -1,6 +1,8 @@
 ---
 import Layout from '@/layouts/Layout.astro';
 import AudioBriefPlayer from '@/components/ui/AudioBriefPlayer.astro';
+import PressPdfCallout from '@/components/press/PressPdfCallout.astro';
+import { isHiddenCategory } from '@/lib/categories';
 import ExecutiveBrief from '@/components/ui/ExecutiveBrief.astro';
 import PressPassModal from '@/components/ui/PressPassModal.astro';
 import type { Comunicado, Categoria, Portavoz } from '@/lib/directus';
@@ -70,7 +72,8 @@ if (slug !== canonicalEsSlug) {
   return Astro.redirect(`/comunicados/${canonicalEsSlug}`, 301);
 }
 
-const cat = comunicado.categoria as Categoria | undefined;
+const rawCat = comunicado.categoria as Categoria | undefined;
+const cat = rawCat && !isHiddenCategory(rawCat) ? rawCat : undefined;
 const portavoz = comunicado.portavoz as Portavoz | undefined;
 const title = comunicado.titulo;
 const subtitle = comunicado.bajada;
@@ -194,6 +197,8 @@ const isAuthed = !!pressUser;
       {keyPoints.length > 0 && (
         <ExecutiveBrief points={keyPoints} lang="es" />
       )}
+
+      <PressPdfCallout slug={canonicalEsSlug} archivoPdf={comunicado.archivo_pdf} lang="es" />
 
       <!-- Article Body (100% Libre Acceso) -->
       <div

@@ -3,6 +3,8 @@ import Layout from '@/layouts/Layout.astro';
 import { directus, getAssetUrl } from '@/lib/directus';
 import { readItems } from '@directus/sdk';
 import type { Comunicado, Categoria } from '@/lib/directus';
+import { filterVisibleCategories, scrubHiddenCategory } from '@/lib/categories';
+import { SHOW_MEMBER_DIRECTORY } from '@/lib/features';
 import '@/styles/global.css';
 
 export const prerender = false;
@@ -16,10 +18,9 @@ try {
       readItems('comunicados' as any, {
         filter: { 
           status: { _eq: 'published' },
-          categoria: { _neq: 1 } // Excluir Notas de Prensa oficiales
         },
         sort: ['-fecha_publicacion', '-id'],
-        limit: 50,
+        limit: 100,
         fields: [
           'id',
           'status',
@@ -38,17 +39,14 @@ try {
     ),
     directus.request(
       readItems('categorias' as any, {
-        filter: {
-          id: { _neq: 1 } // Solo categorías de Blog / Cultura
-        },
-        fields: ['id', 'nombre', 'slug', 'color'],
+        fields: ['id', 'nombre', 'nombre_en', 'slug', 'slug_en', 'color'],
         sort: ['nombre'],
       })
     ),
   ]);
 
-  allItems = (articulosRes as any) || [];
-  categorias = (categoriasRes as any) || [];
+  allItems = ((articulosRes as any) || []).map(scrubHiddenCategory);
+  categorias = filterVisibleCategories((categoriasRes as Categoria[]) || []);
 } catch (e) {
   console.error('Error loading /articulos:', e);
 }
@@ -76,7 +74,7 @@ const allRemainingItems = articulos.slice(4);
 
 <Layout
   title="Artículos & Pulso de Madrid | Noche Madrid Press"
-  description="Música en vivo, festivales, tardeo, artes escénicas y el pulso vibrante de la noche madrileña."
+  description="Reportajes de ocio nocturno y espectáculos en Madrid, incluidas las versiones extendidas de las notas de prensa."
   lang="es"
 >
   <div class="w-full bg-paper">
@@ -369,12 +367,18 @@ const allRemainingItems = articulos.slice(4);
               La noche que nunca se apaga
             </h3>
             <p class="font-sans text-xs text-zinc-600 leading-relaxed">
-              Con más de 96 salas asociadas, Madrid ofrece una oferta escénica, musical y de ocio nocturno inigualable en Europa.
+              Madrid concentra una oferta de ocio nocturno y espectáculos que se cuenta desde esta sala de prensa.
             </p>
             <div class="pt-2 border-t border-zinc-200">
-              <a href="/directorio" class="font-mono text-xs font-bold text-zinc-950 hover:text-emerald-700 underline block">
-                Explorar directorio de salas →
-              </a>
+              {SHOW_MEMBER_DIRECTORY ? (
+                <a href="/directorio" class="font-mono text-xs font-bold text-zinc-950 hover:text-emerald-700 underline block">
+                  Explorar directorio de salas →
+                </a>
+              ) : (
+                <a href="/estudios" class="font-mono text-xs font-bold text-zinc-950 hover:text-emerald-700 underline block">
+                  Estudios y campañas del sector →
+                </a>
+              )}
             </div>
           </div>
         </div>

@@ -1,0 +1,45 @@
+---
+import { resolvePressPdfUrl } from '@/lib/pressPdf';
+import { pressOffice } from '@/lib/contacts';
+import type { DirectusFile } from '@/lib/directus';
+
+interface Props {
+  slug?: string | null;
+  archivoPdf?: string | DirectusFile | null;
+  lang?: 'es' | 'en';
+}
+
+const { slug, archivoPdf, lang = 'es' } = Astro.props;
+const isEn = lang === 'en';
+const pdfUrl = resolvePressPdfUrl({ slug, archivo_pdf: archivoPdf });
+---
+
+<aside class="border border-zinc-950 bg-canvas p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+  <div class="space-y-1.5">
+    <div class="font-mono text-[10px] uppercase tracking-widest text-zinc-500 font-bold">
+      {isEn ? 'Downloadable press note' : 'Nota de prensa descargable'}
+    </div>
+    <p class="font-sans text-sm text-zinc-800 leading-relaxed">
+      {pdfUrl
+        ? (isEn ? 'Official PDF of this press note, ready to download.' : 'PDF oficial de esta nota, listo para descargar.')
+        : (isEn ? 'The PDF for this note will be published here as soon as the file is available.' : 'El PDF de esta nota se publicará aquí en cuanto el archivo esté disponible.')}
+    </p>
+    <p class="font-mono text-[11px] text-zinc-600">
+      {isEn ? pressOffice.lineEn : pressOffice.lineEs}
+    </p>
+  </div>
+  {pdfUrl ? (
+    <a
+      href={pdfUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="bg-zinc-950 hover:bg-vermilion text-white font-mono text-xs font-bold px-4 py-3 uppercase tracking-wider transition-colors whitespace-nowrap text-center"
+    >
+      {isEn ? 'Download PDF' : 'Descargar PDF'} ↓
+    </a>
+  ) : (
+    <span class="font-mono text-[11px] uppercase tracking-wider text-zinc-500 border border-zinc-300 px-3 py-2 whitespace-nowrap">
+      {isEn ? 'PDF pending' : 'PDF pendiente'}
+    </span>
+  )}
+</aside>

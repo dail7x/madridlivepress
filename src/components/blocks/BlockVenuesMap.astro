@@ -3,6 +3,7 @@ import type { BlockVenuesMap, Sala } from '@/lib/directus';
 import { directus, getAssetUrl } from '@/lib/directus';
 import { readItems } from '@directus/sdk';
 import { useTranslations } from '@/lib/i18n';
+import { SHOW_MEMBER_DIRECTORY } from '@/lib/features';
 
 interface Props {
   block: BlockVenuesMap;
@@ -63,6 +64,7 @@ const DEFAULT_VENUE_PHOTOS = [
 ];
 ---
 
+{SHOW_MEMBER_DIRECTORY && (
 <section class="w-full bg-paper border-b border-zinc-200 py-12 md:py-16">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
     <!-- Header -->
@@ -72,7 +74,7 @@ const DEFAULT_VENUE_PHOTOS = [
           {isEn ? 'NOCHEMADRID DIRECTORY · 96 ASSOCIATES' : 'DIRECTORIO NOCHEMADRID · 96 ASOCIADOS'}
         </div>
         <h2 class="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-zinc-950 tracking-tight">
-          {block.titulo || (isEn ? '96 Associated Cultural Venues & Clubs' : '96 Espacios Escénicos y Salas Asociadas')}
+          {block.titulo || (isEn ? 'Associated nightlife venues' : 'Salas asociadas de ocio nocturno y espectáculos')}
         </h2>
       </div>
 
@@ -238,3 +240,4 @@ const DEFAULT_VENUE_PHOTOS = [
     setupHomeVenues();
   </script>
 </section>
+)}

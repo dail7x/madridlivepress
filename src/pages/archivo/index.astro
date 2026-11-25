@@ -4,6 +4,8 @@ import WireframeHeader from '@/components/ui/WireframeHeader.astro';
 import { directus, getAssetUrl } from '@/lib/directus';
 import { readItems } from '@directus/sdk';
 import type { Comunicado, Categoria } from '@/lib/directus';
+import { scrubHiddenCategory } from '@/lib/categories';
+import { pressOffice } from '@/lib/contacts';
 
 export const prerender = false;
 
@@ -28,7 +30,7 @@ try {
       ],
     })
   );
-  items = (res as any) || [];
+  items = ((res as any) || []).map(scrubHiddenCategory);
 } catch (e) {
   console.error('Error loading /archivo:', e);
 }
@@ -126,8 +128,6 @@ const DEFAULT_THUMBS = [
                 <span>Todos</span>
                 <span class="dot w-1.5 h-1.5 rounded-full bg-vermilion inline-block"></span>
               </button>
-              <span class="text-zinc-300">|</span>
-              <button type="button" class="sector-filter-btn text-zinc-600 hover:text-zinc-950" data-sector="artes">Artes escénicas</button>
               <span class="text-zinc-300">|</span>
               <button type="button" class="sector-filter-btn text-zinc-600 hover:text-zinc-950" data-sector="musica">Música</button>
               <span class="text-zinc-300">|</span>
@@ -307,10 +307,10 @@ const DEFAULT_THUMBS = [
               ¿No encuentras algo?
             </p>
             <a
-              href="mailto:prensa@nochemadrid.org"
+              href={`tel:${pressOffice.phoneTel}`}
               class="font-mono text-xs font-bold text-zinc-950 hover:text-vermilion inline-flex items-center gap-1 uppercase tracking-wider"
             >
-              <span>Contacto de prensa</span>
+              <span>{pressOffice.name} · {pressOffice.phoneDisplay}</span>
               <span>↗</span>
             </a>
           </div>

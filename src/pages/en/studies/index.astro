@@ -1,0 +1,25 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import WireframeHeader from '@/components/ui/WireframeHeader.astro';
+import EstudiosCatalog from '@/components/estudios/EstudiosCatalog.astro';
+
+export const prerender = false;
+---
+
+<Layout
+  title="Studies and campaigns | Noche Madrid Press"
+  description="Nightlife campaigns, projects and studies published by Noche Madrid, with the original links and PDFs."
+  lang="en"
+  alternateUrlEs="/estudios"
+  alternateUrlEn="/en/studies"
+>
+  <div class="w-full bg-paper pb-16">
+    <WireframeHeader
+      title="STUDIES"
+      subtitle="Campaigns, projects and studies on nightlife and shows, with the link or PDF published by Noche Madrid."
+      badge="OFFICIAL SOURCE"
+      updatedTime="NOCHEMADRID.ORG"
+    />
+    <EstudiosCatalog lang="en" />
+  </div>
+</Layout>

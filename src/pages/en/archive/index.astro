@@ -4,6 +4,8 @@ import WireframeHeader from '@/components/ui/WireframeHeader.astro';
 import { directus, getAssetUrl } from '@/lib/directus';
 import { readItems } from '@directus/sdk';
 import type { Comunicado, Categoria } from '@/lib/directus';
+import { scrubHiddenCategory } from '@/lib/categories';
+import { pressOffice } from '@/lib/contacts';
 
 export const prerender = false;
 
@@ -32,7 +34,7 @@ try {
       ],
     })
   );
-  items = (res as any) || [];
+  items = ((res as any) || []).map(scrubHiddenCategory);
 } catch (e) {
   console.error('Error loading /en/archive:', e);
 }
@@ -47,7 +49,7 @@ const DEFAULT_THUMBS = [
 
 <Layout
   title="Documentary & Historical Archive | Noche Madrid Press"
-  description="Comprehensive repository of press releases, photographic assets, and macroeconomic reports on Madrid's nightlife and performing arts."
+  description="Archive of press notes, photographs and reports on Madrid nightlife and shows."
   lang="en"
 >
   <div class="w-full bg-paper">
@@ -150,10 +152,10 @@ const DEFAULT_THUMBS = [
               Need custom research or archived footage?
             </p>
             <a
-              href="mailto:prensa@nochemadrid.org"
+              href={`tel:${pressOffice.phoneTel}`}
               class="font-bold text-zinc-950 hover:text-vermilion inline-flex items-center gap-1 uppercase tracking-wider"
             >
-              <span>Contact Press Office</span>
+              <span>{pressOffice.name} · {pressOffice.phoneDisplay}</span>
               <span>↗</span>
             </a>
           </div>
