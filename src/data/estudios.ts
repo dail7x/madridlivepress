@@ -14,11 +14,20 @@ export const ESTUDIOS_SOURCE = {
 };
 
 export const ESTUDIOS_INTRO = {
-  kicker: 'Campañas dirigidas a la dinamización del sector y la promoción turística.',
-  paragraphs: [
-    'El reconocimiento de la importancia del ocio nocturno como generador de tendencias de consumo está cada vez más presente en los acuerdos de colaboración que Noche Madrid ha suscrito con el Ayuntamiento de Madrid, la Comunidad de Madrid y también con marcas y proveedores.',
-    'Gracias a estos proyectos se impulsa una movilidad responsable, la participación en Fitur para reivindicar la importancia turística del ocio nocturno, la celebración de la Gala anual de Navidad y la convocatoria de los Premios Recicla la Noche, entre otras iniciativas que mantienen de actualidad las propuestas del sector recreativo.',
-  ],
+  es: {
+    kicker: 'Campañas dirigidas a la dinamización del sector y la promoción turística.',
+    paragraphs: [
+      'El reconocimiento de la importancia del ocio nocturno como generador de tendencias de consumo está cada vez más presente en los acuerdos de colaboración que Noche Madrid ha suscrito con el Ayuntamiento de Madrid, la Comunidad de Madrid y también con marcas y proveedores.',
+      'Gracias a estos proyectos se impulsa una movilidad responsable, la participación en Fitur para reivindicar la importancia turística del ocio nocturno, la celebración de la Gala anual de Navidad y la convocatoria de los Premios Recicla la Noche, entre otras iniciativas que mantienen de actualidad las propuestas del sector recreativo.',
+    ],
+  },
+  en: {
+    kicker: 'Campaigns aimed at energising the sector and promoting tourism.',
+    paragraphs: [
+      'Recognition of nightlife as a source of consumption trends is increasingly present in the collaboration agreements Noche Madrid has signed with Madrid City Council, the Community of Madrid, and also with brands and suppliers.',
+      'These projects support responsible mobility, participation in Fitur to assert the tourist importance of nightlife, the annual Christmas Gala, and the Recicla la Noche awards, among other initiatives that keep the recreational sector’s proposals current.',
+    ],
+  },
 };
 
 export interface EstudioLink {

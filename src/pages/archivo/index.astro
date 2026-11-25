@@ -4,7 +4,6 @@ import WireframeHeader from '@/components/ui/WireframeHeader.astro';
 import { directus, getAssetUrl } from '@/lib/directus';
 import { readItems } from '@directus/sdk';
 import type { Comunicado, Categoria } from '@/lib/directus';
-import { scrubHiddenCategory } from '@/lib/categories';
 import { pressOffice } from '@/lib/contacts';
 
 export const prerender = false;
@@ -30,7 +29,7 @@ try {
       ],
     })
   );
-  items = ((res as any) || []).map(scrubHiddenCategory);
+  items = (res as any) || [];
 } catch (e) {
   console.error('Error loading /archivo:', e);
 }

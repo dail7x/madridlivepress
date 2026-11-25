@@ -16,6 +16,7 @@ const prefix = isEn ? '/en' : '';
 const t = useTranslations(lang);
 
 let salas: Sala[] = [];
+if (SHOW_MEMBER_DIRECTORY) {
 try {
   const res = await directus.request(
     readItems('salas' as any, {
@@ -43,6 +44,7 @@ try {
   salas = (res as any) || [];
 } catch (e) {
   console.error('Error fetching venues in BlockVenuesMap:', e);
+}
 }
 
 const districts = [
