@@ -1,6 +1,8 @@
 ---
 import type { BlockPressGrid, Comunicado, Categoria } from '@/lib/directus';
 import { directus, readItems, getAssetUrl } from '@/lib/directus';
+import { filterVisibleCategories, isHiddenCategory } from '@/lib/categories';
+import { resolvePressPdfUrl } from '@/lib/pressPdf';
 
 interface Props {
   block: BlockPressGrid;
@@ -56,7 +58,7 @@ try {
   ]);
 
   comunicados = (comunicadosRes as Comunicado[]) || [];
-  categorias = (categoriasRes as Categoria[]) || [];
+  categorias = filterVisibleCategories((categoriasRes as Categoria[]) || []);
 } catch (e) {
   console.error('Error loading press releases in BlockPressGrid:', e);
 }
@@ -117,7 +119,7 @@ try {
           const storySlug = isEn ? (item.slug_en || item.slug) : item.slug;
           const storyBajada = (isEn ? item.bajada_en : item.bajada) || item.bajada;
           const catName = (isEn ? cat?.nombre_en : cat?.nombre) || cat?.nombre;
-          const pdf = item.archivo_pdf ? getAssetUrl(item.archivo_pdf) : null;
+          const pdf = resolvePressPdfUrl(item);
           const pubDate = item.fecha_publicacion ? new Date(item.fecha_publicacion) : new Date();
           const dateFormatted = pubDate.toLocaleDateString(isEn ? 'en-US' : 'es-ES', {
             day: '2-digit',
@@ -133,7 +135,7 @@ try {
               <div class="md:col-span-3 font-mono text-xs text-zinc-500 space-y-1">
                 <div class="text-zinc-900 font-bold tracking-wider">{dateFormatted}</div>
                 <div class="text-zinc-400">{npCode}</div>
-                {cat && (
+                {cat && !isHiddenCategory(cat) && (
                   <div class="text-zinc-600 uppercase tracking-widest pt-1">
                     {catName}
                   </div>

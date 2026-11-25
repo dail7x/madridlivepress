@@ -1,0 +1,25 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import WireframeHeader from '@/components/ui/WireframeHeader.astro';
+import EstudiosCatalog from '@/components/estudios/EstudiosCatalog.astro';
+
+export const prerender = false;
+---
+
+<Layout
+  title="Estudios y campañas | Noche Madrid Press"
+  description="Campañas, proyectos y estudios del ocio nocturno publicados por Noche Madrid. Listado tomado de nocheMadrid.org, con sus enlaces y PDF."
+  lang="es"
+  alternateUrlEs="/estudios"
+  alternateUrlEn="/en/studies"
+>
+  <div class="w-full bg-paper pb-16">
+    <WireframeHeader
+      title="ESTUDIOS"
+      subtitle="Campañas, proyectos y estudios del ocio nocturno y los espectáculos, con el enlace o el PDF publicado por Noche Madrid."
+      badge="FUENTE OFICIAL"
+      updatedTime="NOCHEMADRID.ORG"
+    />
+    <EstudiosCatalog lang="es" />
+  </div>
+</Layout>

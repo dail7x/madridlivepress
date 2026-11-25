@@ -1,6 +1,7 @@
 ---
 import type { BlockRichText } from '@/lib/directus';
 import { getAssetUrl } from '@/lib/directus';
+import { replacePreviousPressContact } from '@/lib/contacts';
 
 interface Props {
   block: BlockRichText;
@@ -9,6 +10,7 @@ interface Props {
 
 const { block } = Astro.props;
 const avatarUrl = block.cita_avatar ? getAssetUrl(block.cita_avatar, { width: 160, height: 160, format: 'webp' }) : null;
+const attribution = replacePreviousPressContact(block.cita_autor, block.cita_cargo);
 ---
 
 <section class="w-full bg-paper border-b border-zinc-200 py-12 md:py-16">
@@ -44,13 +46,13 @@ const avatarUrl = block.cita_avatar ? getAssetUrl(block.cita_avatar, { width: 16
             {block.cita_texto}
           </blockquote>
 
-          {(block.cita_autor || block.cita_cargo) && (
+          {(attribution.name || attribution.role) && (
             <div class="pt-2 font-mono text-xs text-zinc-500 uppercase tracking-widest leading-relaxed border-t border-zinc-200">
-              {block.cita_autor && (
-                <div class="font-bold text-zinc-900">{block.cita_autor}</div>
+              {attribution.name && (
+                <div class="font-bold text-zinc-900">{attribution.name}</div>
               )}
-              {block.cita_cargo && (
-                <div class="text-zinc-600">{block.cita_cargo}</div>
+              {attribution.role && (
+                <div class="text-zinc-600">{attribution.role}</div>
               )}
             </div>
           )}

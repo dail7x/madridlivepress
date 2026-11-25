@@ -1,0 +1,128 @@
+---
+import { CAMPANAS, COLABORACIONES, ESTUDIOS_INTRO, ESTUDIOS_PDF, ESTUDIOS_SOURCE } from '@/data/estudios';
+
+interface Props {
+  lang?: 'es' | 'en';
+}
+
+const { lang = 'es' } = Astro.props;
+const isEn = lang === 'en';
+const intro = isEn ? ESTUDIOS_INTRO.en : ESTUDIOS_INTRO.es;
+
+const kindLabel = (kind: string) => {
+  if (!isEn) return kind;
+  if (kind === 'Campaña') return 'Campaign';
+  if (kind === 'Proyecto') return 'Project';
+  if (kind === 'Estudio') return 'Study';
+  if (kind === 'Colaboración') return 'Collaboration';
+  return kind;
+};
+---
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <div class="lg:col-span-8 space-y-4 font-sans text-sm sm:text-base text-zinc-700 leading-relaxed">
+      <p class="font-display text-2xl sm:text-3xl font-bold text-zinc-950 leading-tight">
+        {intro.kicker}
+      </p>
+      {intro.paragraphs.map((paragraph) => (
+        <p>{paragraph}</p>
+      ))}
+      <p class="font-mono text-[11px] text-zinc-500 uppercase tracking-wider">
+        {isEn ? 'Source' : 'Fuente'}:{' '}
+        <a href={ESTUDIOS_SOURCE.url} class="underline hover:text-vermilion" target="_blank" rel="noopener noreferrer">
+          {ESTUDIOS_SOURCE.title}
+        </a>
+        {' '}· {ESTUDIOS_SOURCE.publisher}
+      </p>
+    </div>
+    <aside class="lg:col-span-4 border border-zinc-200 bg-canvas p-5 font-mono text-xs text-zinc-600 space-y-2">
+      <div class="font-bold text-zinc-950 uppercase tracking-widest">
+        {isEn ? 'What is listed' : 'Qué se recoge'}
+      </div>
+      <p>{isEn ? `${CAMPANAS.length} campaigns and projects from the source page.` : `${CAMPANAS.length} campañas y proyectos de la página de origen.`}</p>
+      <p>{isEn ? `${ESTUDIOS_PDF.length} studies and reports with their PDF.` : `${ESTUDIOS_PDF.length} estudios e informes con su PDF.`}</p>
+      <p>{isEn ? 'No figures have been added beyond that page.' : 'No se añaden cifras que no estén en esa página.'}</p>
+    </aside>
+  </div>
+
+  <section class="space-y-4">
+    <h2 class="font-mono text-xs font-bold uppercase tracking-widest text-zinc-400">
+      {isEn ? 'Campaigns and projects' : 'Campañas y proyectos'}
+    </h2>
+    <ul class="divide-y divide-zinc-200 border-y border-zinc-200">
+      {CAMPANAS.map((item) => (
+        <li class="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 items-center py-4">
+          <span class="sm:col-span-2 font-mono text-[11px] uppercase tracking-wider text-zinc-500">{kindLabel(item.kind)}</span>
+          <span class="sm:col-span-7 font-display text-base sm:text-lg font-semibold text-zinc-950">{item.title}</span>
+          <a
+            href={item.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="sm:col-span-3 sm:text-right font-mono text-xs font-bold uppercase tracking-wider text-zinc-950 hover:text-vermilion"
+          >
+            {isEn ? 'Open' : 'Abrir'} ↗
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="space-y-4">
+    <div class="space-y-2">
+      <h2 class="font-mono text-xs font-bold uppercase tracking-widest text-zinc-400">
+        {isEn ? 'Studies and reports' : 'Estudios y balances'}
+      </h2>
+      <p class="font-sans text-sm text-zinc-600 max-w-3xl">
+        {isEn
+          ? 'PDF files linked from the “Estudios y balances” block on the source page. Titles are reproduced as published.'
+          : 'Archivos PDF enlazados en el bloque «Estudios y balances» de la página de origen. Los títulos se reproducen tal como están publicados.'}
+      </p>
+    </div>
+    <ul class="divide-y divide-zinc-200 border-y border-zinc-200">
+      {ESTUDIOS_PDF.map((item) => (
+        <li class="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 items-center py-4">
+          <span class="sm:col-span-2 font-mono text-[11px] uppercase tracking-wider text-zinc-500">PDF</span>
+          <span class="sm:col-span-7 font-display text-sm sm:text-base font-semibold text-zinc-950 leading-snug">{item.title}</span>
+          <a
+            href={encodeURI(item.href)}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="sm:col-span-3 sm:text-right font-mono text-xs font-bold uppercase tracking-wider text-zinc-950 hover:text-vermilion"
+          >
+            {isEn ? 'Download PDF' : 'Descargar PDF'} ↓
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="space-y-4">
+    <div class="space-y-2">
+      <h2 class="font-mono text-xs font-bold uppercase tracking-widest text-zinc-400">
+        {isEn ? 'Campaigns with other organisations' : 'Campañas de otras organizaciones'}
+      </h2>
+      <p class="font-sans text-sm text-zinc-600 max-w-3xl">
+        {isEn
+          ? 'Noche Madrid also takes part in campaigns of organisations it collaborates with. The source page shows logos without a caption: the label below comes from the published link.'
+          : 'Noche Madrid también participa en campañas de otras organizaciones con las que colabora. En la página de origen aparecen como logotipos sin pie de foto: el nombre de abajo sale del enlace publicado.'}
+      </p>
+    </div>
+    <ul class="divide-y divide-zinc-200 border-y border-zinc-200">
+      {COLABORACIONES.map((item) => (
+        <li class="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 items-center py-4">
+          <span class="sm:col-span-2 font-mono text-[11px] uppercase tracking-wider text-zinc-500">{kindLabel(item.kind)}</span>
+          <span class="sm:col-span-7 font-display text-sm sm:text-base font-semibold text-zinc-950">{item.title}</span>
+          <a
+            href={item.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="sm:col-span-3 sm:text-right font-mono text-xs font-bold uppercase tracking-wider text-zinc-950 hover:text-vermilion"
+          >
+            {isEn ? 'Open' : 'Abrir'} ↗
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+</div>

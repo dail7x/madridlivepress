@@ -3,6 +3,7 @@ import Layout from '@/layouts/Layout.astro';
 import { directus, getAssetUrl } from '@/lib/directus';
 import { readItems } from '@directus/sdk';
 import type { Comunicado, Categoria } from '@/lib/directus';
+import { filterVisibleCategories, scrubHiddenCategory } from '@/lib/categories';
 import '@/styles/global.css';
 
 export const prerender = false;
@@ -16,10 +17,9 @@ try {
       readItems('comunicados' as any, {
         filter: { 
           status: { _eq: 'published' },
-          categoria: { _neq: 1 } // Exclude Press Releases
         },
         sort: ['-fecha_publicacion', '-id'],
-        limit: 50,
+        limit: 100,
         fields: [
           'id',
           'status',
@@ -40,17 +40,14 @@ try {
     ),
     directus.request(
       readItems('categorias' as any, {
-        filter: {
-          id: { _neq: 1 }
-        },
         fields: ['id', 'nombre', 'nombre_en', 'slug', 'slug_en', 'color'],
         sort: ['nombre'],
       })
     ),
   ]);
 
-  allItems = (articulosRes as any) || [];
-  categorias = (categoriasRes as any) || [];
+  allItems = ((articulosRes as any) || []).map(scrubHiddenCategory);
+  categorias = filterVisibleCategories((categoriasRes as Categoria[]) || []);
 } catch (e) {
   console.error('Error loading /en/articles:', e);
 }
