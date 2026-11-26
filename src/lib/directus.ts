@@ -66,7 +66,13 @@ export interface Comunicado {
   imagen_portada?: string | DirectusFile;
   imagen_url_externa?: string;
   archivo_pdf?: string | DirectusFile;
-  categoria?: string | Categoria;
+  categoria?: string | number | Categoria;
+  /** M2M hacia categorías (`comunicados_categorias_adicionales`). */
+  categorias_adicionales?: Array<{
+    id?: number | string;
+    comunicados_id?: number | string;
+    categorias_id?: number | string | { id?: number | string | null };
+  }> | null;
   portavoz?: string | Portavoz;
   audio_video_url?: string;
   audio_habilitado?: boolean;

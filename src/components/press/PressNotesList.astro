@@ -1,5 +1,6 @@
 ---
-import { hasPressPdf, resolvePressPdfUrl } from '@/lib/pressPdf';
+import { resolvePressPdfUrl } from '@/lib/pressPdf';
+import { isListedPressNote } from '@/lib/pressNotes';
 import type { Comunicado } from '@/lib/directus';
 
 interface Props {
@@ -8,7 +9,7 @@ interface Props {
 }
 
 const { items: sourceItems, lang = 'es' } = Astro.props;
-const items = sourceItems.filter((item) => hasPressPdf(item));
+const items = sourceItems.filter((item) => isListedPressNote(item));
 const isEn = lang === 'en';
 const base = isEn ? '/en/news' : '/notasdeprensa';
 const PAGE_SIZE = 12;
