@@ -45,7 +45,7 @@ const base = isEn ? '/en' : '';
           {isEn ? 'PRESS DIRECTORY' : 'DIRECTORIO DE PRENSA'}
         </h4>
         <ul class="space-y-2 font-sans text-xs text-zinc-700">
-          <li><a href={isEn ? '/en/news' : '/comunicados'} class="hover:text-vermilion transition-colors">{isEn ? 'News & Press Releases' : 'Noticias y Comunicados'}</a></li>
+          <li><a href={isEn ? '/en/news' : '/notasdeprensa'} class="hover:text-vermilion transition-colors">{isEn ? 'News & Press Releases' : 'Notas de prensa'}</a></li>
           <li><a href={isEn ? '/en/articles' : '/articulos'} class="hover:text-vermilion transition-colors">{isEn ? 'Articles' : 'Artículos'}</a></li>
           <li><a href={isEn ? '/en/studies' : '/estudios'} class="hover:text-vermilion transition-colors">{isEn ? 'Studies and campaigns' : 'Estudios y campañas'}</a></li>
           <li><a href={isEn ? '/en/coverage' : '/cobertura'} class="hover:text-vermilion transition-colors">{isEn ? 'Media Coverage & Clipping' : 'Cobertura en Medios'}</a></li>
@@ -88,9 +88,9 @@ const base = isEn ? '/en' : '';
     <div class="border-t border-zinc-200 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs text-zinc-500">
       <p>© {new Date().getFullYear()} Noche Madrid Press. {isEn ? 'All rights reserved.' : 'Todos los derechos reservados.'}</p>
       <div class="flex items-center gap-4 text-[11px]">
-        <a href="/comunicados" class="hover:text-zinc-950">Aviso Legal</a>
+        <a href="/notasdeprensa" class="hover:text-zinc-950">Aviso Legal</a>
         <span>·</span>
-        <a href="/comunicados" class="hover:text-zinc-950">Privacidad</a>
+        <a href="/notasdeprensa" class="hover:text-zinc-950">Privacidad</a>
         <span>·</span>
         <a href="https://mlpdirectus.116.203.118.1.sslip.io" target="_blank" rel="noopener noreferrer" class="hover:text-zinc-950">Directus CMS</a>
       </div>

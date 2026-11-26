@@ -18,9 +18,9 @@ function getAlternateLanguagePath(pathname: string, targetLang: 'es' | 'en'): st
   
   if (targetLang === 'es') {
     if (cleanPath === '/en' || cleanPath === '/en/') return '/';
-    if (cleanPath === '/en/news' || cleanPath === '/en/comunicados') return '/comunicados';
-    if (cleanPath.startsWith('/en/news/')) return cleanPath.replace('/en/news/', '/comunicados/');
-    if (cleanPath.startsWith('/en/comunicados/')) return cleanPath.replace('/en/comunicados/', '/comunicados/');
+    if (cleanPath === '/en/news' || cleanPath === '/en/comunicados') return '/notasdeprensa';
+    if (cleanPath.startsWith('/en/news/')) return cleanPath.replace('/en/news/', '/notasdeprensa/');
+    if (cleanPath.startsWith('/en/comunicados/')) return cleanPath.replace('/en/comunicados/', '/notasdeprensa/');
     if (cleanPath === '/en/articles' || cleanPath === '/en/articulos') return '/articulos';
     if (cleanPath.startsWith('/en/articles/')) return cleanPath.replace('/en/articles/', '/articulos/');
     if (cleanPath.startsWith('/en/articulos/')) return cleanPath.replace('/en/articulos/', '/articulos/');
@@ -41,8 +41,9 @@ function getAlternateLanguagePath(pathname: string, targetLang: 'es' | 'en'): st
 
   if (targetLang === 'en') {
     if (cleanPath === '/' || cleanPath === '') return '/en';
-    if (cleanPath === '/comunicados') return '/en/news';
+    if (cleanPath === '/comunicados' || cleanPath === '/notasdeprensa') return '/en/news';
     if (cleanPath.startsWith('/comunicados/')) return cleanPath.replace('/comunicados/', '/en/news/');
+    if (cleanPath.startsWith('/notasdeprensa/')) return cleanPath.replace('/notasdeprensa/', '/en/news/');
     if (cleanPath === '/articulos') return '/en/articles';
     if (cleanPath.startsWith('/articulos/')) return cleanPath.replace('/articulos/', '/en/articles/');
     if (cleanPath === '/directorio') return '/en/directory';
@@ -75,7 +76,7 @@ const navItems = (isEn
       { label: 'ABOUT US', href: '/en/about' },
     ]
   : [
-      { label: 'NOTAS DE PRENSA', href: '/comunicados' },
+      { label: 'NOTAS DE PRENSA', href: '/notasdeprensa' },
       { label: 'ARTÍCULOS', href: '/articulos' },
       { label: 'ESTUDIOS', href: '/estudios' },
       { label: 'COBERTURA', href: '/cobertura' },
