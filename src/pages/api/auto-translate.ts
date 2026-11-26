@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { requireApiSharedSecret } from '@/lib/apiSharedSecret';
 
 export const prerender = false;
 
@@ -32,6 +33,9 @@ function slugify(text: string): string {
 }
 
 export const ALL: APIRoute = async ({ request, url }) => {
+  const authFailure = requireApiSharedSecret(request);
+  if (authFailure) return authFailure;
+
   try {
     let body: any = {};
     if (request.method === 'POST') {

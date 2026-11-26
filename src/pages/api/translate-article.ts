@@ -1,25 +1,16 @@
 import type { APIRoute } from 'astro';
-import { directus, readItem, createItem, updateItem, readItems, DIRECTUS_URL, DIRECTUS_TOKEN } from '@/lib/directus';
+import { directus, readItem, createItem, updateItem, readItems } from '@/lib/directus';
 import { translateArticle } from '@/lib/translation';
 import type { SupportedTargetLang } from '@/lib/translation';
+import { requireApiSharedSecret } from '@/lib/apiSharedSecret';
 
 export const prerender = false;
 
-const INTERNAL_SECRET = import.meta.env.TRANSLATION_WEBHOOK_SECRET || 'mlp_translation_secret_2026';
-
 export const POST: APIRoute = async ({ request }) => {
+  const authFailure = requireApiSharedSecret(request);
+  if (authFailure) return authFailure;
+
   try {
-    const authHeader = request.headers.get('Authorization');
-    const token = authHeader?.replace(/^Bearer\s+/i, '');
-
-    // Protect endpoint
-    if (token !== INTERNAL_SECRET && token !== DIRECTUS_TOKEN) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-
     const body = await request.json();
     const articleId = body.articleId || body.id || body.key;
     const targetLangs: SupportedTargetLang[] = body.targetLangs || ['it', 'fr'];
