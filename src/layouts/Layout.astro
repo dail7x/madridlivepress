@@ -107,7 +107,7 @@ function getAlternateLanguagePath(pathname: string, targetLang: 'es' | 'en'): st
     if (cleanPath === '/en/press-kits') return '/press-kits';
     if (cleanPath === '/en/coverage' || cleanPath === '/en/cobertura') return '/cobertura';
     if (cleanPath === '/en/archive' || cleanPath === '/en/archivo') return '/archivo';
-    if (cleanPath === '/en/about' || cleanPath === '/en/sobre-el-sector' || cleanPath === '/en/sobre-nosotros') return '/sobre-el-sector';
+    if (cleanPath === '/en/about' || cleanPath === '/en/sobre-el-sector' || cleanPath === '/en/sobre-nosotros') return '/sobre-nosotros';
     if (cleanPath === '/en/studies' || cleanPath === '/en/estudios') return '/estudios';
     if (cleanPath === '/en/events' || cleanPath === '/en/eventos') return '/eventos';
     if (cleanPath.startsWith('/en/events/')) return cleanPath.replace('/en/events/', '/eventos/');
@@ -362,10 +362,10 @@ const targetPathEn = alternateUrlEn || getAlternateLanguagePath(currentPath, 'en
       </a>
 
       <a
-        href={isEn ? '/en/about' : '/sobre-el-sector'}
+        href={isEn ? '/en/about' : '/sobre-nosotros'}
         data-astro-prefetch="hover"
         class={`flex flex-col items-center justify-center gap-1 flex-1 py-1 transition-colors active:scale-[0.95] ${
-          currentPath.includes('/sobre-el-sector') || currentPath.includes('/about') ? 'text-zinc-950 font-bold' : 'text-zinc-500 hover:text-zinc-950'
+          currentPath.includes('/sobre-nosotros') || currentPath.includes('/sobre-el-sector') || currentPath.includes('/about') ? 'text-zinc-950 font-bold' : 'text-zinc-500 hover:text-zinc-950'
         }`}
       >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
