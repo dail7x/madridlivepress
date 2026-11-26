@@ -1,16 +1,16 @@
 ---
 import Layout from '@/layouts/Layout.astro';
 import PressNotesList from '@/components/press/PressNotesList.astro';
-import { fetchOfficialPressNotes } from '@/lib/pressNotes';
+import { fetchOfficialPressNotesWithPdf } from '@/lib/pressNotes';
 
 export const prerender = false;
 
-const items = await fetchOfficialPressNotes();
+const items = await fetchOfficialPressNotesWithPdf();
 ---
 
 <Layout
   title="Press Releases | Noche Madrid Press"
-  description="Official press releases from Noche Madrid. Each note links to its page and to the PDF when the file is published."
+  description="Official press releases from Noche Madrid. The list includes only notes that already have a PDF."
   lang="en"
 >
   <div class="w-full bg-paper">
@@ -20,7 +20,7 @@ const items = await fetchOfficialPressNotes();
           <span class="inline-block w-2 h-2 rounded-full bg-rose-600 animate-pulse"></span>
           <span class="font-mono text-zinc-900 font-bold uppercase tracking-wider">Official Pressroom</span>
           <span class="text-zinc-400 hidden sm:inline">|</span>
-          <span class="text-zinc-600 hidden sm:inline">Open press notes, with the official PDF when it is published.</span>
+          <span class="text-zinc-600 hidden sm:inline">Open press notes, each one with its official PDF.</span>
         </div>
         <a
           href="/en/articles"
@@ -37,7 +37,7 @@ const items = await fetchOfficialPressNotes();
       </div>
 
       <p class="font-sans text-xs sm:text-sm text-zinc-700 font-medium pt-2 pb-3 border-b border-zinc-200">
-        Official notes from Noche Madrid, ordered by date. Each headline opens the note, and the PDF downloads when the file is published.
+        Official notes from Noche Madrid that already have a PDF, ordered by date. Each headline opens the note and the file downloads beside it.
       </p>
     </div>
 

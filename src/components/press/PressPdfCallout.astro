@@ -28,7 +28,7 @@ const pdfUrl = resolvePressPdfUrl({ slug, archivo_pdf: archivoPdf });
       {isEn ? pressOffice.lineEn : pressOffice.lineEs}
     </p>
   </div>
-  {pdfUrl ? (
+  {pdfUrl && (
     <a
       href={pdfUrl}
       target="_blank"
@@ -37,9 +37,5 @@ const pdfUrl = resolvePressPdfUrl({ slug, archivo_pdf: archivoPdf });
     >
       {isEn ? 'Download PDF' : 'Descargar PDF'} ↓
     </a>
-  ) : (
-    <span class="font-mono text-[11px] uppercase tracking-wider text-zinc-500 border border-zinc-300 px-3 py-2 whitespace-nowrap">
-      {isEn ? 'PDF pending' : 'PDF pendiente'}
-    </span>
   )}
 </aside>
