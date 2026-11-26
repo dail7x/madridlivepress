@@ -1,6 +1,7 @@
 ---
 import type { BlockHero, Comunicado, Categoria } from '@/lib/directus';
-import { directus, readItems, getAssetUrl } from '@/lib/directus';
+import { getAssetUrl } from '@/lib/directus';
+import { fetchLatestWithPressPdf } from '@/lib/pressNotes';
 
 interface Props {
   block: BlockHero;
@@ -12,28 +13,23 @@ const isEn = lang === 'en';
 const prefix = isEn ? '/en' : '';
 const newsBase = isEn ? '/en/news' : '/notasdeprensa';
 
-// Pull latest 3 published stories
+// Últimos publicados con PDF. Las notas oficiales sin archivo no entran en este bloque.
 let latestStories: Comunicado[] = [];
 try {
-  const res = await directus.request(
-    readItems('comunicados' as any, {
-      filter: { status: { _eq: 'published' } },
-      sort: ['-fecha_publicacion', '-id'],
-      limit: 3,
-      fields: [
-        'id',
-        'titulo',
-        'titulo_en',
-        'slug',
-        'slug_en',
-        'fecha_publicacion',
-        'imagen_url_externa',
-        'imagen_portada.*',
-        { categoria: ['id', 'nombre', 'nombre_en', 'slug', 'slug_en'] }
-      ],
-    })
-  );
-  latestStories = (res as any) || [];
+  latestStories = await fetchLatestWithPressPdf(3, {
+    fields: [
+      'id',
+      'titulo',
+      'titulo_en',
+      'slug',
+      'slug_en',
+      'fecha_publicacion',
+      'imagen_url_externa',
+      'imagen_portada.*',
+      'archivo_pdf.*',
+      { categoria: ['id', 'nombre', 'nombre_en', 'slug', 'slug_en'] },
+    ],
+  });
 } catch (e) {
   console.error('Error in BlockHero:', e);
 }
@@ -141,7 +137,7 @@ const DEFAULT_THUMBS = [
               <span>↗</span>
             </a>
             <a
-              href={`${prefix}/sobre-el-sector`}
+              href={isEn ? '/en/about' : '/sobre-nosotros'}
               data-astro-prefetch="hover"
               class="border border-zinc-950 bg-paper hover:bg-zinc-100 text-zinc-950 font-bold px-3.5 sm:px-4 py-2 uppercase tracking-wider transition-colors inline-flex items-center gap-1 active:scale-95 text-[11px] sm:text-xs"
             >
@@ -178,6 +174,11 @@ const DEFAULT_THUMBS = [
         </div>
 
         <div class="space-y-2 flex-1 flex flex-col justify-between">
+          {latestStories.length === 0 && (
+            <p class="font-sans text-xs text-zinc-500 py-4">
+              {isEn ? 'No press notes with a PDF yet.' : 'Todavía no hay notas de prensa con PDF.'}
+            </p>
+          )}
           {latestStories.map((story, idx) => {
             const cat = story.categoria as Categoria | undefined;
             const imgUrl = (story as any).imagen_url_externa || (story.imagen_portada ? getAssetUrl(story.imagen_portada, { width: 280, height: 200, format: 'webp' }) : DEFAULT_THUMBS[idx % DEFAULT_THUMBS.length]);

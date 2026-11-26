@@ -30,7 +30,7 @@ function getAlternateLanguagePath(pathname: string, targetLang: 'es' | 'en'): st
     if (cleanPath === '/en/press-kits') return '/press-kits';
     if (cleanPath === '/en/coverage' || cleanPath === '/en/cobertura') return '/cobertura';
     if (cleanPath === '/en/archive' || cleanPath === '/en/archivo') return '/archivo';
-    if (cleanPath === '/en/about' || cleanPath === '/en/sobre-el-sector' || cleanPath === '/en/sobre-nosotros') return '/sobre-el-sector';
+    if (cleanPath === '/en/about' || cleanPath === '/en/sobre-el-sector' || cleanPath === '/en/sobre-nosotros') return '/sobre-nosotros';
     if (cleanPath === '/en/studies' || cleanPath === '/en/estudios') return '/estudios';
     if (cleanPath === '/en/events' || cleanPath === '/en/eventos') return '/eventos';
     if (cleanPath.startsWith('/en/events/')) return cleanPath.replace('/en/events/', '/eventos/');
@@ -82,7 +82,7 @@ const navItems = (isEn
       { label: 'COBERTURA', href: '/cobertura' },
       { label: 'PRESS KITS', href: '/press-kits' },
       { label: 'DIRECTORIO', href: '/directorio' },
-      { label: 'SOBRE NOSOTROS', href: '/sobre-el-sector' },
+      { label: 'SOBRE NOSOTROS', href: '/sobre-nosotros' },
     ]
 ).filter((item) => SHOW_MEMBER_DIRECTORY || !item.href.includes('director'));
 ---

@@ -1,5 +1,5 @@
 ---
-import { resolvePressPdfUrl } from '@/lib/pressPdf';
+import { hasPressPdf, resolvePressPdfUrl } from '@/lib/pressPdf';
 import type { Comunicado } from '@/lib/directus';
 
 interface Props {
@@ -7,7 +7,8 @@ interface Props {
   lang?: 'es' | 'en';
 }
 
-const { items, lang = 'es' } = Astro.props;
+const { items: sourceItems, lang = 'es' } = Astro.props;
+const items = sourceItems.filter((item) => hasPressPdf(item));
 const isEn = lang === 'en';
 const base = isEn ? '/en/news' : '/notasdeprensa';
 const PAGE_SIZE = 12;
@@ -62,7 +63,7 @@ const rows = items
       pdfUrl: resolvePressPdfUrl(item),
     };
   })
-  .filter((row) => row.title);
+  .filter((row) => row.title && row.pdfUrl);
 
 const months = [...new Set(rows.map((row) => row.month).filter(Boolean))].sort().reverse();
 
@@ -164,20 +165,14 @@ const sortNext = orden === 'desc' ? 'asc' : 'desc';
             {row.title}
           </a>
           <div class="sm:col-span-3 sm:text-right">
-            {row.pdfUrl ? (
-              <a
-                href={row.pdfUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="inline-flex font-mono text-[11px] font-bold uppercase tracking-wider text-zinc-950 border border-zinc-950 hover:bg-zinc-950 hover:text-white px-2.5 py-1.5 transition-colors"
-              >
-                {isEn ? 'Download PDF' : 'Descargar PDF'} ↓
-              </a>
-            ) : (
-              <span class="font-mono text-[11px] uppercase tracking-wider text-zinc-400">
-                {isEn ? 'PDF pending' : 'PDF pendiente'}
-              </span>
-            )}
+            <a
+              href={row.pdfUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex font-mono text-[11px] font-bold uppercase tracking-wider text-zinc-950 border border-zinc-950 hover:bg-zinc-950 hover:text-white px-2.5 py-1.5 transition-colors"
+            >
+              {isEn ? 'Download PDF' : 'Descargar PDF'} ↓
+            </a>
           </div>
         </li>
       ))}
