@@ -12,6 +12,6 @@ export const POST: APIRoute = async ({ cookies }) => {
 
 export const GET: APIRoute = async ({ cookies, url, redirect }) => {
   cookies.delete('mlp_press_session', { path: '/' });
-  const redirectTarget = url.searchParams.get('redirect') || '/comunicados';
+  const redirectTarget = url.searchParams.get('redirect') || '/notasdeprensa';
   return redirect(redirectTarget);
 };

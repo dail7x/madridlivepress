@@ -12,7 +12,7 @@ export const POST: APIRoute = async ({ request, url }) => {
   try {
     const body = await request.json();
     const email = body?.email?.toLowerCase().trim();
-    const redirectUrl = body?.redirectUrl || '/comunicados';
+    const redirectUrl = body?.redirectUrl || '/notasdeprensa';
 
     if (!email || !email.includes('@')) {
       return new Response(

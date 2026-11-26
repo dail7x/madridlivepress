@@ -12,7 +12,7 @@ interface Props {
 const { block, lang = 'es' } = Astro.props;
 const isEn = lang === 'en';
 const prefix = isEn ? '/en' : '';
-const newsBase = isEn ? '/en/news' : '/comunicados';
+const newsBase = isEn ? '/en/news' : '/notasdeprensa';
 const limit = block.limite || 6;
 
 let comunicados: Comunicado[] = [];

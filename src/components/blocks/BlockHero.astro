@@ -10,7 +10,7 @@ interface Props {
 const { block, lang = 'es' } = Astro.props;
 const isEn = lang === 'en';
 const prefix = isEn ? '/en' : '';
-const newsBase = isEn ? '/en/news' : '/comunicados';
+const newsBase = isEn ? '/en/news' : '/notasdeprensa';
 
 // Pull latest 3 published stories
 let latestStories: Comunicado[] = [];

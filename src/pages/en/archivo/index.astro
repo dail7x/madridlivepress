@@ -14,7 +14,7 @@ try {
       filter: { status: { _eq: 'published' } },
       sort: ['-fecha_publicacion', '-id'],
       limit: 50,
-      fields: ['id', 'status', 'fecha_publicacion', 'slug', 'titulo', 'bajada', 'imagen_portada.*'],
+      fields: ['id', 'status', 'fecha_publicacion', 'slug', 'slug_en', 'titulo', 'bajada', 'imagen_portada.*'],
     })
   );
   items = (res as any) || [];
@@ -54,13 +54,13 @@ try {
               <div class="flex items-center gap-6">
                 <span class="font-bold text-zinc-950 w-16">{dateStr}</span>
                 <span class="text-zinc-500 uppercase text-[10px] w-28">{typeLabel}</span>
-                <a href={`/en/comunicados/${item.slug}`} class="font-sans font-medium text-sm text-zinc-950 group-hover:text-vermilion transition-colors">
+                <a href={`/en/news/${item.slug_en || item.slug}`} class="font-sans font-medium text-sm text-zinc-950 group-hover:text-vermilion transition-colors">
                   {item.titulo}
                 </a>
               </div>
               <div class="flex items-center gap-4 text-[11px] text-zinc-500">
                 <span>PDF · HIGH RES</span>
-                <a href={`/en/comunicados/${item.slug}`} class="font-bold text-zinc-950 hover:text-vermilion">VIEW ↗</a>
+                <a href={`/en/news/${item.slug_en || item.slug}`} class="font-bold text-zinc-950 hover:text-vermilion">VIEW ↗</a>
               </div>
             </div>
           );
