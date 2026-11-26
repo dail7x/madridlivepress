@@ -1,0 +1,46 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import PressNotesList from '@/components/press/PressNotesList.astro';
+import { fetchOfficialPressNotes } from '@/lib/pressNotes';
+
+export const prerender = false;
+
+const items = await fetchOfficialPressNotes();
+---
+
+<Layout
+  title="Notas de Prensa Oficiales | Noche Madrid Press"
+  description="Notas de prensa de Noche Madrid, asociación de empresarios del ocio nocturno de la Comunidad de Madrid. Cada nota enlaza a su ficha y al PDF cuando está publicado."
+  lang="es"
+>
+  <div class="w-full bg-paper">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
+      <div class="flex items-center justify-between gap-3 p-3 bg-zinc-50 border border-zinc-200 text-xs mb-3">
+        <div class="flex items-center gap-2">
+          <span class="inline-block w-2 h-2 rounded-full bg-rose-600 animate-pulse"></span>
+          <span class="font-mono text-zinc-900 font-bold uppercase tracking-wider">Sala de Prensa Oficial</span>
+          <span class="text-zinc-400 hidden sm:inline">|</span>
+          <span class="text-zinc-600 hidden sm:inline">Notas de prensa de libre acceso, con el PDF oficial cuando está publicado.</span>
+        </div>
+        <a
+          href="/articulos"
+          class="font-mono text-xs font-bold text-zinc-900 hover:text-rose-600 underline flex items-center gap-1 transition-colors"
+        >
+          Ver Artículos de Blog sobre Madrid →
+        </a>
+      </div>
+
+      <div class="w-full h-12 sm:h-16 lg:h-20 overflow-hidden flex items-end select-none pointer-events-none">
+        <h1 class="font-display font-black text-4xl sm:text-6xl lg:text-[6.5rem] tracking-tight leading-none text-wireframe block translate-y-2 sm:translate-y-4">
+          NOTAS DE PRENSA
+        </h1>
+      </div>
+
+      <p class="font-sans text-xs sm:text-sm text-zinc-700 font-medium pt-2 pb-3 border-b border-zinc-200">
+        Comunicados oficiales de Noche Madrid, ordenados por fecha. Cada titular abre la ficha y el PDF se descarga cuando el archivo está publicado.
+      </p>
+    </div>
+
+    <PressNotesList items={items} lang="es" />
+  </div>
+</Layout>

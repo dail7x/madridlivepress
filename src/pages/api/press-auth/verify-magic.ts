@@ -9,7 +9,7 @@ export const prerender = false;
 
 export const GET: APIRoute = async ({ url, cookies, redirect }) => {
   const token = url.searchParams.get('token');
-  const redirectTarget = url.searchParams.get('redirect') || '/comunicados';
+  const redirectTarget = url.searchParams.get('redirect') || '/notasdeprensa';
 
   if (!token) {
     return redirect(`${redirectTarget}?auth_error=missing_token`);

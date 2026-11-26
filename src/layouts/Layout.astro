@@ -49,7 +49,7 @@ const prefix = isEn ? '/en' : '';
 // Contextual default Open Graph image based on section
 function getOptimalDefaultOgImage(pathname: string): string {
   const p = pathname.toLowerCase();
-  if (p.includes('/comunicados') || p.includes('/news') || p.includes('/articulos') || p.includes('/articles')) {
+  if (p.includes('/notasdeprensa') || p.includes('/comunicados') || p.includes('/news') || p.includes('/articulos') || p.includes('/articles')) {
     return '/images/og/og-comunicados.jpg';
   }
   if (p.includes('/directorio') || p.includes('/directory') || p.includes('/salas')) {
@@ -98,9 +98,9 @@ function getAlternateLanguagePath(pathname: string, targetLang: 'es' | 'en'): st
   
   if (targetLang === 'es') {
     if (cleanPath === '/en' || cleanPath === '/en/') return '/';
-    if (cleanPath === '/en/news' || cleanPath === '/en/comunicados') return '/comunicados';
-    if (cleanPath.startsWith('/en/news/')) return cleanPath.replace('/en/news/', '/comunicados/');
-    if (cleanPath.startsWith('/en/comunicados/')) return cleanPath.replace('/en/comunicados/', '/comunicados/');
+    if (cleanPath === '/en/news' || cleanPath === '/en/comunicados') return '/notasdeprensa';
+    if (cleanPath.startsWith('/en/news/')) return cleanPath.replace('/en/news/', '/notasdeprensa/');
+    if (cleanPath.startsWith('/en/comunicados/')) return cleanPath.replace('/en/comunicados/', '/notasdeprensa/');
     if (cleanPath === '/en/directory' || cleanPath === '/en/directorio') return '/directorio';
     if (cleanPath.startsWith('/en/directory/')) return cleanPath.replace('/en/directory/', '/directorio/');
     if (cleanPath.startsWith('/en/directorio/')) return cleanPath.replace('/en/directorio/', '/directorio/');
@@ -118,8 +118,9 @@ function getAlternateLanguagePath(pathname: string, targetLang: 'es' | 'en'): st
 
   if (targetLang === 'en') {
     if (cleanPath === '/' || cleanPath === '') return '/en';
-    if (cleanPath === '/comunicados') return '/en/news';
+    if (cleanPath === '/comunicados' || cleanPath === '/notasdeprensa') return '/en/news';
     if (cleanPath.startsWith('/comunicados/')) return cleanPath.replace('/comunicados/', '/en/news/');
+    if (cleanPath.startsWith('/notasdeprensa/')) return cleanPath.replace('/notasdeprensa/', '/en/news/');
     if (cleanPath === '/directorio') return '/en/directory';
     if (cleanPath.startsWith('/directorio/')) return cleanPath.replace('/directorio/', '/en/directory/');
     if (cleanPath === '/press-kits') return '/en/press-kits';
@@ -288,10 +289,10 @@ const targetPathEn = alternateUrlEn || getAlternateLanguagePath(currentPath, 'en
       aria-label="Barra de navegación móvil"
     >
       <a
-        href={`${prefix}/comunicados`}
+        href={isEn ? '/en/news' : '/notasdeprensa'}
         data-astro-prefetch="hover"
         class={`flex flex-col items-center justify-center gap-1 flex-1 py-1 transition-colors active:scale-[0.95] ${
-          currentPath.includes('/comunicados') ? 'text-zinc-950 font-bold' : 'text-zinc-500 hover:text-zinc-950'
+          currentPath.startsWith('/notasdeprensa') || currentPath.startsWith('/en/news') || currentPath.includes('/comunicados') ? 'text-zinc-950 font-bold' : 'text-zinc-500 hover:text-zinc-950'
         }`}
       >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">

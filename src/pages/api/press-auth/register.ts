@@ -15,7 +15,7 @@ export const POST: APIRoute = async ({ request, url }) => {
     const email = body?.email?.toLowerCase().trim();
     const medio = body?.medio?.trim() || 'Prensa / Redacción';
     const tipo_medio = body?.tipo_medio || 'Digital';
-    const redirectUrl = body?.redirectUrl || '/comunicados';
+    const redirectUrl = body?.redirectUrl || '/notasdeprensa';
 
     if (!nombre || !email || !email.includes('@')) {
       return new Response(
