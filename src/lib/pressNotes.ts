@@ -1,5 +1,38 @@
 import { directus, readItems, type Comunicado } from '@/lib/directus';
-import { hasPressPdf } from '@/lib/pressPdf';
+import { hasPressPdf, pdfFilenameHasNdp, pressPdfFilename } from '@/lib/pressPdf';
+
+/** Categoría principal de nota de prensa oficial. */
+export const OFFICIAL_PRESS_CATEGORY_ID = '1';
+/** «Proyectos y Campañas» (slug proyectos-y-campanas). */
+export const PROJECTS_CAMPAIGNS_CATEGORY_ID = '7';
+
+type CategoryRef = number | string | { id?: number | string | null } | null | undefined;
+
+function categoryId(value: CategoryRef): string | null {
+  if (value == null) return null;
+  if (typeof value === 'number' || typeof value === 'string') {
+    const text = String(value).trim();
+    return text || null;
+  }
+  if (typeof value === 'object' && value.id != null) {
+    const text = String(value.id).trim();
+    return text || null;
+  }
+  return null;
+}
+
+/**
+ * Una nota publicada entra en /notasdeprensa y /en/news si tiene PDF y, además,
+ * cumple al menos una de: categoría 1, categoría 7 en categorias_adicionales,
+ * o «NDP» en el nombre del PDF.
+ */
+export function isListedPressNote(item: Comunicado): boolean {
+  if (!hasPressPdf(item)) return false;
+  if (categoryId(item.categoria) === OFFICIAL_PRESS_CATEGORY_ID) return true;
+  const extras = item.categorias_adicionales ?? [];
+  if (extras.some((row) => categoryId(row?.categorias_id) === PROJECTS_CAMPAIGNS_CATEGORY_ID)) return true;
+  return pdfFilenameHasNdp(pressPdfFilename(item));
+}
 
 const PAGE_SIZE = 100;
 const MAX_NOTES = 5000;
@@ -47,14 +80,25 @@ export async function fetchOfficialPressNotes(): Promise<Comunicado[]> {
 }
 
 /**
- * Comunicados publicados con PDF, de cualquier categoría.
- * La lista de notas no puede quedarse en la categoría 1: en Directus hay
- * archivos también en estudios, festivales y el resto. Se pide el id de
- * `archivo_pdf` (no `archivo_pdf.*`) para no depender del permiso de lectura
- * de `directus_files`.
+ * Notas de /notasdeprensa y /en/news.
+ * PDF obligatorio y, además, categoría 1, la 7 en `categorias_adicionales`,
+ * o «NDP» en el nombre del archivo. Esos campos ya tienen lectura pública.
  */
+const LIST_FIELDS = [
+  'id',
+  'status',
+  'fecha_publicacion',
+  'slug',
+  'slug_en',
+  'titulo',
+  'titulo_en',
+  'categoria',
+  'archivo_pdf.id',
+  'archivo_pdf.filename_download',
+  'categorias_adicionales.categorias_id',
+];
+
 export async function fetchOfficialPressNotesWithPdf(): Promise<Comunicado[]> {
-  const fields = FIELDS.map((field) => (field === 'archivo_pdf.*' ? 'archivo_pdf' : field));
   const matched: Comunicado[] = [];
   let offset = 0;
 
@@ -66,12 +110,12 @@ export async function fetchOfficialPressNotesWithPdf(): Promise<Comunicado[]> {
           sort: ['-fecha_publicacion', '-id'],
           limit: PAGE_SIZE,
           offset,
-          fields,
+          fields: LIST_FIELDS,
         })
       );
       const items = (batch as Comunicado[]) || [];
       for (const item of items) {
-        if (hasPressPdf(item)) matched.push(item);
+        if (isListedPressNote(item)) matched.push(item);
       }
       if (items.length < PAGE_SIZE || offset + items.length >= MAX_NOTES) break;
       offset += PAGE_SIZE;
