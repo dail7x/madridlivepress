@@ -22,10 +22,15 @@ const localPdfModules = import.meta.glob('../assets/notas-prensa/**/*.pdf', {
 }) as Record<string, string>;
 
 const localPdfBySlug: Record<string, string> = {};
+const localPdfFilenameBySlug: Record<string, string> = {};
 for (const [path, url] of Object.entries(localPdfModules)) {
   const file = path.split('/').pop() || '';
-  const slug = decodeURIComponent(file.replace(/\.pdf$/i, ''));
-  if (slug && typeof url === 'string') localPdfBySlug[slug] = url;
+  const filename = decodeURIComponent(file);
+  const slug = filename.replace(/\.pdf$/i, '');
+  if (slug && typeof url === 'string') {
+    localPdfBySlug[slug] = url;
+    localPdfFilenameBySlug[slug] = filename;
+  }
 }
 
 export function resolvePressPdfUrl(item: PressPdfItem): string | null {
@@ -40,4 +45,27 @@ export function resolvePressPdfUrl(item: PressPdfItem): string | null {
 /** Hay PDF descargable, en Directus o en src/assets/notas-prensa. */
 export function hasPressPdf(item: PressPdfItem): boolean {
   return resolvePressPdfUrl(item) != null;
+}
+
+/**
+ * Nombre del PDF que se publica.
+ * Si Directus tiene archivo, manda `filename_download`.
+ * Si el PDF es solo el respaldo local, manda el nombre de ese archivo.
+ */
+export function pressPdfFilename(item: PressPdfItem): string | null {
+  const file = item.archivo_pdf;
+  if (file && typeof file === 'object') {
+    const name = typeof file.filename_download === 'string' ? file.filename_download.trim() : '';
+    if (name) return name;
+    if (file.id) return null;
+  }
+  if (typeof file === 'string' && file.trim()) return null;
+  const slug = item.slug?.trim();
+  if (slug && localPdfFilenameBySlug[slug]) return localPdfFilenameBySlug[slug];
+  return null;
+}
+
+/** «NDP» en el nombre del archivo, sin distinguir mayúsculas. */
+export function pdfFilenameHasNdp(filename: string | null | undefined): boolean {
+  return typeof filename === 'string' && filename.toLowerCase().includes('ndp');
 }
