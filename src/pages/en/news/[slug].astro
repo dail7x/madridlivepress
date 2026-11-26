@@ -1,7 +1,9 @@
 ---
 import Layout from '@/layouts/Layout.astro';
 import AudioBriefPlayer from '@/components/ui/AudioBriefPlayer.astro';
+import PressPdfCallout from '@/components/press/PressPdfCallout.astro';
 import ExecutiveBrief from '@/components/ui/ExecutiveBrief.astro';
+import { isHiddenCategory } from '@/lib/categories';
 import PressPassModal from '@/components/ui/PressPassModal.astro';
 import type { Comunicado, Categoria, Portavoz } from '@/lib/directus';
 import { directus, readItems, getAssetUrl } from '@/lib/directus';
@@ -70,7 +72,8 @@ if (slug !== canonicalEnSlug) {
   return Astro.redirect(`/en/news/${canonicalEnSlug}`, 301);
 }
 
-const cat = comunicado.categoria as Categoria | undefined;
+const rawCat = comunicado.categoria as Categoria | undefined;
+const cat = rawCat && !isHiddenCategory(rawCat) ? rawCat : undefined;
 const portavoz = comunicado.portavoz as Portavoz | undefined;
 const title = comunicado.titulo_en || comunicado.titulo;
 const subtitle = comunicado.bajada_en || comunicado.bajada;
@@ -191,6 +194,8 @@ const isAuthed = !!pressUser;
           lang="en"
         />
       )}
+
+      <PressPdfCallout slug={comunicado.slug} archivoPdf={comunicado.archivo_pdf} lang="en" />
 
       <!-- Article Body (100% Free Access) -->
       <div

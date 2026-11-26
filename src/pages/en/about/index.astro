@@ -1,121 +1,115 @@
 ---
 import Layout from '@/layouts/Layout.astro';
 import WireframeHeader from '@/components/ui/WireframeHeader.astro';
+import { association, pressOffice } from '@/lib/contacts';
 
 export const prerender = false;
 ---
 
 <Layout
-  title="About the Sector & NocheMadrid | Noche Madrid Press"
-  description="Discover NocheMadrid: 96 associated venues, economic impact, historical background, and cultural governance in Madrid."
+  title="About us | Noche Madrid Press"
+  description="Noche Madrid is the association of nightlife business owners in the Community of Madrid. Sector: nightlife and shows."
   lang="en"
+  alternateUrlEs="/sobre-el-sector"
+  alternateUrlEn="/en/about"
 >
   <div class="w-full bg-paper pb-16">
-    <!-- Top Wireframe Header "THE SECTOR" -->
     <WireframeHeader
-      title="THE SECTOR"
-      subtitle="The official federation representing, defending, and globally projecting Madrid’s cultural nightlife and performing arts."
-      badge="96 ASSOCIATED VENUES"
-      updatedTime="FOUNDED 2010"
+      title="ABOUT US"
+      subtitle="Noche Madrid is the association of nightlife business owners in the Community of Madrid. Sector: nightlife and shows."
+      badge="ASSOCIATION"
+      updatedTime="SINCE 2010"
     />
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
-      <!-- Section 1: Intro Grid -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         <div class="lg:col-span-7 space-y-6">
           <h2 class="font-display text-2xl sm:text-4xl font-bold text-zinc-950 tracking-tight leading-tight">
-            A unified voice for the world’s most vibrant cultural nightlife.
+            A business association for Madrid nightlife.
           </h2>
 
-          <div class="prose prose-zinc max-w-none font-sans text-sm sm:text-base text-zinc-700 leading-relaxed space-y-4">
+          <div class="font-sans text-sm sm:text-base text-zinc-700 leading-relaxed space-y-4">
             <p>
-              <strong>NOCHEMADRID</strong> is the premier business and federative organization for nightlife, live music, and performing arts across the Community of Madrid. It represents <strong>96 associated enterprises and landmark spaces</strong>, encompassing historic live concert halls, global electronic music clubs, musical theaters, flamenco tablaos, and late-night culinary destinations.
+              <strong>Noche Madrid</strong> is the association of nightlife business owners in the Community of Madrid. It is not a federation. Its sector is <strong>nightlife and shows</strong>.
             </p>
             <p>
-              Established in 2010 through the merger of <strong>ASFYDIS</strong> and <strong>ECO</strong>, the federation works continuously to advance professional dignity, public safety, acoustic innovation, and harmonious neighborhood coexistence.
+              It is the main business organisation for nightlife in Madrid and brings together the recreational, cultural, dining and show activities that make up nightlife.
+            </p>
+            <p>
+              It was founded in 2010 when the Asociación de Empresarios de Espectáculos, Salas de Fiesta y Ocio de la Comunidad de Madrid (ASFYDIS) and the Asociación Madrileña de Empresarios por la Calidad del Ocio (ECO) came together. Since then it has worked to defend and raise the standing of the nightlife and shows business.
+            </p>
+            <p class="font-mono text-[11px] text-zinc-500 uppercase tracking-wider">
+              Institutional text based on{' '}
+              <a href="https://nochemadrid.org/quienes-somos/" class="underline hover:text-vermilion" target="_blank" rel="noopener noreferrer">nochemadrid.org/quienes-somos</a>.
             </p>
           </div>
 
           <div class="pt-2 flex flex-wrap gap-4 font-mono text-xs">
             <a
-              href="/en/directory"
+              href="/en/studies"
               class="bg-zinc-950 text-white hover:bg-vermilion px-5 py-3 font-bold uppercase tracking-wider transition-colors inline-flex items-center gap-1.5"
             >
-              <span>Explore the 96 Federated Venues</span>
-              <span>↗</span>
+              <span>Studies and campaigns</span>
+              <span>→</span>
             </a>
             <a
               href="/en/news"
               class="border border-zinc-950 hover:bg-zinc-100 text-zinc-950 px-5 py-3 font-bold uppercase tracking-wider transition-colors inline-flex items-center gap-1.5"
             >
-              <span>Official Press Releases</span>
+              <span>Press releases</span>
               <span>→</span>
             </a>
           </div>
         </div>
 
-        <!-- Right Side: Stats Grid -->
-        <div class="lg:col-span-5 grid grid-cols-2 gap-4 bg-canvas p-6 border border-zinc-200 font-mono">
+        <div class="lg:col-span-5 grid grid-cols-1 gap-4 bg-canvas p-6 border border-zinc-200 font-mono">
           <div class="border-b border-zinc-200 pb-4">
-            <div class="font-display text-3xl sm:text-4xl font-bold text-zinc-950">96</div>
-            <div class="text-[10px] sm:text-xs text-zinc-500 uppercase tracking-widest mt-1">Federated Venues</div>
+            <div class="font-display text-xl font-bold text-zinc-950">Association</div>
+            <div class="text-[11px] text-zinc-500 uppercase tracking-widest mt-1">Nightlife business owners</div>
           </div>
-
           <div class="border-b border-zinc-200 pb-4">
-            <div class="font-display text-3xl sm:text-4xl font-bold text-zinc-950">+28K</div>
-            <div class="text-[10px] sm:text-xs text-zinc-500 uppercase tracking-widest mt-1">Direct Jobs</div>
+            <div class="font-display text-xl font-bold text-zinc-950">Community of Madrid</div>
+            <div class="text-[11px] text-zinc-500 uppercase tracking-widest mt-1">Territory</div>
           </div>
-
-          <div class="pt-2">
-            <div class="font-display text-3xl sm:text-4xl font-bold text-zinc-950">14.5K</div>
-            <div class="text-[10px] sm:text-xs text-zinc-500 uppercase tracking-widest mt-1">Annual Showcases</div>
-          </div>
-
-          <div class="pt-2">
-            <div class="font-display text-3xl sm:text-4xl font-bold text-zinc-950">2.0M</div>
-            <div class="text-[10px] sm:text-xs text-zinc-500 uppercase tracking-widest mt-1">Global Tourists</div>
+          <div>
+            <div class="font-display text-xl font-bold text-zinc-950">Nightlife and shows</div>
+            <div class="text-[11px] text-zinc-500 uppercase tracking-widest mt-1">Sector</div>
           </div>
         </div>
       </div>
 
-      <!-- Section 2: Leadership & Press Office -->
-      <div class="border-t border-zinc-200 pt-10">
+      <div id="contact" class="border-t border-zinc-200 pt-10">
         <h3 class="font-mono text-xs font-bold text-zinc-400 uppercase tracking-widest mb-6">
-          GOVERNANCE & OFFICIAL SPOKESPERSONS
+          Contact
         </h3>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div class="border border-zinc-200 p-6 bg-paper space-y-4">
-            <div class="flex items-center gap-4">
-              <div class="w-12 h-12 rounded-full bg-zinc-900 text-white font-mono text-sm font-bold flex items-center justify-center">
-                AZ
-              </div>
-              <div>
-                <h4 class="font-display text-lg font-bold text-zinc-950">Alejandro Zamarro</h4>
-                <p class="font-mono text-xs text-zinc-500 uppercase">President of NocheMadrid</p>
-              </div>
+            <div>
+              <h4 class="font-display text-lg font-bold text-zinc-950">{association.name}</h4>
+              <p class="font-mono text-xs text-zinc-500 uppercase">Association of nightlife business owners in the Community of Madrid</p>
             </div>
-            <p class="font-sans text-xs sm:text-sm text-zinc-600 leading-relaxed">
-              Cultural entrepreneur with over two decades leading landmark music halls and theatrical venues. Directs the digital modernization and international expansion roadmap of Madrid’s nightlife.
+            <p class="font-sans text-sm text-zinc-600 leading-relaxed">
+              Headquarters and general contact published on nocheMadrid.org.
             </p>
+            <div class="space-y-1 font-mono text-xs">
+              <a href={`mailto:${association.email}`} class="block text-vermilion font-bold hover:underline">{association.email}</a>
+              <a href={`tel:${association.phoneTel}`} class="block text-zinc-950 font-bold">+34 {association.phoneDisplay}</a>
+              <div class="text-zinc-500">{association.address} · {association.city}, Spain</div>
+            </div>
           </div>
 
           <div class="border border-zinc-200 p-6 bg-paper space-y-4">
-            <div class="flex items-center gap-4">
-              <div class="w-12 h-12 rounded-full bg-vermilion text-white font-mono text-sm font-bold flex items-center justify-center">
-                PO
-              </div>
-              <div>
-                <h4 class="font-display text-lg font-bold text-zinc-950">Press & Communications Office</h4>
-                <p class="font-mono text-xs text-zinc-500 uppercase">Media & International Outlets</p>
-              </div>
+            <div>
+              <h4 class="font-display text-lg font-bold text-zinc-950">{pressOffice.name}</h4>
+              <p class="font-mono text-xs text-zinc-500 uppercase">{pressOffice.office}</p>
             </div>
-            <p class="font-sans text-xs sm:text-sm text-zinc-600 leading-relaxed">
-              Dedicated service for journalists, news agencies, and foreign correspondents. Manages press accreditations, executive interviews, and broadcast asset requests.
+            <p class="font-sans text-sm text-zinc-600 leading-relaxed">
+              Primary press contact for newsrooms, agencies and correspondents.
             </p>
             <div class="space-y-1 font-mono text-xs">
-              <div class="text-vermilion font-bold">prensa@nochemadrid.org · +34 91 542 23 04</div>
-              <div class="text-zinc-500">C/ Valverde 13, 3º D · 28004 Madrid, Spain</div>
+              <a href={`tel:${pressOffice.phoneTel}`} class="block text-vermilion font-bold">Tel. +34 {pressOffice.phoneDisplay}</a>
+              <div class="text-zinc-500">{pressOffice.lineEn}</div>
             </div>
           </div>
         </div>

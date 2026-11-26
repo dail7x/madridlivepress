@@ -1,0 +1,77 @@
+---
+import { resolvePressPdfUrl } from '@/lib/pressPdf';
+import type { Comunicado } from '@/lib/directus';
+
+interface Props {
+  items: Comunicado[];
+  lang?: 'es' | 'en';
+}
+
+const { items, lang = 'es' } = Astro.props;
+const isEn = lang === 'en';
+const base = isEn ? '/en/news' : '/comunicados';
+const withPdf = items.filter((item) => resolvePressPdfUrl(item)).length;
+---
+
+<section class="border border-zinc-200 bg-paper" aria-label={isEn ? 'Press notes and PDF downloads' : 'Notas de prensa y descargas PDF'}>
+  <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 px-4 sm:px-5 py-4 border-b border-zinc-200 bg-canvas">
+    <div>
+      <h2 class="font-mono text-xs font-bold uppercase tracking-widest text-zinc-950">
+        {isEn ? 'Press notes · downloadable PDF' : 'Notas de prensa · PDF descargable'}
+      </h2>
+      <p class="font-sans text-xs text-zinc-600 mt-1 max-w-2xl">
+        {isEn
+          ? 'Each published note can carry its PDF. Files for 2026 appear here when they are attached in Directus or added to the press-notes folder.'
+          : 'Cada nota publicada puede llevar su PDF. Los archivos de 2026 aparecen aquí cuando se adjuntan en Directus o se añaden a la carpeta de notas.'}
+      </p>
+    </div>
+    <div class="font-mono text-[11px] uppercase tracking-wider text-zinc-500 whitespace-nowrap">
+      {withPdf}/{items.length} PDF
+    </div>
+  </div>
+
+  {items.length === 0 ? (
+    <p class="px-5 py-8 font-sans text-sm text-zinc-500">
+      {isEn ? 'There are no published press notes yet.' : 'Todavía no hay notas de prensa publicadas.'}
+    </p>
+  ) : (
+    <ul class="divide-y divide-zinc-200">
+      {items.map((item) => {
+        const pdfUrl = resolvePressPdfUrl(item);
+        const slug = (isEn ? item.slug_en || item.slug : item.slug) || item.slug;
+        const title = (isEn ? item.titulo_en || item.titulo : item.titulo) || item.titulo;
+        const date = item.fecha_publicacion
+          ? new Date(item.fecha_publicacion).toLocaleDateString(isEn ? 'en-GB' : 'es-ES', {
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric',
+            }).toUpperCase()
+          : '';
+        return (
+          <li class="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 items-center px-4 sm:px-5 py-3">
+            <div class="sm:col-span-2 font-mono text-[11px] text-zinc-500 uppercase">{date}</div>
+            <a href={`${base}/${slug}`} class="sm:col-span-7 font-display text-sm font-semibold text-zinc-950 hover:text-vermilion leading-snug">
+              {title}
+            </a>
+            <div class="sm:col-span-3 sm:text-right">
+              {pdfUrl ? (
+                <a
+                  href={pdfUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex font-mono text-[11px] font-bold uppercase tracking-wider text-zinc-950 border border-zinc-950 hover:bg-zinc-950 hover:text-white px-2.5 py-1.5 transition-colors"
+                >
+                  {isEn ? 'Download PDF' : 'Descargar PDF'} ↓
+                </a>
+              ) : (
+                <span class="font-mono text-[11px] uppercase tracking-wider text-zinc-400">
+                  {isEn ? 'PDF pending' : 'PDF pendiente'}
+                </span>
+              )}
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  )}
+</section>

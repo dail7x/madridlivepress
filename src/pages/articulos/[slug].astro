@@ -5,6 +5,7 @@ import ExecutiveBrief from '@/components/ui/ExecutiveBrief.astro';
 import PressPassGate from '@/components/ui/PressPassGate.astro';
 import PressPassModal from '@/components/ui/PressPassModal.astro';
 import type { Comunicado, Categoria, Portavoz } from '@/lib/directus';
+import { isHiddenCategory } from '@/lib/categories';
 import { directus, readItems, getAssetUrl } from '@/lib/directus';
 
 export const prerender = false;
@@ -63,7 +64,6 @@ try {
       readItems('comunicados' as any, {
         filter: {
           status: { _eq: 'published' },
-          categoria: { _neq: 1 },
           slug: { _neq: slug }
         },
         fields: [
@@ -99,7 +99,8 @@ if (slug !== canonicalEsSlug) {
   return Astro.redirect(`/articulos/${canonicalEsSlug}`, 301);
 }
 
-const cat = comunicado.categoria as Categoria | undefined;
+const rawCat = comunicado.categoria as Categoria | undefined;
+const cat = rawCat && !isHiddenCategory(rawCat) ? rawCat : undefined;
 const title = comunicado.titulo;
 const subtitle = comunicado.bajada;
 const body = comunicado.cuerpo || '';
