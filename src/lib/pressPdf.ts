@@ -36,3 +36,8 @@ export function resolvePressPdfUrl(item: PressPdfItem): string | null {
   if (item.slug && localPdfBySlug[item.slug]) return localPdfBySlug[item.slug];
   return null;
 }
+
+/** Hay PDF descargable, en Directus o en src/assets/notas-prensa. */
+export function hasPressPdf(item: PressPdfItem): boolean {
+  return resolvePressPdfUrl(item) != null;
+}

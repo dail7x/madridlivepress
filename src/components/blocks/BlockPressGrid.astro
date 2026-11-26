@@ -3,6 +3,7 @@ import type { BlockPressGrid, Comunicado, Categoria } from '@/lib/directus';
 import { directus, readItems, getAssetUrl } from '@/lib/directus';
 import { filterVisibleCategories, isHiddenCategory } from '@/lib/categories';
 import { resolvePressPdfUrl } from '@/lib/pressPdf';
+import { fetchLatestWithPressPdf } from '@/lib/pressNotes';
 
 interface Props {
   block: BlockPressGrid;
@@ -19,36 +20,32 @@ let comunicados: Comunicado[] = [];
 let categorias: Categoria[] = [];
 
 try {
-  const filter: Record<string, any> = { status: { _eq: 'published' } };
+  const noteFilter: Record<string, unknown> = {};
   if (block.categoria_filtrada) {
-    filter.categoria = { _eq: block.categoria_filtrada };
+    noteFilter.categoria = { _eq: block.categoria_filtrada };
   }
 
   const [comunicadosRes, categoriasRes] = await Promise.all([
-    directus.request(
-      readItems('comunicados' as any, {
-        filter,
-        sort: ['-fecha_publicacion', '-id'],
-        limit,
-        fields: [
-          'id',
-          'status',
-          'fecha_publicacion',
-          'slug',
-          'slug_en',
-          'titulo',
-          'titulo_en',
-          'bajada',
-          'bajada_en',
-          'imagen_url_externa',
-          'imagen_portada.*',
-          'archivo_pdf.*',
-          'tags',
-          { categoria: ['id', 'nombre', 'nombre_en', 'slug', 'slug_en', 'color'] },
-          { portavoz: ['id', 'nombre', 'cargo'] },
-        ],
-      })
-    ),
+    fetchLatestWithPressPdf(limit, {
+      filter: noteFilter,
+      fields: [
+        'id',
+        'status',
+        'fecha_publicacion',
+        'slug',
+        'slug_en',
+        'titulo',
+        'titulo_en',
+        'bajada',
+        'bajada_en',
+        'imagen_url_externa',
+        'imagen_portada.*',
+        'archivo_pdf.*',
+        'tags',
+        { categoria: ['id', 'nombre', 'nombre_en', 'slug', 'slug_en', 'color'] },
+        { portavoz: ['id', 'nombre', 'cargo'] },
+      ],
+    }),
     directus.request(
       readItems('categorias' as any, {
         fields: ['id', 'nombre', 'nombre_en', 'slug', 'slug_en', 'color'],
@@ -57,7 +54,7 @@ try {
     ),
   ]);
 
-  comunicados = (comunicadosRes as Comunicado[]) || [];
+  comunicados = comunicadosRes;
   categorias = filterVisibleCategories((categoriasRes as Categoria[]) || []);
 } catch (e) {
   console.error('Error loading press releases in BlockPressGrid:', e);
